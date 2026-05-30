@@ -238,6 +238,14 @@ textarea{resize:none;font-size:13px;border:1px solid var(--b1);border-radius:4px
   </div>
   <div id="alert-box"></div>
 
+  <!-- 이번 주 목표 (주간 탭에서 설정한 다음주 목표 → 읽기 전용) -->
+  <div id="daily-week-goal" style="display:none;background:#0a1a2a;border:1px solid #1e4a7f;border-radius:8px;padding:10px 14px;margin-bottom:10px">
+    <div style="font-size:11px;color:var(--blue);font-weight:700;letter-spacing:.06em;margin-bottom:6px">📌 이번 주 목표</div>
+    <div id="daily-week-goal-text" style="font-size:13px;color:var(--t1);margin-bottom:6px"></div>
+    <div style="font-size:11px;color:var(--t3);font-weight:700;margin-bottom:3px">세부 실천사항</div>
+    <div id="daily-week-detail-text" style="font-size:12px;color:var(--t2);white-space:pre-wrap"></div>
+  </div>
+
   <!-- 계획/실행표 -->
   <div class="card">
     <div class="sec-label" style="display:flex;justify-content:space-between;align-items:center">
@@ -315,7 +323,7 @@ textarea{resize:none;font-size:13px;border:1px solid var(--b1);border-radius:4px
             <span class="chk" id="chk-a-pmp" onclick="toggleChk('a-pmp')"><span class="chk-box"><span class="chk-mark">✓</span></span><span class="chk-label">PMP</span></span>
             <span class="chk" id="chk-a-lang" onclick="toggleChk('a-lang')"><span class="chk-box"><span class="chk-mark">✓</span></span><span class="chk-label">영어/중국어</span></span>
             <span class="chk" id="chk-a-ai" onclick="toggleChk('a-ai')"><span class="chk-box"><span class="chk-mark">✓</span></span><span class="chk-label">AI실습</span></span>
-            <span class="chk" id="chk-a-adsp" onclick="toggleChk('a-adsp')"><span class="chk-box"><span class="chk-mark">✓</span></span><span class="chk-label">ADsP</span></span>
+            <span class="chk" id="chk-a-adsp" onclick="toggleChk('a-adsp')"><span class="chk-box"><span class="chk-mark">✓</span></span><span class="chk-label">빅데이터분석</span></span>
             <span class="chk" id="chk-a-info" onclick="toggleChk('a-info')"><span class="chk-box"><span class="chk-mark">✓</span></span><span class="chk-label">정보처리</span></span>
           </div>
           <input type="text" id="f-action-study" placeholder="내용/단위/산출물..." oninput="autoSave()" style="font-size:12px">
@@ -378,11 +386,12 @@ textarea{resize:none;font-size:13px;border:1px solid var(--b1);border-radius:4px
       <div class="rl"><div class="rl-m">수련·운동</div><div class="rl-s">기록 축적</div></div>
       <div class="rc">
         <div style="display:flex;flex-wrap:wrap;gap:4px 0;margin-bottom:6px">
-          <span class="chk" id="chk-hongik" onclick="toggleChk('hongik')"><span class="chk-box"><span class="chk-mark">✓</span></span><span class="chk-label">홍익학당</span></span>
+          <span class="chk" id="chk-hongik" onclick="toggleChk('hongik')"><span class="chk-box"><span class="chk-mark">✓</span></span><span class="chk-label">단전호흡</span></span>
           <span class="chk" id="chk-gicheon" onclick="toggleChk('gicheon')"><span class="chk-box"><span class="chk-mark">✓</span></span><span class="chk-label">기천</span></span>
           <span class="chk" id="chk-mindful" onclick="toggleChk('mindful')"><span class="chk-box"><span class="chk-mark">✓</span></span><span class="chk-label">마음챙김</span></span>
-          <span class="chk" id="chk-run" onclick="toggleChk('run')"><span class="chk-box"><span class="chk-mark">✓</span></span><span class="chk-label">달리기/맨몸</span></span>
+          <span class="chk" id="chk-run" onclick="toggleChk('run')"><span class="chk-box"><span class="chk-mark">✓</span></span><span class="chk-label">달리기</span></span>
           <span class="chk" id="chk-strength" onclick="toggleChk('strength')"><span class="chk-box"><span class="chk-mark">✓</span></span><span class="chk-label">근력운동</span></span>
+          <span class="chk" id="chk-lecture" onclick="toggleChk('lecture')"><span class="chk-box"><span class="chk-mark">✓</span></span><span class="chk-label">강의시청</span></span>
         </div>
         <input type="text" id="f-exercise-etc" placeholder="기록(시간/거리/내용)..." oninput="autoSave()" style="width:100%">
       </div>
@@ -425,8 +434,15 @@ textarea{resize:none;font-size:13px;border:1px solid var(--b1);border-radius:4px
 
 <!-- ═══════════════════ 주간 ═══════════════════ -->
 <div class="view" id="v-weekly">
-  <div style="color:var(--t3);font-size:12px;font-weight:700;letter-spacing:.08em;margin-bottom:4px">🗓 주간 CEO 회의 — 금요일 오후</div>
-  <div style="color:var(--t3);font-size:11px;margin-bottom:14px">느낌이 아니라 기록 데이터 기반</div>
+  <!-- 주차 내비게이션 -->
+  <div class="date-nav" style="padding:6px 0 10px">
+    <button class="date-arrow" onclick="shiftWeek(-1)">‹</button>
+    <div style="text-align:center;flex:1">
+      <div id="wk-label" style="font-weight:700;font-size:15px;color:var(--t1)"></div>
+      <div style="font-size:10px;color:var(--t3);margin-top:2px">🗓 CEO 회의 — 금요일 오후 · 기록 데이터 기반</div>
+    </div>
+    <button class="date-arrow" onclick="shiftWeek(1)">›</button>
+  </div>
 
   <!-- 5대 기둥 점수 -->
   <div class="card">
@@ -491,9 +507,20 @@ textarea{resize:none;font-size:13px;border:1px solid var(--b1);border-radius:4px
       <div class="m-label">나는 언제 기운 빠지는가 <span style="color:var(--t3);font-size:11px">— 위 집계 보고 종합</span></div>
       <input type="text" id="wk-drained" placeholder="패턴 요약..." oninput="saveWeekly()">
     </div>
-    <div class="m-field" style="margin-bottom:0">
+    <div class="m-field">
       <div class="m-label">주간 결산 느낀 점 / 다음 주 각오</div>
       <textarea id="wk-review" rows="2" placeholder="이번 주를 돌아보며..." oninput="saveWeekly()"></textarea>
+    </div>
+    <div style="background:#0d1f30;border:1px solid #1e4a7f;border-radius:7px;padding:10px 12px;margin-top:4px">
+      <div style="font-size:11px;color:var(--blue);font-weight:700;margin-bottom:8px">📌 다음 주 목표 — 일일 탭에 자동 표시</div>
+      <div class="m-field">
+        <div class="m-label">다음 주 목표</div>
+        <input type="text" id="wk-next-goal" placeholder="다음 주 핵심 목표 한 줄..." oninput="saveWeekly()">
+      </div>
+      <div class="m-field" style="margin-bottom:0">
+        <div class="m-label">세부 실천사항</div>
+        <textarea id="wk-next-detail" rows="2" placeholder="구체적인 실천 내용..." oninput="saveWeekly()"></textarea>
+      </div>
     </div>
   </div>
 
@@ -505,9 +532,10 @@ textarea{resize:none;font-size:13px;border:1px solid var(--b1);border-radius:4px
       <table style="width:100%;border-collapse:collapse;font-size:12px">
         <thead>
           <tr>
-            <th style="background:var(--s3);padding:5px;text-align:left;color:var(--t2);width:70px">시간</th>
+            <th style="background:var(--s3);padding:5px;text-align:left;color:var(--t2);width:68px">시간</th>
             <th style="background:var(--s3);padding:5px;text-align:left;color:var(--t2)">계획</th>
-            <th style="background:var(--s3);padding:5px;width:30px"></th>
+            <th style="background:var(--s3);padding:5px;text-align:left;color:var(--t2)">요일</th>
+            <th style="background:var(--s3);padding:5px;width:24px"></th>
           </tr>
         </thead>
         <tbody id="wk-plan-body"></tbody>
@@ -525,8 +553,15 @@ textarea{resize:none;font-size:13px;border:1px solid var(--b1);border-radius:4px
 
 <!-- ═══════════════════ 월간 ═══════════════════ -->
 <div class="view" id="v-monthly">
-  <div style="color:var(--t3);font-size:12px;font-weight:700;letter-spacing:.08em;margin-bottom:4px">📅 월간 60분 운영회의 — 매월 말</div>
-  <div style="color:var(--t3);font-size:11px;margin-bottom:10px">강점 확인 → 약점 분석 → 결정 → 공유 → 의미 순서 유지</div>
+  <!-- 월 내비게이션 -->
+  <div class="date-nav" style="padding:6px 0 10px">
+    <button class="date-arrow" onclick="shiftMonth(-1)">‹</button>
+    <div style="text-align:center;flex:1">
+      <div id="m-label" style="font-weight:700;font-size:17px;color:var(--t1)"></div>
+      <div style="font-size:10px;color:var(--t3);margin-top:2px">📅 60분 운영회의 — 매월 말 · 강점→약점→결정→공유→의미</div>
+    </div>
+    <button class="date-arrow" onclick="shiftMonth(1)">›</button>
+  </div>
 
   <!-- 주간 데이터 요약 -->
   <div id="monthly-weekly-summary"></div>
@@ -911,8 +946,10 @@ const BACKTRACK = [
 // 인메모리 상태 — var 사용해야 module 스크립트의 window.* 할당과 같은 바인딩 공유
 var allDaily = {}, allWeekly = {}, allMonthly = {}, wkPlanDefaults = {};
 let curDate = today();
+let curWk = monStr();       // 현재 보고 있는 주의 월요일 날짜 (주간 탭)
+let curMon = (() => { const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'); })(); // 현재 보고 있는 월 (월간 탭)
 let dailyPlanRows = [];
-let checks = { gicheon:false, hongik:false, mindful:false, run:false, strength:false,
+let checks = { gicheon:false, hongik:false, mindful:false, run:false, strength:false, lecture:false,
   'a-contact':false,'a-interview':false,'a-blog':false,'a-brunch':false,
   'a-paper':false,'a-pmp':false,'a-lang':false,'a-ai':false,'a-adsp':false,'a-info':false,
   'a-jobscan':false,'a-apply':false };
@@ -994,22 +1031,44 @@ function renderDailyPlan(rows) {
   if (!rows||rows.length===0) {
     const mon=monStr(curDate);
     const def=(wkPlanDefaults&&wkPlanDefaults[mon])||[];
-    if(def.length){ def.forEach(r=>{ if(r) addDailyPlanRow(r.time,r.plan,''); }); }
+    if(def.length){
+      const dayName=DAYS[new Date(curDate+'T00:00:00').getDay()];
+      const filtered=def.filter(r=>!r||!r.days||r.days.length===0||r.days.includes(dayName));
+      filtered.forEach(r=>{ if(r) addDailyPlanRow(r.time,r.plan,''); });
+    }
     else{ if(emptyEl) emptyEl.style.display='block'; }
   } else { rows.forEach(r=>{ if(r) addDailyPlanRow(r.time,r.plan,r.exec); }); }
 }
 
-function addWkPlanRow(time_v, plan_v) {
+const WK_DAYS = ['월','화','수','목','금','토','일'];
+function addWkPlanRow(time_v, plan_v, days_v) {
   const idx = wkPlanRows.length;
-  wkPlanRows.push({ time: time_v||'', plan: plan_v||'' });
+  const daysArr = days_v ? days_v.slice() : [];
+  wkPlanRows.push({ time: time_v||'', plan: plan_v||'', days: daysArr });
   const tbody = document.getElementById('wk-plan-body');
   if (!tbody) return;
   const tr = document.createElement('tr');
   tr.id = 'wkpr-'+idx;
+  const dayChks = WK_DAYS.map(d => {
+    const on = daysArr.includes(d);
+    const s = on?'background:var(--blue);color:#000':'background:var(--s3);color:var(--t3)';
+    return `<span id="wkpr-day-${idx}-${d}" onclick="toggleWkPlanDay(${idx},'${d}')" style="cursor:pointer;font-size:10px;font-weight:700;padding:1px 4px;border-radius:3px;${s};margin:1px">${d}</span>`;
+  }).join('');
   tr.innerHTML = `<td style="padding:3px"><input type="time" id="wkpr-time-${idx}" value="${time_v||''}" oninput="updateWkPlanRow(${idx})" style="width:80px;background:transparent;border:none;border-bottom:1px solid var(--b1);color:var(--t1);font-size:12px"></td>
     <td style="padding:3px"><input type="text" id="wkpr-plan-${idx}" value="${(plan_v||'').replace(/"/g,'&quot;')}" placeholder="계획..." oninput="updateWkPlanRow(${idx})" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--b1);color:var(--t1);font-size:12px"></td>
+    <td style="padding:3px;white-space:nowrap">${dayChks}</td>
     <td style="padding:3px;text-align:center"><button onclick="removeWkPlanRow(${idx})" style="background:transparent;border:none;color:var(--red);font-size:14px;cursor:pointer">×</button></td>`;
   tbody.appendChild(tr);
+}
+function toggleWkPlanDay(idx, day) {
+  if (!wkPlanRows[idx]) return;
+  const days = wkPlanRows[idx].days || [];
+  const i = days.indexOf(day);
+  if (i>=0) days.splice(i,1); else days.push(day);
+  wkPlanRows[idx].days = days;
+  const el = document.getElementById(`wkpr-day-${idx}-${day}`);
+  if (el) { const on=days.includes(day); el.style.background=on?'var(--blue)':'var(--s3)'; el.style.color=on?'#000':'var(--t3)'; }
+  saveWeekly();
 }
 function updateWkPlanRow(idx) {
   if (wkPlanRows[idx] !== undefined) {
@@ -1025,12 +1084,9 @@ function removeWkPlanRow(idx) {
   saveWeekly();
 }
 function applyWkPlanToDaily() {
-  // 주간 기본값을 다음 주 일일에 적용 (Firebase에 저장)
-  const nextMon = (() => {
-    const dt = new Date(); const day=dt.getDay();
-    const diff = day===0?1:8-day; dt.setDate(dt.getDate()+diff);
-    return dt.toISOString().split('T')[0];
-  })();
+  // 현재 보고 있는 주의 다음 주 월요일을 기본값 키로 사용
+  const dt = new Date(curWk+'T00:00:00'); dt.setDate(dt.getDate()+7);
+  const nextMon = localDateStr(dt);
   const validRows = wkPlanRows.filter(r=>r&&(r.time||r.plan));
   if (!wkPlanDefaults) wkPlanDefaults = {};
   wkPlanDefaults[nextMon] = validRows;
@@ -1038,7 +1094,26 @@ function applyWkPlanToDaily() {
   alert('다음 주('+nextMon+'~) 일일 기본값으로 저장됐습니다.');
 }
 
-function today() { return new Date().toISOString().split('T')[0]; }
+// ── 날짜 헬퍼
+function localDateStr(d) {
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function today() { return localDateStr(new Date()); }
+function getISOWeek(d) {
+  const dt = new Date(d.getTime()); dt.setHours(0,0,0,0);
+  dt.setDate(dt.getDate()+3-(dt.getDay()+6)%7);
+  const w1 = new Date(dt.getFullYear(),0,4);
+  return 1+Math.round(((dt-w1)/86400000-3+(w1.getDay()+6)%7)/7);
+}
+function weekLabel(monDate) {
+  const mon = new Date(monDate+'T00:00:00');
+  const sun = new Date(monDate+'T00:00:00'); sun.setDate(sun.getDate()+6);
+  const wn = getISOWeek(mon);
+  const yy = String(mon.getFullYear()).slice(2);
+  const fmt = d=>`${d.getMonth()+1}. ${d.getDate()}.(${DAYS[d.getDay()]})`;
+  return `${wn}주차 [\`${yy}. ${fmt(mon)}~${fmt(sun)}]`;
+}
+function monthLabel(mk) { const [y,m]=mk.split('-'); return `${y}년 ${parseInt(m)}월`; }
 
 // (load/save 함수들은 위 Firebase 섹션에서 정의됨)
 
@@ -1089,7 +1164,7 @@ function fillForm(e) {
   sv('f-tmr-action', e.tmr_action); sv('f-tmr-goal', e.tmr_goal); sv('f-tmr-ban', e.tmr_ban);
   sv('f-tmr-notdo', e.tmr_notdo);
   renderDailyPlan(e.daily_plan_rows||[]);
-  checks = Object.assign({ gicheon:false, hongik:false, mindful:false, run:false, strength:false,
+  checks = Object.assign({ gicheon:false, hongik:false, mindful:false, run:false, strength:false, lecture:false,
     'a-contact':false,'a-interview':false,'a-blog':false,'a-brunch':false,
     'a-paper':false,'a-pmp':false,'a-lang':false,'a-ai':false,'a-adsp':false,'a-info':false,
     'a-jobscan':false,'a-apply':false }, e.exercise || e.action_checks || {});
@@ -1161,9 +1236,18 @@ function renderChk(k) {
 function toggleChk(k) { checks[k] = !checks[k]; renderChk(k); autoSave(); }
 function shiftDate(d) {
   const dt = new Date(curDate+'T00:00:00'); dt.setDate(dt.getDate()+d);
-  curDate = dt.toISOString().split('T')[0]; loadDate();
+  curDate = localDateStr(dt); loadDate();
 }
 function onDateChange() { curDate = gv('date-picker'); loadDate(); }
+function shiftWeek(d) {
+  const dt = new Date(curWk+'T00:00:00'); dt.setDate(dt.getDate()+d*7);
+  curWk = localDateStr(dt); renderWeekly();
+}
+function shiftMonth(d) {
+  let [y,m] = curMon.split('-').map(Number); m+=d;
+  if(m<1){m=12;y--;} if(m>12){m=1;y++;}
+  curMon = y+'-'+String(m).padStart(2,'0'); renderMonthly();
+}
 function loadDate() {
   const dt = new Date(curDate+'T00:00:00');
   document.getElementById('date-label').textContent = `${dt.getMonth()+1}월 ${dt.getDate()}일 (${DAYS[dt.getDay()]})`;
@@ -1176,6 +1260,18 @@ function loadDate() {
     if (planDefault.length) e._planDefault = planDefault;
   }
   fillForm(e); renderAlerts();
+  // 이번 주 목표 표시 (지난 주 weekly 탭의 "다음주 목표" 읽기)
+  const curWeekMon = monStr(curDate);
+  const prevDt = new Date(curWeekMon+'T00:00:00'); prevDt.setDate(prevDt.getDate()-7);
+  const prevWkMon = localDateStr(prevDt);
+  const wkGoal   = (allWeekly[prevWkMon]||{}).next_goal   || '';
+  const wkDetail = (allWeekly[prevWkMon]||{}).next_detail || '';
+  const goalBox = document.getElementById('daily-week-goal');
+  if (goalBox) {
+    goalBox.style.display = (wkGoal||wkDetail) ? 'block' : 'none';
+    const gt = document.getElementById('daily-week-goal-text');   if(gt) gt.textContent = wkGoal;
+    const dt2 = document.getElementById('daily-week-detail-text'); if(dt2) dt2.textContent = wkDetail;
+  }
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1184,11 +1280,11 @@ function loadDate() {
 function monStr(d) {
   const dt = new Date((d||today())+'T00:00:00'), day=dt.getDay();
   const diff = day===0?-6:1-day; dt.setDate(dt.getDate()+diff);
-  return dt.toISOString().split('T')[0];
+  return localDateStr(dt);
 }
-function getWk() { return allWeekly[monStr()] || {}; }
+function getWk() { return allWeekly[curWk] || {}; }
 function saveWeekly() {
-  const wk = monStr();
+  const wk = curWk;
   if (!allWeekly[wk]) allWeekly[wk] = {};
   const w = allWeekly[wk];
   CEO_QS.forEach(q => { const el = document.getElementById('wk-ceo-'+q.k); if(el) w[q.k]=el.value; });
@@ -1199,6 +1295,8 @@ function saveWeekly() {
   w.small_output = gv('wk-small-output');
   w.big_output = gv('wk-big-output');
   w.finance = wkChecks.finance; w.emotion = wkChecks.emotion;
+  w.next_goal   = gv('wk-next-goal');
+  w.next_detail = gv('wk-next-detail');
   w.plan_rows = wkPlanRows.filter(r=>r);
   PILLARS.filter(p=>!p.auto).forEach(p => {
     const el = document.getElementById('pillar-slider-'+p.key); if(el) w['pillar_'+p.key]=parseInt(el.value)||0;
@@ -1221,7 +1319,7 @@ function toggleWkChk(k) {
   saveWeekly(); renderWeekly();
 }
 function calcAutoPillarScores() {
-  const wk = monStr();
+  const wk = curWk;
   const days = Object.entries(allDaily).filter(([d])=>monStr(d)===wk).map(([,e])=>e);
   const scores = {};
   // ── 회복 (10점): 우울역산(4) + 수면7h↑(3) + 수련횟수(3)
@@ -1267,6 +1365,8 @@ function calcAutoPillarScores() {
   return scores;
 }
 function renderWeekly() {
+  const lbl = document.getElementById('wk-label');
+  if (lbl) lbl.textContent = weekLabel(curWk);
   const w = getWk();
   const autoScores = calcAutoPillarScores();
   let html = '', warnings = [];
@@ -1337,8 +1437,11 @@ function renderWeekly() {
   sv('wk-output-count', w.output_count);
   sv('wk-small-output', w.small_output);
   sv('wk-big-output', w.big_output);
+  // 목표 필드 복원
+  sv('wk-next-goal', w.next_goal);
+  sv('wk-next-detail', w.next_detail);
   // 일일 텍스트 자동 집계
-  const wk2 = monStr();
+  const wk2 = curWk;
   const days2 = Object.entries(allDaily).filter(([d])=>monStr(d)===wk2).sort(([a],[b])=>a>b?1:-1).map(([d,e])=>({d,e}));
   const DAY_KR = ['일','월','화','수','목','금','토'];
   function dayLabel(ds) { const dt=new Date(ds+'T00:00:00'); return (dt.getMonth()+1)+'/'+(dt.getDate())+'('+DAY_KR[dt.getDay()]+')'; }
@@ -1358,7 +1461,7 @@ function renderWeekly() {
   wkPlanRows = [];
   const tbody = document.getElementById('wk-plan-body');
   if (tbody) tbody.innerHTML = '';
-  (w.plan_rows||[]).forEach(r => { if(r) addWkPlanRow(r.time, r.plan); });
+  (w.plan_rows||[]).forEach(r => { if(r) addWkPlanRow(r.time, r.plan, r.days); });
   wkChecks.finance = !!w.finance; wkChecks.emotion = !!w.emotion;
   ['finance','emotion'].forEach(k => {
     const el = document.getElementById('wk-'+k);
@@ -1377,9 +1480,9 @@ function renderWeekly() {
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // 월간 탭
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-function monthKey() { const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'); }
+function monthKey() { return curMon; }
 function saveMonthly() {
-  const mk = monthKey();
+  const mk = curMon;
   if (!allMonthly[mk]) allMonthly[mk]={};
   const m = allMonthly[mk];
   ['sinsin','strong','best','weak','avoid-pattern','reduce','maintain','experiment','finance','relation','livelihood','medical','meaning'].forEach(k=>{
@@ -1394,7 +1497,9 @@ function saveMonthlyBtn() {
   setTimeout(()=>{ btn.textContent='저장'; btn.classList.remove('ok'); },2000);
 }
 function renderMonthly() {
-  const mk = monthKey(), m = allMonthly[mk]||{};
+  const mk = curMon;
+  const lbl = document.getElementById('m-label'); if(lbl) lbl.textContent = monthLabel(mk);
+  const m = allMonthly[mk]||{};
   ['sinsin','strong','best','weak','avoid-pattern','reduce','maintain','experiment','finance','relation','livelihood','medical','meaning'].forEach(k=>{
     const el=document.getElementById('m-'+k); if(el) el.value=m[k]||'';
   });
@@ -1618,8 +1723,8 @@ function goDate(d) { curDate=d; switchTab('today'); loadDate(); }
 function switchTab(v) {
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('on', t.dataset.v===v));
   document.querySelectorAll('.view').forEach(vEl => vEl.classList.toggle('on', vEl.id==='v-'+v));
-  if (v==='weekly') renderWeekly();
-  if (v==='monthly') renderMonthly();
+  if (v==='weekly') { curWk = curWk || monStr(); renderWeekly(); }
+  if (v==='monthly') { curMon = curMon || (()=>{ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'); })(); renderMonthly(); }
   if (v==='principle') renderPrinciple();
   if (v==='routine') renderRoutine();
   if (v==='guide') renderGuide();
