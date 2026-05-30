@@ -1,0 +1,1639 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>일일기록표</title>
+<style>
+:root {
+  --bg:#0d1117; --s1:#161b22; --s2:#0d1117; --s3:#21262d;
+  --b1:#30363d; --b2:#21262d;
+  --t1:#e6edf3; --t2:#8b949e; --t3:#484f58;
+  --green:#3fb950; --gdim:#0f2d1a; --gbright:#56d364;
+  --red:#f85149; --rdim:#2d1010; --yellow:#d29922;
+  --blue:#58a6ff; --bdim:#0d2042; --purple:#a371f7;
+  --acc:#1f6feb; --acc2:#388bfd;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--bg);color:var(--t1);font-family:'Apple SD Gothic Neo','Noto Sans KR',sans-serif;font-size:15px;overscroll-behavior:none}
+/* ── 탭 ── */
+.topbar{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--s1);border-bottom:1px solid var(--b2)}
+.title-row{display:flex;align-items:center;justify-content:space-between;padding:10px 16px 0}
+.title-main{font-size:13px;font-weight:700;color:var(--t2);letter-spacing:.06em}
+.title-sub{font-size:10px;color:var(--t3);margin-top:1px}
+.tabs{display:flex;overflow-x:auto;padding:8px 16px 0;gap:4px;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex-shrink:0;padding:6px 12px;font-size:12px;font-family:inherit;border:1px solid var(--b1);border-radius:6px 6px 0 0;background:transparent;color:var(--t3);cursor:pointer;border-bottom:none;margin-bottom:-1px;transition:all .15s}
+.tab.on{background:var(--s1);color:var(--blue);border-color:var(--b1);border-bottom:1px solid var(--s1);font-weight:700}
+/* ── 뷰 ── */
+.view{display:none;padding:16px 16px 100px;margin-top:82px}
+.view.on{display:block}
+/* ── 카드 ── */
+.card{background:var(--s1);border:1px solid var(--b1);border-radius:10px;padding:4px 14px 10px;margin-bottom:10px}
+.sec-label{font-size:11px;font-weight:700;color:var(--t3);letter-spacing:.08em;padding:10px 0 4px}
+/* ── 행 ── */
+.row{display:flex;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--b2);gap:10px}
+.row:last-child{border-bottom:none}
+.rl{min-width:100px}
+.rl-m{font-size:13px;font-weight:600;color:var(--t2);line-height:1.3}
+.rl-s{font-size:11px;color:var(--t3);margin-top:2px}
+.rc{flex:1}
+/* ── 입력 ── */
+input[type=text],input[type=time],textarea{background:transparent;border:none;border-bottom:1.5px solid var(--b1);color:var(--t1);font-family:inherit;outline:none;padding:3px 2px;width:100%}
+input[type=number]{background:transparent;border:none;border-bottom:1.5px solid var(--b1);color:var(--t1);font-family:inherit;outline:none;padding:3px 0;width:50px;text-align:center}
+input[type=range]{width:100%;accent-color:var(--blue);margin:4px 0}
+input::placeholder,textarea::placeholder{color:var(--t3)}
+select{background:var(--s3);border:1px solid var(--b1);color:var(--t1);font-size:13px;font-family:inherit;padding:4px 6px;border-radius:4px;outline:none;max-width:150px}
+textarea{resize:none;font-size:13px;border:1px solid var(--b1);border-radius:4px;padding:6px;margin-top:4px}
+/* ── 체크박스 ── */
+.chk{display:inline-flex;align-items:center;gap:5px;cursor:pointer;user-select:none;margin-right:10px}
+.chk-box{width:18px;height:18px;border-radius:3px;border:2px solid var(--b1);background:transparent;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
+.chk-box.on{border-color:var(--green);background:var(--gdim)}
+.chk-mark{color:var(--green);font-size:12px;display:none}
+.chk-box.on .chk-mark{display:block}
+.chk-label{font-size:13px;color:var(--t2)}
+.chk.on .chk-label{color:var(--green)}
+/* ── 경보 ── */
+.alert-box{background:#1a0a0a;border:1px solid var(--rdim);border-radius:7px;padding:10px 14px;margin-bottom:8px}
+.alert-item{color:var(--red);font-size:13px;margin-bottom:3px}
+.alert-item:last-child{margin-bottom:0}
+/* ── 내일 첫 행동 ── */
+.tomorrow-box{background:#0a1520;border:1px solid #1e3a5f;border-radius:10px;padding:12px 14px;margin:10px 0 0}
+.tomorrow-title{color:var(--green);font-size:12px;font-weight:700;letter-spacing:.08em;margin-bottom:8px}
+/* ── 저장 버튼 ── */
+.save-btn{display:flex;justify-content:flex-end;margin:10px 0 0}
+.btn{background:var(--bdim);border:1px solid var(--acc);color:var(--blue);border-radius:6px;padding:9px 24px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .2s}
+.btn.ok{background:var(--gdim);border-color:var(--green);color:var(--green)}
+/* ── 주간 기둥 ── */
+.pillar-row{margin-bottom:12px}
+.pillar-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px}
+.pillar-desc{font-size:10px;color:var(--t3);margin-top:1px}
+.pillar-score{font-size:19px;font-weight:700;font-family:monospace}
+.pillar-basis{font-size:10px;color:var(--t3);margin-top:2px}
+.warn-box{background:#1a0a0a;border:1px solid var(--rdim);border-radius:6px;padding:8px 12px;margin-top:8px}
+/* ── 상황처방 버튼 ── */
+.sit-btn{background:transparent;border:1px solid var(--b1);color:var(--t2);border-radius:20px;padding:6px 13px;font-size:13px;cursor:pointer;font-family:inherit;transition:all .15s;margin-bottom:4px}
+.risk-btn{background:transparent;border-radius:20px;padding:6px 13px;font-size:13px;cursor:pointer;font-family:inherit;margin-bottom:4px}
+/* ── 결과 카드 ── */
+.result-card{background:var(--s1);border-radius:10px;padding:14px;margin-top:8px}
+/* ── 루틴 아이템 ── */
+.routine-item{background:var(--s1);border:1px solid var(--b1);border-radius:8px;padding:10px 12px;margin-bottom:6px;display:flex;gap:10px;align-items:flex-start}
+.step-num{border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;width:24px;height:24px}
+/* ── 원칙 카드 ── */
+.principle-card{background:var(--s1);border-radius:8px;padding:11px 13px;margin-bottom:7px;display:flex;gap:10px;border-left:3px solid}
+/* ── 기록 ── */
+.hist-item{background:var(--s1);border:1px solid var(--b1);border-radius:8px;padding:10px 13px;margin-bottom:7px;cursor:pointer}
+/* ── 경보 배지 ── */
+.badge{background:var(--rdim);color:var(--red);font-size:10px;padding:1px 5px;border-radius:3px;font-weight:700;margin-left:5px}
+/* ── 월간 섹션 ── */
+.monthly-sec{background:var(--s1);border:1px solid var(--b1);border-radius:10px;padding:12px 14px;margin-bottom:10px}
+.monthly-sec-title{font-size:13px;font-weight:700;margin-bottom:8px}
+.m-field{margin-bottom:10px}
+.m-label{font-size:12px;color:var(--t2);margin-bottom:4px}
+/* ── 플랜B / 리스크 ── */
+.planb-card{background:var(--s1);border-radius:8px;padding:10px 12px;margin-bottom:7px;border-left:3px solid}
+/* ── 주간 체크 ── */
+.wk-check{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--b2);cursor:pointer}
+/* ── 9.4 블록 ── */
+.m94-block{background:var(--s3);border-radius:6px;padding:9px 11px;margin-bottom:7px;border-left:3px solid}
+/* ── 복구 순서 ── */
+.rec-item{background:var(--s3);border-radius:6px;padding:9px 11px;margin-bottom:5px;border-left:3px solid}
+/* ── 역추적표 ── */
+.bt-table{width:100%;border-collapse:collapse;font-size:11px}
+.bt-table th{background:#1a3a5c;color:#fff;padding:5px 7px;text-align:left;white-space:nowrap;font-weight:600}
+.bt-table td{padding:5px 7px;border-bottom:1px solid var(--b2)}
+/* ── 날짜 네비 ── */
+.date-nav{display:flex;align-items:center;justify-content:space-between;padding:12px 0 6px}
+.date-arrow{background:none;border:none;color:var(--t2);font-size:22px;cursor:pointer;padding:2px 8px}
+.date-label{font-weight:700;font-size:17px;text-align:center}
+.date-input{font-size:11px;color:var(--t3);background:none;border:none;cursor:pointer;margin-top:2px;width:100%;text-align:center}
+.sleep-hrs{font-size:12px;margin-left:6px}
+</style>
+<!-- Firebase SDK -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getDatabase, ref, get, set, onValue, goOffline, goOnline } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBPU6uqf3pvKAhPPEF9OTwKx20S_YdbO0s",
+    authDomain: "diary-629dd.firebaseapp.com",
+    databaseURL: "https://diary-629dd-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "diary-629dd",
+    storageBucket: "diary-629dd.firebasestorage.app",
+    messagingSenderId: "698468942403",
+    appId: "1:698468942403:web:043767c021232d0c420af6"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  // 오프라인 대기 큐
+  let pendingWrites = {};
+  let isOnline = navigator.onLine;
+
+  async function fbSet(path, data) {
+    if (isOnline) {
+      try {
+        await set(ref(db, path), data);
+        delete pendingWrites[path];
+      } catch(e) {
+        pendingWrites[path] = data;
+      }
+    } else {
+      pendingWrites[path] = data;
+    }
+  }
+
+  async function flushPending() {
+    for (const [path, data] of Object.entries(pendingWrites)) {
+      try {
+        await set(ref(db, path), data);
+        delete pendingWrites[path];
+      } catch(e) {}
+    }
+  }
+
+  window.addEventListener('online', () => {
+    isOnline = true;
+    flushPending();
+    const badge = document.getElementById('sync-badge');
+    if (badge) badge.style.display = 'none';
+  });
+  window.addEventListener('offline', () => {
+    isOnline = false;
+    const badge = document.getElementById('sync-badge');
+    if (badge) badge.style.display = 'inline';
+  });
+
+  // 전역에 노출 (기존 코드에서 호출)
+  window._fbSet = fbSet;
+  window._db = db;
+  window._dbRef = ref;
+  window._dbGet = get;
+
+  // 초기 데이터 로드
+  async function loadFromFirebase() {
+    showSpinner(true);
+    try {
+      const snap = await get(ref(db, 'diary'));
+      const data = snap.val() || {};
+      window.allDaily   = data.daily_v2   || {};
+      window.allWeekly  = data.weekly_v2  || {};
+      window.allMonthly = data.monthly_v2 || {};
+      window.wkPlanDefaults = data.wk_plan_defaults || {};
+    } catch(e) {
+      // 오프라인이면 빈 객체로 시작
+      window.allDaily   = {};
+      window.allWeekly  = {};
+      window.allMonthly = {};
+      window.wkPlanDefaults = {};
+    }
+    showSpinner(false);
+    window._dataReady = true;
+    window.loadDate();
+  }
+
+  // DOM 준비 후 로드 시작
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadFromFirebase);
+  } else {
+    loadFromFirebase();
+  }
+</script>
+</head>
+<body>
+
+<!-- 로딩 스피너 -->
+<div id="loading-overlay" style="position:fixed;inset:0;background:rgba(13,17,23,.92);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px">
+  <div style="width:40px;height:40px;border:3px solid var(--b1);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite"></div>
+  <div style="font-size:13px;color:var(--t2)">데이터 불러오는 중...</div>
+</div>
+<style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+
+<div class="topbar">
+  <div class="title-row">
+    <div><div class="title-main">일일기록표</div><div class="title-sub">9장 운영표 연동</div></div>
+    <span id="sync-badge" style="display:none;background:#2d1010;color:var(--red);font-size:10px;padding:2px 7px;border-radius:4px;font-weight:700">오프라인</span>
+  </div>
+  <div class="tabs" id="tabs">
+    <button class="tab on" data-v="today">일일</button>
+    <button class="tab" data-v="weekly">주간</button>
+    <button class="tab" data-v="monthly">월간</button>
+    <button class="tab" data-v="principle">원칙</button>
+    <button class="tab" data-v="routine">루틴</button>
+    <button class="tab" data-v="guide">상황처방</button>
+    <button class="tab" data-v="history">기록</button>
+  </div>
+</div>
+
+<!-- ═══════════════════ 일일 ═══════════════════ -->
+<div class="view on" id="v-today">
+  <div class="date-nav">
+    <button class="date-arrow" onclick="shiftDate(-1)">‹</button>
+    <div style="text-align:center">
+      <div class="date-label" id="date-label"></div>
+      <input type="date" class="date-input" id="date-picker" onchange="onDateChange()">
+    </div>
+    <button class="date-arrow" onclick="shiftDate(1)">›</button>
+  </div>
+  <div id="alert-box"></div>
+
+  <!-- 계획/실행표 -->
+  <div class="card">
+    <div class="sec-label" style="display:flex;justify-content:space-between;align-items:center">
+      📋 계획 / 실행표
+      <span style="display:flex;gap:6px">
+        <button onclick="addDailyPlanRow()" style="background:transparent;border:1px solid var(--b1);color:var(--t3);border-radius:4px;padding:2px 8px;font-size:11px;cursor:pointer">+ 행</button>
+      </span>
+    </div>
+    <div style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;font-size:12px">
+        <thead>
+          <tr>
+            <th style="background:var(--s3);padding:5px;text-align:left;color:var(--t2);width:72px">시간</th>
+            <th style="background:var(--s3);padding:5px;text-align:left;color:var(--t2)">계획</th>
+            <th style="background:var(--s3);padding:5px;text-align:left;color:var(--t2)">실행</th>
+            <th style="background:var(--s3);padding:5px;width:24px"></th>
+          </tr>
+        </thead>
+        <tbody id="daily-plan-body"></tbody>
+      </table>
+    </div>
+    <div id="daily-plan-empty" style="font-size:11px;color:var(--t3);padding:6px 0;display:none">주간 탭에서 기본값을 설정하거나 + 행으로 추가하세요</div>
+  </div>
+
+  <div class="card">
+    <div class="sec-label">✅ 절대 유지</div>
+    <div class="row">
+      <div class="rl"><div class="rl-m">우울 / 불안</div><div class="rl-s">각 0~10</div></div>
+      <div class="rc">
+        <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:6px">
+          <label style="font-size:12px;color:var(--t2)">우울 <input type="number" id="f-dep" min="0" max="10" oninput="autoSave()"></label>
+          <label style="font-size:12px;color:var(--t2)">불안 <input type="number" id="f-anx" min="0" max="10" oninput="autoSave()"></label>
+        </div>
+        <input type="text" id="f-dep-context" placeholder="어떤 상황에서 우울/불안했는지 (선택, 5점↑ 권장)..." oninput="autoSave()" style="font-size:12px;color:var(--yellow)">
+      </div>
+    </div>
+    <div class="row">
+      <div class="rl"><div class="rl-m">수면 <span id="sleep-badge"></span></div><div class="rl-s">취침·기상</div></div>
+      <div class="rc">
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:4px">
+          <label style="font-size:12px;color:var(--t2)">취침 <input type="time" id="f-bed" style="width:88px" oninput="autoSave();calcSleep()"></label>
+          <label style="font-size:12px;color:var(--t2)">기상 <input type="time" id="f-wake" style="width:88px" oninput="autoSave();calcSleep()"></label>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <label style="font-size:12px;color:var(--t2)">중간각성 <input type="number" id="f-wakeups" min="0" max="20" placeholder="회" style="width:44px" oninput="autoSave()"></label>
+          <span id="sleep-hrs" class="sleep-hrs"></span>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="rl"><div class="rl-m">오늘 화공 행동</div><div class="rl-s">1개라도</div></div>
+      <div class="rc">
+        <div style="display:flex;flex-wrap:wrap;gap:4px 8px;margin-bottom:6px">
+          <span onclick="toggleGroup('g-contact')" style="cursor:pointer;font-size:12px;color:var(--blue);font-weight:700">📞 연락▾</span>
+          <span onclick="toggleGroup('g-record')" style="cursor:pointer;font-size:12px;color:var(--green);font-weight:700">📝 기록▾</span>
+          <span onclick="toggleGroup('g-study')" style="cursor:pointer;font-size:12px;color:var(--yellow);font-weight:700">📚 공부▾</span>
+          <span onclick="toggleGroup('g-apply')" style="cursor:pointer;font-size:12px;color:var(--purple);font-weight:700">🎯 지원▾</span>
+        </div>
+        <!-- 연락 그룹 -->
+        <div id="g-contact" style="display:none;background:var(--s3);border-radius:6px;padding:8px;margin-bottom:4px">
+          <span class="chk" id="chk-a-contact" onclick="toggleChk('a-contact')"><span class="chk-box"><span class="chk-mark">✓</span></span><span class="chk-label">연락</span></span>
+          <span class="chk" id="chk-a-interview" onclick="toggleChk('a-interview')"><span class="chk-box"><span class="chk-mark">✓</span></span><span class="chk-label">인터뷰</span></span>
+          <input type="text" id="f-action-contact" placeholder="누구와 / 인터뷰 결과..." oninput="autoSave()" style="margin-top:4px;font-size:12px">
+        </div>
+        <!-- 기록 그룹 -->
+        <div id="g-record" style="display:none;background:var(--s3);border-radius:6px;padding:8px;margin-bottom:4px">
+          <span class="chk" id="chk-a-blog" onclick="toggleChk('a-blog')"><span class="chk-box"><span class="chk-mark">✓</span></span><span class="chk-label">블로그</span></span>
+          <span class="chk" id="chk-a-brunch" onclick="toggleChk('a-brunch')"><span class="chk-box"><span class="chk-mark">✓</span></span><span class="chk-label">브런치</span></span>
+          <input type="text" id="f-action-record" placeholder="기천일지 / 게임개발 / 브런치 초고..." oninput="autoSave()" style="margin-top:4px;font-size:12px">
+        </div>
+        <!-- 공부 그룹 -->
+        <div id="g-study" style="display:none;background:var(--s3);border-radius:6px;padding:8px;margin-bottom:4px">
+          <div style="display:flex;flex-wrap:wrap;gap:4px 8px;margin-bottom:4px">
+            <span class="chk" id="chk-a-paper" onclick="toggleChk('a-paper')"><span class="chk-box"><span class="chk-mark">✓</span></span><span class="chk-label">논문</span></span>
+            <span class="chk" id="chk-a-pmp" onclick="toggleChk('a-pmp')"><span class="chk-box"><span class="chk-mark">✓</span></span><span class="chk-label">PMP</span></span>
+            <span class="chk" id="chk-a-lang" onclick="toggleChk('a-lang')"><span class="chk-box"><span class="chk-mark">✓</span></span><span class="chk-label">영어/중국어</span></span>
+            <span class="chk" id="chk-a-ai" onclick="toggleChk('a-ai')"><span class="chk-box"><span class="chk-mark">✓</span></span><span class="chk-label">AI실습</span></span>
+            <span class="chk" id="chk-a-adsp" onclick="toggleChk('a-adsp')"><span class="chk-box"><span class="chk-mark">✓</span></span><span class="chk-label">ADsP</span></span>
+            <span class="chk" id="chk-a-info" onclick="toggleChk('a-info')"><span class="chk-box"><span class="chk-mark">✓</span></span><span class="chk-label">정보처리</span></span>
+          </div>
+          <input type="text" id="f-action-study" placeholder="내용/단위/산출물..." oninput="autoSave()" style="font-size:12px">
+        </div>
+        <!-- 지원 그룹 -->
+        <div id="g-apply" style="display:none;background:var(--s3);border-radius:6px;padding:8px;margin-bottom:4px">
+          <span class="chk" id="chk-a-jobscan" onclick="toggleChk('a-jobscan')"><span class="chk-box"><span class="chk-mark">✓</span></span><span class="chk-label">공고분석</span></span>
+          <span class="chk" id="chk-a-apply" onclick="toggleChk('a-apply')"><span class="chk-box"><span class="chk-mark">✓</span></span><span class="chk-label">지원</span></span>
+          <input type="text" id="f-action-apply" placeholder="어디(몇개)..." oninput="autoSave()" style="margin-top:4px;font-size:12px">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 일과 회고 (See) ── -->
+  <div class="card">
+    <div class="sec-label">🔍 일과 회고 (See)</div>
+    <div class="row">
+      <div class="rl"><div class="rl-m">항법 기록</div><div class="rl-s">조정 ≠ 실패</div></div>
+      <div class="rc"><input type="text" id="f-navig" placeholder="최초계획 → 실제수행 / 변경사유(선택)" oninput="autoSave()"></div>
+    </div>
+    <div class="row">
+      <div class="rl"><div class="rl-m">해마 노트</div><div class="rl-s">장소+대상+순간+감정 2개↑</div></div>
+      <div class="rc"><textarea id="f-hema" rows="2" placeholder="오늘 가장 선명했던 장면 — 뿌듯함·깨달음·인상깊은 기억 등" oninput="autoSave()"></textarea></div>
+    </div>
+    <div class="row">
+      <div class="rl"><div class="rl-m">버텨낸 것</div><div class="rl-s">성과 아닌 버팀</div></div>
+      <div class="rc"><input type="text" id="f-survived" placeholder="오늘 내가 버텨낸 것 한 가지..." oninput="autoSave()"></div>
+    </div>
+    <div class="row">
+      <div class="rl"><div class="rl-m">살아난 순간</div><div class="rl-s">에너지 올라온 때</div></div>
+      <div class="rc"><input type="text" id="f-alive" placeholder="어떤 순간에 에너지가 올라왔는가..." oninput="autoSave()"></div>
+    </div>
+    <div class="row" style="border-bottom:none">
+      <div class="rl"><div class="rl-m">기운 빠진 순간</div><div class="rl-s">에너지 빠진 때</div></div>
+      <div class="rc"><input type="text" id="f-drained" placeholder="어떤 순간에 에너지가 빠졌는가..." oninput="autoSave()"></div>
+    </div>
+  </div>
+
+  <!-- ── 가능하면 유지 ── -->
+  <div class="card">
+    <div class="sec-label">⚠ 가능하면 유지</div>
+    <!-- 관계 묶음 -->
+    <div class="row">
+      <div class="rl"><div class="rl-m">관계 긴장도</div><div class="rl-s">0~10</div></div>
+      <div class="rc" style="display:flex;gap:8px;align-items:center">
+        <input type="number" id="f-tension" min="0" max="10" style="width:50px" oninput="autoSave()">
+        <input type="text" id="f-unsaid" placeholder="말 못 한 감정 한 줄..." oninput="autoSave()" style="flex:1">
+      </div>
+    </div>
+    <div class="row">
+      <div class="rl"><div class="rl-m">아내에게</div><div class="rl-s">따뜻하게 한 일/말</div></div>
+      <div class="rc"><input type="text" id="f-wife" placeholder="오늘 아내에게 따뜻하게 한 것..." oninput="autoSave()"></div>
+    </div>
+    <div class="row">
+      <div class="rl"><div class="rl-m">회피 행동</div><div class="rl-s">유튜브·검색 등</div></div>
+      <div class="rc"><input type="text" id="f-avoid" placeholder="없음 / 유튜브 1h..." oninput="autoSave()"></div>
+    </div>
+    <div class="row">
+      <div class="rl"><div class="rl-m">수련·운동</div><div class="rl-s">기록 축적</div></div>
+      <div class="rc">
+        <div style="display:flex;flex-wrap:wrap;gap:4px 0;margin-bottom:6px">
+          <span class="chk" id="chk-hongik" onclick="toggleChk('hongik')"><span class="chk-box"><span class="chk-mark">✓</span></span><span class="chk-label">홍익학당</span></span>
+          <span class="chk" id="chk-gicheon" onclick="toggleChk('gicheon')"><span class="chk-box"><span class="chk-mark">✓</span></span><span class="chk-label">기천</span></span>
+          <span class="chk" id="chk-mindful" onclick="toggleChk('mindful')"><span class="chk-box"><span class="chk-mark">✓</span></span><span class="chk-label">마음챙김</span></span>
+          <span class="chk" id="chk-run" onclick="toggleChk('run')"><span class="chk-box"><span class="chk-mark">✓</span></span><span class="chk-label">달리기/맨몸</span></span>
+          <span class="chk" id="chk-strength" onclick="toggleChk('strength')"><span class="chk-box"><span class="chk-mark">✓</span></span><span class="chk-label">근력운동</span></span>
+        </div>
+        <input type="text" id="f-exercise-etc" placeholder="기록(시간/거리/내용)..." oninput="autoSave()" style="width:100%">
+      </div>
+    </div>
+    <div class="row" style="border-bottom:none">
+      <div class="rl"><div class="rl-m">몸 상태</div><div class="rl-s">피로·통증·집중</div></div>
+      <div class="rc" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <span class="chk" id="chk-body-ok" onclick="toggleChkSingle('body','ok')"><span class="chk-box"><span class="chk-mark">✓</span></span><span class="chk-label">양호</span></span>
+        <span class="chk" id="chk-body-tired" onclick="toggleChkSingle('body','tired')"><span class="chk-box"><span class="chk-mark">✓</span></span><span class="chk-label">피로</span></span>
+        <span class="chk" id="chk-body-pain" onclick="toggleChkSingle('body','pain')"><span class="chk-box"><span class="chk-mark">✓</span></span><span class="chk-label">통증</span></span>
+        <input type="text" id="f-body" placeholder="메모..." oninput="autoSave()" style="flex:1;min-width:80px">
+      </div>
+    </div>
+  </div>
+
+  <div class="tomorrow-box">
+    <div class="tomorrow-title">🟢 내일 첫 행동 — 퇴근 전 결정</div>
+    <div class="m-field">
+      <div class="m-label">첫 행동 <span style="color:var(--t3);font-size:11px">(무엇을 열거나 쓰거나 보낼지)</span></div>
+      <input type="text" id="f-tmr-action" placeholder="AI 샘플 초안 열기 / 채용공고 1개 저장..." oninput="autoSave()">
+    </div>
+    <div style="display:flex;gap:10px">
+      <div style="flex:1" class="m-field">
+        <div class="m-label">25분 완료 기준</div>
+        <input type="text" id="f-tmr-goal" placeholder="눈에 보이는 산출물 1개..." oninput="autoSave()">
+      </div>
+      <div style="flex:1" class="m-field">
+        <div class="m-label">금지 행동</div>
+        <input type="text" id="f-tmr-ban" placeholder="자료조사 / 도구변경..." oninput="autoSave()">
+      </div>
+    </div>
+    <div class="m-field" style="margin-bottom:0">
+      <div class="m-label">내일 하지 않을 것 <span style="color:var(--t3);font-size:11px">— 아침 재확인</span></div>
+      <input type="text" id="f-tmr-notdo" placeholder="SNS / 도구 세팅 / 새 계획 수립..." oninput="autoSave()">
+    </div>
+  </div>
+
+  <div class="save-btn"><button class="btn" id="save-btn" onclick="manualSave()">저장</button></div>
+</div>
+
+<!-- ═══════════════════ 주간 ═══════════════════ -->
+<div class="view" id="v-weekly">
+  <div style="color:var(--t3);font-size:12px;font-weight:700;letter-spacing:.08em;margin-bottom:4px">🗓 주간 CEO 회의 — 금요일 오후</div>
+  <div style="color:var(--t3);font-size:11px;margin-bottom:14px">느낌이 아니라 기록 데이터 기반</div>
+
+  <!-- 5대 기둥 점수 -->
+  <div class="card">
+    <div class="sec-label">📊 5대 기둥 주간 점수</div>
+    <div style="font-size:11px;color:var(--t3);margin-bottom:10px">7점↑ 유지 / 4~6 조정 / 3↓ 복구 · 회복 4점↓ → 전 기둥 50% 즉시 축소</div>
+    <div id="pillar-scores"></div>
+    <div id="pillar-summary"></div>
+
+    <!-- 관계·성장 수동 보조 입력 -->
+    <div style="background:var(--s3);border-radius:6px;padding:10px 12px;margin-top:10px">
+      <div style="font-size:11px;color:var(--t3);margin-bottom:8px">수동 입력 항목 (자동 계산 불가)</div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap">
+        <div>
+          <div style="font-size:11px;color:var(--t2);margin-bottom:4px">관계 — 이번 주 대화</div>
+          <div style="display:flex;gap:8px">
+            <span class="chk" id="wk-finance" onclick="toggleWkChk('finance')"><span class="chk-box"><span class="chk-mark">✓</span></span><span class="chk-label" style="font-size:12px">재무 대화</span></span>
+            <span class="chk" id="wk-emotion" onclick="toggleWkChk('emotion')"><span class="chk-box"><span class="chk-mark">✓</span></span><span class="chk-label" style="font-size:12px">감정 대화</span></span>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--t2);margin-bottom:4px">성장 — 이번 주 산출물 (10점)</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <label style="font-size:12px;color:var(--t2)">소산출물 <input type="number" id="wk-small-output" min="0" max="20" style="width:36px" oninput="saveWeekly();renderWeekly()"> 회</label>
+            <label style="font-size:12px;color:var(--t2)">대산출물 <input type="number" id="wk-big-output" min="0" max="5" style="width:36px" oninput="saveWeekly();renderWeekly()"> 개</label>
+            <label style="font-size:12px;color:var(--t2)">블로그/브런치 <input type="number" id="wk-output-count" min="0" max="5" style="width:36px" oninput="saveWeekly();renderWeekly()"> 개</label>
+          </div>
+          <div style="font-size:10px;color:var(--t3);margin-top:2px">소산출물=공부정리 1페이지급 / 대산출물=논문·PPT·포트폴리오급</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CEO 회의 질문 -->
+  <div class="card">
+    <div class="sec-label">🎯 CEO 회의 질문 (다음 주 기준)</div>
+    <div id="ceo-questions"></div>
+  </div>
+
+  <!-- 주간 결산 -->
+  <div class="card">
+    <div class="sec-label">📝 주간 결산</div>
+    <!-- 일일 데이터 자동 집계 -->
+    <div style="background:var(--s3);border-radius:6px;padding:10px;margin-bottom:10px">
+      <div style="font-size:11px;color:var(--t3);font-weight:700;margin-bottom:6px">이번 주 일일 기록 자동 집계</div>
+      <div id="wk-daily-alive" style="margin-bottom:6px"></div>
+      <div id="wk-daily-drained" style="margin-bottom:6px"></div>
+      <div id="wk-daily-navig"></div>
+    </div>
+    <div class="m-field">
+      <div class="m-label">이번 주 완성한 산출물</div>
+      <input type="text" id="wk-output" placeholder="논문 1문단 / AI샘플 1개 / 브런치 1편..." oninput="saveWeekly()">
+    </div>
+    <div class="m-field">
+      <div class="m-label">다음 주 과제를 하나만 고른다면</div>
+      <input type="text" id="wk-next" placeholder="가장 중요한 과제 하나..." oninput="saveWeekly()">
+    </div>
+    <div class="m-field">
+      <div class="m-label">나는 언제 살아나는가 <span style="color:var(--t3);font-size:11px">— 위 집계 보고 종합</span></div>
+      <input type="text" id="wk-alive" placeholder="패턴 요약..." oninput="saveWeekly()" style="flex:1">
+    </div>
+    <div class="m-field">
+      <div class="m-label">나는 언제 기운 빠지는가 <span style="color:var(--t3);font-size:11px">— 위 집계 보고 종합</span></div>
+      <input type="text" id="wk-drained" placeholder="패턴 요약..." oninput="saveWeekly()">
+    </div>
+    <div class="m-field" style="margin-bottom:0">
+      <div class="m-label">주간 결산 느낀 점 / 다음 주 각오</div>
+      <textarea id="wk-review" rows="2" placeholder="이번 주를 돌아보며..." oninput="saveWeekly()"></textarea>
+    </div>
+  </div>
+
+  <!-- 다음 주 계획/실행표 기본값 설정 -->
+  <div class="card">
+    <div class="sec-label">📅 다음 주 계획 기본값 설정</div>
+    <div style="font-size:11px;color:var(--t3);margin-bottom:8px">여기서 입력한 시간-계획이 다음 주 일일 탭 기본값으로 적용됩니다</div>
+    <div id="wk-plan-table">
+      <table style="width:100%;border-collapse:collapse;font-size:12px">
+        <thead>
+          <tr>
+            <th style="background:var(--s3);padding:5px;text-align:left;color:var(--t2);width:70px">시간</th>
+            <th style="background:var(--s3);padding:5px;text-align:left;color:var(--t2)">계획</th>
+            <th style="background:var(--s3);padding:5px;width:30px"></th>
+          </tr>
+        </thead>
+        <tbody id="wk-plan-body"></tbody>
+      </table>
+      <button onclick="addWkPlanRow()" style="margin-top:6px;background:transparent;border:1px dashed var(--b1);color:var(--t3);border-radius:4px;padding:4px 12px;font-size:12px;cursor:pointer;width:100%">+ 행 추가</button>
+    </div>
+    <div style="margin-top:8px;font-size:11px;color:var(--blue)">※ 저장 후 다음 주 일일 탭에서 수정 가능 (수정은 해당 일자에만 적용)</div>
+  </div>
+
+  <div class="save-btn" style="gap:8px;display:flex;justify-content:flex-end">
+    <button class="btn" onclick="applyWkPlanToDaily()" style="background:transparent;border-color:var(--purple);color:var(--purple)">다음주 일일 적용</button>
+    <button class="btn" id="wk-save-btn" onclick="saveWeeklyBtn()">저장</button>
+  </div>
+</div>
+
+<!-- ═══════════════════ 월간 ═══════════════════ -->
+<div class="view" id="v-monthly">
+  <div style="color:var(--t3);font-size:12px;font-weight:700;letter-spacing:.08em;margin-bottom:4px">📅 월간 60분 운영회의 — 매월 말</div>
+  <div style="color:var(--t3);font-size:11px;margin-bottom:10px">강점 확인 → 약점 분석 → 결정 → 공유 → 의미 순서 유지</div>
+
+  <!-- 주간 데이터 요약 -->
+  <div id="monthly-weekly-summary"></div>
+
+  <!-- 修身 -->
+  <div class="monthly-sec" style="border-left:3px solid var(--green)">
+    <div class="monthly-sec-title" style="color:var(--green)">🧘 修身 — 내면 점검</div>
+    <div class="m-label">지금 나의 상태와 내면은 어떠한가. 이번 달 판단들은 1.0의 방향과 일치했는가.</div>
+    <textarea id="m-sinsin" rows="2" oninput="saveMonthly()" placeholder="솔직하게 한 줄..."></textarea>
+  </div>
+
+  <!-- 확인 5분 -->
+  <div class="monthly-sec" style="border-left:3px solid var(--blue)">
+    <div class="monthly-sec-title" style="color:var(--blue)">✅ 확인 <span style="font-size:11px;font-weight:400;color:var(--t3)">5분 — 주간 점수 평균 기반 한 줄</span></div>
+    <div class="m-field">
+      <div class="m-label">이번 달 가장 안정된 기둥</div>
+      <input type="text" id="m-strong" oninput="saveMonthly()" placeholder="회복 / 관계 / 생계 / 성장 / 의미">
+    </div>
+    <div class="m-field" style="margin-bottom:0">
+      <div class="m-label">이번 달 가장 의미 있었던 작은 행동</div>
+      <input type="text" id="m-best" oninput="saveMonthly()" placeholder="어떤 행동이었는가...">
+    </div>
+  </div>
+
+  <!-- 분석 10분 -->
+  <div class="monthly-sec" style="border-left:3px solid var(--yellow)">
+    <div class="monthly-sec-title" style="color:var(--yellow)">🔍 분석 <span style="font-size:11px;font-weight:400;color:var(--t3)">10분</span></div>
+    <div class="m-field">
+      <div class="m-label">이번 달 가장 약해진 기둥</div>
+      <input type="text" id="m-weak" oninput="saveMonthly()" placeholder="회복 / 관계 / 생계 / 성장 / 의미">
+    </div>
+    <div class="m-field" style="margin-bottom:0">
+      <div class="m-label">이번 달 반복된 회피 행동</div>
+      <input type="text" id="m-avoid-pattern" oninput="saveMonthly()" placeholder="어떤 패턴이었는가...">
+    </div>
+  </div>
+
+  <!-- 결정 10분 -->
+  <div class="monthly-sec" style="border-left:3px solid var(--red)">
+    <div class="monthly-sec-title" style="color:var(--red)">⚡ 결정 <span style="font-size:11px;font-weight:400;color:var(--t3)">10분</span></div>
+    <div class="m-field">
+      <div class="m-label">다음 달 줄일 것 <span style="color:var(--red);font-size:11px">[필수 — 없으면 과부하 신호]</span></div>
+      <input type="text" id="m-reduce" oninput="saveMonthly()" placeholder="무엇을 줄일 것인가...">
+    </div>
+    <div class="m-field">
+      <div class="m-label">다음 달 반드시 유지할 것</div>
+      <input type="text" id="m-maintain" oninput="saveMonthly()" placeholder="무엇을 지킬 것인가...">
+    </div>
+    <div class="m-field" style="margin-bottom:0">
+      <div class="m-label">다음 달 실험할 작은 행동</div>
+      <input type="text" id="m-experiment" oninput="saveMonthly()" placeholder="어떤 실험을 해볼 것인가...">
+    </div>
+  </div>
+
+  <!-- 공유 30분 -->
+  <div class="monthly-sec" style="border-left:3px solid var(--purple)">
+    <div class="monthly-sec-title" style="color:var(--purple)">🤝 공유 <span style="font-size:11px;font-weight:400;color:var(--t3)">30분 — 배우자와 함께</span></div>
+    <div style="background:var(--rdim);border-radius:5px;padding:7px 10px;margin-bottom:10px;font-size:11px;color:var(--red)">
+      ⛔ 필수 생략 불가: 재무 숫자 확인 + 배우자 감정 공유
+    </div>
+    <div class="m-field">
+      <div class="m-label">[필수] 재무 — 월 고정비·비상금·생존 가능 개월 수</div>
+      <input type="text" id="m-finance" oninput="saveMonthly()" placeholder="비상금 N개월치 / 고정지출 확인...">
+    </div>
+    <div class="m-field">
+      <div class="m-label">[필수] 관계 — 배우자에게 공유할 사실·사과·요청</div>
+      <textarea id="m-relation" rows="2" oninput="saveMonthly()" placeholder="이번 달 공유할 내용..."></textarea>
+    </div>
+    <div class="m-field">
+      <div class="m-label">생계 — 지원 건수·인터뷰·포트폴리오 진행</div>
+      <input type="text" id="m-livelihood" oninput="saveMonthly()" placeholder="지원 N건 / 인터뷰 N명 / 산출물 N개...">
+    </div>
+    <div class="m-field" style="margin-bottom:0">
+      <div class="m-label">다음 진료 때 보고할 내용</div>
+      <input type="text" id="m-medical" oninput="saveMonthly()" placeholder="수면 추이 / 우울 패턴...">
+    </div>
+  </div>
+
+  <!-- 의미축 5분 -->
+  <div class="monthly-sec" style="border-left:3px solid var(--green)">
+    <div class="monthly-sec-title" style="color:var(--green)">🌿 의미축 확인 <span style="font-size:11px;font-weight:400;color:var(--t3)">5분</span></div>
+    <div class="m-field" style="margin-bottom:0">
+      <div class="m-label">게임제작·수련·AI 산출물 중 이번 달 의미 있었던 결과물</div>
+      <input type="text" id="m-meaning" oninput="saveMonthly()" placeholder="어떤 결과물이었는가...">
+    </div>
+  </div>
+
+  <!-- 6.2 기둥 복구 순서 -->
+  <div class="card">
+    <div class="sec-label">🔧 6.2 기둥 복구 순서</div>
+    <div style="font-size:11px;color:var(--t3);margin-bottom:8px">기둥이 동시에 흔들릴 때 순서 고정 — 수신제가치국평천하</div>
+    <div id="pillar-recovery"></div>
+  </div>
+
+  <!-- 역추적표 -->
+  <div class="card">
+    <div class="sec-label">🗺 역추적표 — 방향을 잃었을 때</div>
+    <div style="font-size:11px;color:var(--t3);margin-bottom:8px">막힌 지점 확인 후 5분 내 지금 당장 할 것 하나를 실행한다</div>
+    <div style="overflow-x:auto"><table class="bt-table" id="backtrack-tbl"></table></div>
+  </div>
+
+  <div class="save-btn"><button class="btn" id="m-save-btn" onclick="saveMonthlyBtn()">저장</button></div>
+</div>
+
+<!-- ═══════════════════ 원칙 ═══════════════════ -->
+<div class="view" id="v-principle">
+  <div style="color:var(--t3);font-size:12px;font-weight:700;letter-spacing:.08em;margin-bottom:4px">📌 결론 10가지 실천 원칙</div>
+  <div style="color:var(--t3);font-size:11px;margin-bottom:14px">새로운 선택지·방향 상실·의욕 급등 시 꺼낸다</div>
+  <div id="principle-list"></div>
+  <div class="card" style="margin-top:14px">
+    <div class="sec-label">⚙ 9.6 운영 최소 규칙</div>
+    <div style="font-size:13px;color:var(--t1);padding:6px 0;border-bottom:1px solid var(--b2)">보고서 본문은 <b style="color:var(--blue)">월 1회</b> 이상 읽지 않는다</div>
+    <div style="font-size:13px;color:var(--t1);padding:6px 0;border-bottom:1px solid var(--b2)">일상에서 꺼내는 것은 <b style="color:var(--blue)">9장 운영표 + 결론 10원칙만</b></div>
+    <div style="font-size:13px;color:var(--t1);padding:6px 0;border-bottom:1px solid var(--b2)">보고서 수정·표 업데이트는 <b style="color:var(--red)">72시간 게이트 대상</b></div>
+    <div style="font-size:13px;color:var(--t1);padding:6px 0">운영표 자체가 <b style="color:var(--red)">과잉분석의 도구</b>가 되어서는 안 된다</div>
+  </div>
+</div>
+
+<!-- ═══════════════════ 루틴 ═══════════════════ -->
+<div class="view" id="v-routine">
+  <div style="background:var(--bdim);border:1px solid #1e3a5f;border-radius:8px;padding:10px 13px;margin-bottom:14px">
+    <div style="font-size:11px;color:var(--blue);font-weight:700;margin-bottom:3px">핵심 트리거 문장</div>
+    <div style="font-size:13px;color:var(--t1);font-style:italic">"나는 머릿속에서 완성한 뒤 시작하지 않는다. 밖으로 꺼내고, 3분 안에 닫고, 25분 동안 만든다."</div>
+  </div>
+  <div id="routine-content"></div>
+</div>
+
+<!-- ═══════════════════ 상황처방 ═══════════════════ -->
+<div class="view" id="v-guide">
+  <div style="color:var(--t3);font-size:12px;font-weight:700;letter-spacing:.08em;margin-bottom:8px">💡 지금 상황 선택</div>
+  <div id="sit-buttons" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px"></div>
+  <div id="sit-result"></div>
+
+  <div style="color:var(--t3);font-size:12px;font-weight:700;letter-spacing:.08em;margin:16px 0 6px">🔴 위험 단계 점검 (8.1)</div>
+  <div style="font-size:11px;color:var(--t3);margin-bottom:8px">지금 어느 단계인가 — 해당 위험 탭하기</div>
+  <div id="risk-buttons" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px"></div>
+  <div id="risk-result"></div>
+
+  <div style="color:var(--t3);font-size:12px;font-weight:700;letter-spacing:.08em;margin:16px 0 6px">📋 플랜 B 트리거 (8.3)</div>
+  <div id="planb-list"></div>
+</div>
+
+<!-- ═══════════════════ 기록 ═══════════════════ -->
+<div class="view" id="v-history">
+  <div style="color:var(--t3);font-size:12px;font-weight:700;letter-spacing:.08em;margin-bottom:10px">최근 30일 기록</div>
+  <div id="history-list"></div>
+</div>
+
+<script>
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 상수·데이터
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const DAYS = ['일','월','화','수','목','금','토'];
+const KEY_DAILY = 'daily_v2', KEY_WEEKLY = 'weekly_v2', KEY_MONTHLY = 'monthly_v2';
+
+const PILLARS = [
+  { key:'recovery', label:'회복', icon:'🔴', desc:'수면·수련(홍익>기천)·우울 안정', basis:'우울역산(4) + 수면7h↑(3) + 수련횟수(3) → 자동', warn:'4점↓ → 전 기둥 50% 즉시 축소', warnTh:4, auto:true },
+  { key:'relation', label:'관계', icon:'🟡', desc:'배우자와 예측 가능한 신뢰', basis:'긴장도역산(4) + 감정대화(3) + 아내따뜻(3) → 일부 자동', warn:'3점↓ → 이번 주 감정 대화 우선', warnTh:3, auto:false },
+  { key:'livelihood', label:'생계', icon:'🟢', desc:'방산·국방·AI, 예측 가능 소득', basis:'연락횟수(4) + 포트폴리오진척(4) + 인터뷰보너스(2) → 자동', warn:'3점↓ → 플랜 B 트리거 거리 확인', warnTh:3, auto:true },
+  { key:'growth', label:'성장', icon:'🔵', desc:'공부보다 산출물·포트폴리오', basis:'소산출물주3회↑(4) + 대산출물(4) + 블로그(2) → 수동', warn:'3점↓ → 오늘 행동 1개 규칙 강제', warnTh:3, auto:false },
+  { key:'meaning', label:'의미', icon:'🟣', desc:'홍익학당>기천>게임제작 순 비중', basis:'홍익횟수(4) + 기천횟수(3) + 게임진척(3) → 자동', warn:'3점↓ → 수련 방치 경보 복구', warnTh:3, auto:true },
+];
+
+const CEO_QS = [
+  { n:1, q:'다음 주 가장 중요한 전장은 무엇인가?', ph:'주간 핵심 목표 1개', k:'q1' },
+  { n:2, q:'다음 주 반드시 남길 산출물은 무엇인가?', ph:'문서·계약·콘텐츠·제품 중 1개', k:'q2' },
+  { n:3, q:'다음 주 회피가 예상되는 과제는 무엇인가?', ph:'위험 과제 1개', k:'q3' },
+  { n:4, q:'그 과제를 언제 첫 25분 실행할 것인가?', ph:'캘린더 고정 시간', k:'q4' },
+  { n:5, q:'누구에게 언제 공유할 것인가?', ph:'외부 마감 설정', k:'q5' },
+  { n:6, q:'다음 주 하지 않을 것은 무엇인가?', ph:'제거 항목 1개', k:'q6' },
+];
+
+const PRINCIPLES = [
+  { n:1, title:'修身 먼저', desc:'상담·약물·수면을 진로보다 우선한다', trigger:'우울 7점 3일 → 즉시 실험 축소', ch:'3·6장', c:'#3fb950' },
+  { n:2, title:'매일 행동 1개', desc:'생각 30분 후 반드시 행동 1개로 종료', trigger:'지원 1건, 연락 1명, 기록 1개면 충분', ch:'7장', c:'#58a6ff' },
+  { n:3, title:'72시간 게이트', desc:'고가강의·창업·진학·치료 변경은 5단계 게이트 후 판단', trigger:'밤 10시 이후 결제·선언 조건 없이 금지', ch:'6·8장', c:'#d29922' },
+  { n:4, title:'프리랜서 초기 금지', desc:'구조 없는 자유에서 가장 취약. 외부 구조 먼저', trigger:'외부 구조 먼저, 부분 전환만', ch:'4장', c:'#a371f7' },
+  { n:5, title:'숫자와 행동 보여주기', desc:'신뢰는 반복되는 예측 가능성에서 생긴다', trigger:'월 1회 재무·주 1회 감정 대화 분리', ch:'6장', c:'#3fb950' },
+  { n:6, title:'산출물 우선', desc:'공부 2시간마다 산출물 1개. 문서·제안서·템플릿으로 전환', trigger:'공부 2시간당 산출물 1개', ch:'7장', c:'#58a6ff' },
+  { n:7, title:'시장 빈 곳 먼저', desc:'내가 좋아하는 것보다 고객이 돈을 낼 문제를 먼저', trigger:'고객의 고통이 먼저', ch:'4장', c:'#d29922' },
+  { n:8, title:'무반응은 데이터', desc:'무반응을 데이터로 기록. 10회 단위로 판단', trigger:'방향 문제 or 접근 방식 문제로 전환', ch:'8장', c:'#f85149' },
+  { n:9, title:'기록이 선언보다 먼저', desc:'6개월 이상 기록 후 소규모 파일럿만 허용', trigger:'6개월 기록 후 파일럿', ch:'5장', c:'#3fb950' },
+  { n:10, title:'줄일 것 먼저', desc:'과부하는 우울 재발의 전조. 매월 말 줄일 것 1개 이상', trigger:'월말 줄일 것 1개 이상 필수', ch:'9장', c:'#58a6ff' },
+];
+
+const SITUATIONS = [
+  { label:'착수 못 하고 있다', icon:'🔒', c:'#f85149', meaning:'실행 기능 마비', action:'완벽한 계획보다 첫 동작으로 길을 연다',
+    steps:['과제 이름을 빈 문서에 하나만 적는다','첫 10분 행동을 한 줄 쓴다','25분 완료 기준을 한 줄 쓴다','15분 타이머 켜고 시작 — 완성도 금지'],
+    trigger:'나는 머릿속에서 완성한 뒤 시작하지 않는다.' },
+  { label:'기분이 안 올라온다', icon:'😶', c:'#d29922', meaning:'신체 각성 낮음', action:'행동이 감정보다 먼저다',
+    steps:['물 한 컵 마신다','조명을 켠다','10회 호흡한다','파일 열고 제목만 쓴다'],
+    trigger:'기분이 올라오길 기다리지 않는다.' },
+  { label:'자료가 더 필요하다', icon:'🔍', c:'#d29922', meaning:'시작 기준이 모호함', action:'산출물 제목부터 쓴다',
+    steps:['지금 아는 것만으로 제목 3개를 쓴다','빈칸 남겨두고 시작한다','자료는 25분 이후에'],
+    trigger:'자료 더 필요 = 시작 기준이 모호하다.' },
+  { label:'어떻게 해야 할지 모르겠다', icon:'🌀', c:'#58a6ff', meaning:'비구조 과제 — 작업기억 과부하', action:'화이트보드에 꺼낸다',
+    steps:['모호한 단어 최대 5개 적는다','오늘 다룰 단어 1개 선택(30초)','완료 기준 한 줄(60초)','첫 행동 한 줄(60초) → 타이머'],
+    trigger:'머릿속에서 해결하지 않는다. 꺼내고 3분 닫고 25분 만든다.' },
+  { label:'방향이 틀릴 것 같다', icon:'🎯', c:'#3fb950', meaning:'선택지가 너무 많음', action:'선택지 3개로 좁힌다',
+    steps:['방향 3개만 적는다','각 방향의 25분 완료 기준을 쓴다','가장 작은 것 1개 선택','타이머 시작'],
+    trigger:'방향 틀릴까봐 = 선택지가 너무 많다. 3개만.' },
+  { label:'더 어려운 공부를 해야겠다', icon:'📚', c:'#d29922', meaning:'고급 회피 신호', action:'원래 과제의 첫 문장을 쓴다',
+    steps:['지금 하던 과제 파일을 다시 연다','첫 문장 또는 첫 항목만 쓴다','25분 타이머','공부는 이 세션 끝나고'],
+    trigger:'더 어려운 공부 = 고급 회피. 원래 과제로.' },
+  { label:'장소를 바꿔야겠다', icon:'🚶', c:'#484f58', meaning:'환경 탓으로 전환', action:'25분 실행 후 이동 결정',
+    steps:['지금 자리에서 25분 타이머','산출물 1개 만든다','25분 후 이동 여부 결정'],
+    trigger:'장소 변경이 시작 트리거를 대체하게 두지 않는다.' },
+  { label:'과잉분석 중인 것 같다', icon:'🔄', c:'#f85149', meaning:'최적 방법 찾다 실행 중단', action:'STOP-3 발동',
+    steps:['S — 지금 나는 회피성 분석에 들어가고 있다','T — 목표는 완벽한 이해가 아니라 25분 산출물이다','O — 산출물 제목부터 쓴다','P — 선택지 3개 이하 → 타이머'],
+    trigger:'90초 안에 빈칸 하나만 만든다. 품질은 내일.' },
+  { label:'화가 난다', icon:'😤', c:'#f85149', meaning:'분노는 방향을 요구하는 에너지', action:'말하기 전 3문장 메모',
+    steps:['사실: 실제 일어난 일 한 줄','해석: 내가 느낀 의미 한 줄','요구: 내가 원하는 것 한 줄','10분 뒤 판단'],
+    trigger:'분노는 방향을 요구하는 에너지다. 기술로 바꾼다.' },
+  { label:'권위자 지시가 납득 안 된다', icon:'⚔️', c:'#a371f7', meaning:'즉각 반응하면 관계 훼손', action:'즉각 반응하지 않는다',
+    steps:['상대가 한 말과 내 해석을 분리한다','역할상 필요한 권위인지 관성적 권위인지 판단','따를 것/협상할 것/거절할 것을 정한다','동의하지 않는다고 말하되 부정은 않는다'],
+    trigger:'나는 지금 권위를 부수는 것이 아니라 내 권위를 세운다.' },
+  { label:'자책이 올라온다', icon:'💭', c:'#58a6ff', meaning:'수치심 → 인격 문제로 해석 중', action:'재프레이밍 4단계',
+    steps:['"이건 인격 문제가 아니라 트랙 설계 문제다"','"나는 의지로 버티는 사람이 아니라 짧은 승리 구조로 바꾸는 사람이다"','"지금 필요한 것은 반성이 아니라 25분짜리 산출물이다"','3분 구조화 후 랩타임 시작'],
+    trigger:'구조가 없었던 것이다. 게으른 것이 아니다.' },
+  { label:'오전 루틴을 못 했다', icon:'⏰', c:'#d29922', meaning:'시스템이 아직 살아있다는 신호', action:'ZERO 프로토콜 — 오후 한 번만',
+    steps:['Z: 지금 이 세션에서 할 것 하나를 적는다(1분)','E: 완료 상태를 구체적으로 정의한다(1분)','R: 휴대폰을 다른 방에 둔다(30초)','O: 과제의 첫 동작을 지금 당장 수행한다(30초)'],
+    trigger:'완벽한 루틴보다 복구 프로토콜이 더 중요하다.' },
+  { label:'단순 반복 업무가 쌓였다', icon:'📋', c:'#3fb950', meaning:'나의 가치가 아닌 시스템 처리 대상', action:'업무 착수 프로토콜',
+    steps:['직접/위임/자동화 분류 먼저','최소 완료 기준을 한 줄로 쓴다','15분 타이머 + 체크리스트화','자동화·위임 가능 여부 표시'],
+    trigger:'이 일은 나의 가치가 아니라 시스템으로 처리할 대상이다.' },
+  { label:'지적 권태가 온다', icon:'💤', c:'#d29922', meaning:'내 뇌는 더 어려운 문제를 요구 중', action:'과제를 퍼즐로 재설계',
+    steps:['오늘은 손자병법 구조로 목차를 짠다','오늘은 10살짜리에게 설명하듯 쓴다','시간 단축·오류 감소를 점수화한다','15분 안에 핵심 3개만 뽑는 스프린트'],
+    trigger:'내 뇌는 더 어려운 문제를 요구하고 있다. 과제를 설계하라.' },
+];
+
+const RISKS = [
+  { label:'우울 재발', icon:'🔴', priority:'최우선', c:'#f85149',
+    early:['수면 30분 이상 감소 3일 연속'],
+    mid:['우울 7점 이상 3일 연속','회피 행동(AI질문·검색·유튜브) 증가'],
+    severe:['무가치감·고립·행동 0건 2주 이상'],
+    action:['초기: 수련 재개·수면 우선','중기: 상담사 즉시 연락·목표 50% 축소','심각: 진로 실험 전면 중단'],
+    forbidden:'의욕 급등해도 치료 임의 중단 금지' },
+  { label:'충동적 결정', icon:'⚡', priority:'최우선', c:'#f85149',
+    early:['기분 좋을 때 새 아이디어 반복 출현'],
+    mid:['밤 10시 이후 검색·계획 수정 시작'],
+    severe:['72시간 내 결제·선언·등록 실행'],
+    action:['초기: 메모만 하고 72시간 대기','중기: 게이트 5단계 점검','심각: 결제 취소·선언 철회'],
+    forbidden:'밤 10시 이후 검색·비교·계획 수정 금지' },
+  { label:'과잉분석', icon:'🔄', priority:'최우선', c:'#f85149',
+    early:['AI 질문·검색 30분 이상 행동 없이 반복'],
+    mid:['공부 2시간 후 산출물 0개'],
+    severe:['행동 없이 계획 문서만 계속 수정'],
+    action:['초기: 오늘 행동 1개 규칙 즉시','중기: 공부 중단·산출물 1개 먼저','심각: 최소 유지 버전 전환'],
+    forbidden:'생각 30분 후 반드시 행동 1개로 종료' },
+  { label:'조기 포기', icon:'🏳️', priority:'관리', c:'#d29922',
+    early:["2주 후 '이건 내 길이 아닌 것 같다' 반복"],
+    mid:['새 선택지 탐색·기존 행동 감소'],
+    severe:['4주 이내 방향 전환 선언'],
+    action:['초기: 8주 최소 검증 기간 상기','중기: 배우자·상담사 공유 의무화','심각: 72시간 게이트 강제'],
+    forbidden:'2~3주 느낌이 아니라 8주 데이터로 판단' },
+  { label:'시장 무반응', icon:'📉', priority:'관리', c:'#d29922',
+    early:["지원 3~4회 무반응 후 '내가 부족하다' 해석"],
+    mid:['지원 활동 감소·자기비난 반복'],
+    severe:['지원 중단·포지셔닝 포기 선언'],
+    action:['초기: 방향 문제인가 질문으로 전환','중기: 현직자 인터뷰로 피드백','심각: 플랜 B 시나리오 A'],
+    forbidden:'반응 없다 → 방향 또는 접근 방식 문제로 전환' },
+  { label:'배우자 갈등', icon:'💔', priority:'관리', c:'#d29922',
+    early:['재무 대화 1회 이상 건너뜀'],
+    mid:['비전 설명 반복·숫자 공유 회피'],
+    severe:['감정 대화 2주 이상 공백·이혼 언급'],
+    action:['초기: 재무 대화 즉시 재개','중기: 커플 상담 검토','심각: 관계 기둥 즉시 복구'],
+    forbidden:"'나를 믿어달라' → '이번 달 이것을 했다'로 교체" },
+  { label:'수련 조기 직업화', icon:'🥋', priority:'보험', c:'#58a6ff',
+    early:['기록 6개월 미만에서 브랜드명 설계'],
+    mid:['유료화 계획 구체화·SNS 선언'],
+    severe:['레퍼런스 없이 유료 프로그램 런칭'],
+    action:['초기: 기록 개월 수 확인·선언 보류','중기: 무료 파일럿 1회로 축소','심각: 선언 철회·기록부터 재시작'],
+    forbidden:'6개월 이상 기록 전 상품화 금지' },
+  { label:'게임 과몰입', icon:'🎮', priority:'보험', c:'#58a6ff',
+    early:['게임 기획 시간이 생계 준비 시간 초과'],
+    mid:['생계 산출물 0건 주간 발생'],
+    severe:['게임제작이 주간 계획 50% 이상'],
+    action:['초기: 주 1~2회·30~45분 제한 재확인','중기: 1개월 게임제작 50% 축소','심각: 1개월 중단'],
+    forbidden:'생계 준비보다 창작 설정·기획만 늘어나면 과몰입 신호' },
+  { label:'충동 결제', icon:'💳', priority:'보험', c:'#58a6ff',
+    early:['고가 강의·코칭 프로그램 충동 결제'],
+    mid:['투자 정보 유료 구독 급증'],
+    severe:['재정적 타격'],
+    action:['72시간 보류 적용','50만원↑ 배우자 합의 필수','무료 피드백 2건 먼저'],
+    forbidden:'50만원↑ 배우자 동의 없으면 자동 부결' },
+];
+
+const PLANB = [
+  { s:'A', title:'방산·공공 진입 어려움', trigger:'지원 10건 탈락률 80% 초과', dist:'지원 0건 (미도달)', action:'공공기관 컨설팅·중소 방산기획직으로 확장', principle:'포지셔닝 문장 유지. 채널만 변경', c:'#1f6feb' },
+  { s:'B', title:'우울 재발로 인한 지연', trigger:'산출물 3주 연속 0건 + 우울 6점↑', dist:'⚠ 산출물 불안정 (트리거 근접)', action:'로드맵 1년 후퇴·준비 밀도 낮춤', principle:'전역 시점 변경 금지. 밀도만 조정', c:'#f85149' },
+  { s:'C', title:'배우자 소득 변화', trigger:'배우자 소득 20% 이상 감소', dist:'⚠ 현재 배우자 소득 없음', action:'군무원 경력경쟁채용 우선 검토', principle:'방산·공공 PM 포지셔닝 유지. 군무원은 브릿지', c:'#d29922' },
+  { s:'D', title:'복합 충격 동시 발생', trigger:'수면 6h↓ 3일 + 우울 7점↑ 3일 + 산출물 2주 0건', dist:'발동 조건 2개↑ 시 즉시 확인', action:'결제·선언·전역 시점 변경 단독 결정 금지', principle:'생계·회복·관계 손실 제한 최우선. 성장·의미 자동 축소', c:'#a371f7' },
+];
+
+const ROUTINE_DATA = {
+  morning:[
+    { n:1, time:'0~3분', act:'조명 켜기 · 물 마시기 · 세면', purpose:'신체 각성' },
+    { n:2, time:'3~8분', act:'책상 위 물건 3개만 남기기', purpose:'시각 자극 축소' },
+    { n:3, time:'8~12분', act:'전날 작성한 과제 카드 읽기', purpose:'목표 고정' },
+    { n:4, time:'12~17분', act:'화이트보드에 모호한 단어 최대 5개', purpose:'작업기억 외부화' },
+    { n:5, time:'17~22분', act:'목적 · 첫 행동 · 완료 기준 작성', purpose:'비구조 과제 구조화' },
+    { n:6, time:'22~30분', act:'파일 열기 · 제목 쓰기 · 타이머 시작', purpose:'실행 진입' },
+  ],
+  wmi:[
+    { n:1, str:'작업기억', act:'과제 목적·선택지·완료 기준 외부화', time:'3분' },
+    { n:2, str:'처리속도', act:'첫 문장·첫 표·첫 메시지·첫 설계안 생성', time:'25분' },
+    { n:3, str:'작업기억', act:'결과물을 보고 구조 재배열 (수정 금지·메모만)', time:'5분' },
+    { n:4, str:'처리속도', act:'수정 사항 빠르게 반영', time:'25분' },
+  ],
+  protocol:[
+    { n:1, act:'화이트보드에 모호한 단어 쓰기', limit:'최대 5개', result:'혼란의 외부화' },
+    { n:2, act:'오늘 다룰 단어 1개 선택', limit:'30초', result:'초점 고정' },
+    { n:3, act:'최종 산출물 한 줄 작성', limit:'60초', result:'목적 명확화' },
+    { n:4, act:'첫 10분 행동 작성', limit:'60초', result:'시작 행동 확정' },
+    { n:5, act:'25분 뒤 완료 기준 작성', limit:'60초', result:'종료 조건 확정' },
+    { n:6, act:'타이머 시작', limit:'즉시', result:'실행 진입' },
+  ],
+  zero:[
+    { s:'Z', c:'#f85149', time:'1분', act:"'지금 이 세션에서 할 것 하나'를 적는다" },
+    { s:'E', c:'#d29922', time:'1분', act:"완료 상태를 구체적으로 정의한다 — '리서치를 한다' → 'A4 반 페이지 요약문이 존재한다'" },
+    { s:'R', c:'#3fb950', time:'30초', act:'휴대폰을 물리적으로 다른 방에 두거나 뒤집어 놓는다' },
+    { s:'O', c:'#58a6ff', time:'30초', act:'과제의 첫 문장 또는 첫 동작을 지금 당장 수행한다' },
+  ],
+  final:[
+    { n:1, time:'10초', act:"과제를 보는 즉시 '트랙 설계 문제'로 해석한다" },
+    { n:2, time:'3분', act:'머릿속 시뮬레이션은 최대 3분만 허용한다' },
+    { n:3, time:'2분', act:'목적·첫 행동·완료 기준 3문장을 쓴다' },
+    { n:4, time:'1분', act:'선택지를 3개 이하로 제한한다' },
+    { n:5, time:'15~25분', act:'도파민 스프린트를 시작한다' },
+    { n:6, time:'실행 중', act:'산출물을 만든다. 완성도가 아니라 가시성이 목표다' },
+    { n:7, time:'2분', act:'점수판으로 7점 이상이면 성공 처리한다' },
+    { n:8, time:'3분', act:'다음 블록의 승리 조건을 다시 정한다' },
+  ],
+  dopamine:[
+    { b:'1시간 공부하기', a:'15분 안에 핵심 3개 뽑기' },
+    { b:'보고서 작성하기', a:'25분 안에 제목·문제·결론 초안' },
+    { b:'사업 아이디어 고민', a:'20분 안에 고객·문제·해결책 표 1개' },
+    { b:'자료 정리하기', a:'25분 안에 의사결정 표 1개' },
+    { b:'운동하기', a:'15분 동안 자세·호흡·균형 변화 3가지 기록' },
+  ],
+  gate:[
+    { step:'발동 판단', q:'고가강의·창업·진학·치료 변경·새 프로젝트·전역 시점 변경인가?', yes:'1단계로', no:'게이트 불필요 — 바로 실행', c:'#484f58' },
+    { step:'1단계: 회복', q:'수면 6시간↑·상담 유지·약물 복용 중인가?', yes:'2단계로', no:'회복 기둥 복구 후 72시간 재시작', c:'#276749' },
+    { step:'2단계: 재무', q:'비상금과 월 현금흐름을 해치지 않는가?', yes:'3단계로', no:'재무 대화 후 숫자 확인·1개월 보류', c:'#1f6feb' },
+    { step:'3단계: 가족', q:'배우자에게 통보가 아닌 공유가 가능한가?', yes:'4단계로', no:'감정 대화 먼저·재무 대화 후 재점검', c:'#d29922' },
+    { step:'4단계: 시장성', q:'타인이 돈·시간·피드백으로 반응한 적 있는가?', yes:'실행', no:'무료 파일럿·문서화·1개월 보류 중 하나', c:'#a371f7' },
+  ],
+  autoreject:[
+    { cond:'시간대', rule:'밤 10시 이후 결제·선언·등록·검색·비교·계획 수정 금지' },
+    { cond:'결제', rule:'50만원↑ 배우자 사전 동의 없으면 자동 부결. 100만원↑ 월간 리뷰 전까지 금지' },
+    { cond:'회복', rule:'수면 6h↓ 3일 연속 또는 우울·불안 7점↑ 3일 연속 → 모든 신규 결정 자동 부결' },
+    { cond:'가족 공유', rule:"배우자에게 공유 못 하면 자동 부결. '반대할 것 같아서 말 안 함'도 부결" },
+    { cond:'시장성', rule:'유료 프로그램 구매 전 무료 피드백 2건 또는 무료 파일럿 1회 필수' },
+    { cond:'기록', rule:'72시간 동안 하루 기록 2일 이상 공백 → 게이트 재시작' },
+  ],
+};
+
+const PILLAR_RECOVERY = [
+  { sit:'우울 재발 징후', shaky:'회복', order:'회복 먼저·나머지 전부 보류', act:'상담사 연락·약물 유지·수련 재개', hold:'생계·성장·의미 목표 50%↓', c:'#f85149' },
+  { sit:'배우자 갈등 심화', shaky:'관계', order:'관계 → 회복', act:'감정 대화 즉시 예약·재무 대화 연기', hold:'성장·의미 축소', c:'#d29922' },
+  { sit:'취업 공백 장기화', shaky:'생계', order:'회복 확인 후 → 생계', act:'플랜 B 트리거 확인·브릿지 소득 탐색', hold:'프리랜서·1인 창업 시도 금지', c:'#3fb950' },
+  { sit:'산출물 없음·과잉분석', shaky:'성장', order:'성장 → 회복 확인', act:'오늘 행동 1개 규칙 즉시 재적용', hold:'새 공부 시작 금지·기존 산출물 1개 먼저', c:'#58a6ff' },
+  { sit:'수련·게임 중단', shaky:'의미', order:'의미 → 회복 확인', act:'주 1회·30분으로 즉시 재개', hold:'중단 이유 분석보다 재개 먼저', c:'#a371f7' },
+  { sit:'전 기둥 동시 흔들림', shaky:'전체', order:'회복 → 관계 → 나머지', act:'9장 최소 유지 버전만 실행', hold:'생계·성장·의미 목표 전부 보류', c:'#484f58' },
+];
+
+const BACKTRACK = [
+  { act:'채용공고 1개 저장', mid:'요구역량 표 → 이력서 정밀화', goal:'1차 포지셔닝', block:'공고 저장만 있고 분석 없음', now:'목요일 22시에 분석표 시작' },
+  { act:'논문 1문단 작성', mid:'KCI 게재 → 포트폴리오 1호', goal:'방산·국방 PM 신뢰 자산', block:'초안 작성 중', now:'오늘 1문단 마무리' },
+  { act:'기천·홍익 기록', mid:'6개월 기록 → 의미축', goal:'장기 의미축/회복 루틴', block:'기록 불규칙', now:'오늘부터 3줄 메모 형식으로 고정' },
+  { act:'AI 샘플 제작', mid:'포트폴리오 → 보조 주력', goal:'방산 PM 기술 근거', block:'무엇을 자동화할지 미결정', now:'현재 업무 중 반복 작업 1개 선정' },
+  { act:'배우자 재무 대화', mid:'월 1회 신뢰 축적', goal:'전역 후 심리 안전망', block:'고정지출 미확정', now:'이번 주 지출 항목 목록 작성' },
+  { act:'현직자 1명 연락', mid:'네트워크 → 인터뷰 5명', goal:'시장 가설 검증', block:'연락 대상 목록 미작성', now:'동기·선후배 명단 3명 작성' },
+  { act:'게임제작 기록', mid:'6개월 산출물 → 의미축', goal:'장기 창작 브랜드', block:'주간 제한 시간 미준수', now:'토요일 30분 고정 캘린더 등록' },
+  { act:'우울·수면 기록', mid:'주간 패턴 → 위험 신호', goal:'회복 기둥 유지', block:'기록 빠진 날 보충 방법 없음', now:'자기 전 알람 22:30 고정' },
+];
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 저장·불러오기 (Firebase)
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+// 인메모리 상태 — var 사용해야 module 스크립트의 window.* 할당과 같은 바인딩 공유
+var allDaily = {}, allWeekly = {}, allMonthly = {}, wkPlanDefaults = {};
+let curDate = today();
+let dailyPlanRows = [];
+let checks = { gicheon:false, hongik:false, mindful:false, run:false, strength:false,
+  'a-contact':false,'a-interview':false,'a-blog':false,'a-brunch':false,
+  'a-paper':false,'a-pmp':false,'a-lang':false,'a-ai':false,'a-adsp':false,'a-info':false,
+  'a-jobscan':false,'a-apply':false };
+let wkChecks = { finance:false, emotion:false };
+let bodyState = '';
+let saveTimer = null;
+let wkPlanRows = [];
+
+function showSpinner(on) {
+  const el = document.getElementById('loading-overlay');
+  if (el) el.style.display = on ? 'flex' : 'none';
+}
+
+// Firebase 저장 헬퍼 (module에서 노출된 _fbSet 사용)
+function saveDaily() {
+  if (window._fbSet) window._fbSet('diary/daily_v2', allDaily);
+}
+function saveWeeklyStore() {
+  if (window._fbSet) window._fbSet('diary/weekly_v2', allWeekly);
+}
+function saveMonthlyStore() {
+  if (window._fbSet) window._fbSet('diary/monthly_v2', allMonthly);
+}
+// load()는 Firebase module에서 처리하므로 빈 함수로 유지 (하위 호환)
+function load() {}
+
+function toggleGroup(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+function toggleChkSingle(group, val) {
+  if (group === 'body') {
+    bodyState = bodyState === val ? '' : val;
+    ['ok','tired','pain'].forEach(s => {
+      const el = document.getElementById('chk-body-'+s);
+      if (!el) return;
+      const b = el.querySelector('.chk-box'), m = el.querySelector('.chk-mark');
+      if (bodyState===s) { b.classList.add('on'); el.classList.add('on'); m.style.display='block'; }
+      else { b.classList.remove('on'); el.classList.remove('on'); m.style.display='none'; }
+    });
+    autoSave();
+  }
+}
+// ── 일일 계획/실행표
+function addDailyPlanRow(time_v, plan_v, exec_v) {
+  const idx = dailyPlanRows.length;
+  dailyPlanRows.push({ time: time_v||'', plan: plan_v||'', exec: exec_v||'' });
+  const tbody = document.getElementById('daily-plan-body');
+  if (!tbody) return;
+  const tr = document.createElement('tr');
+  tr.id = 'dpr-'+idx;
+  const pv = (plan_v||'').replace(/"/g,'&quot;');
+  const ev = (exec_v||'').replace(/"/g,'&quot;');
+  tr.innerHTML = `<td style="padding:3px 2px"><input type="time" id="dpr-time-${idx}" value="${time_v||''}" oninput="updateDailyPlanRow(${idx})" style="width:72px;background:transparent;border:none;border-bottom:1px solid var(--b1);color:var(--t1);font-family:inherit;font-size:12px;outline:none"></td>
+    <td style="padding:3px 2px"><input type="text" id="dpr-plan-${idx}" value="${pv}" placeholder="계획..." oninput="updateDailyPlanRow(${idx})" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--b1);color:var(--t1);font-family:inherit;font-size:12px;outline:none"></td>
+    <td style="padding:3px 2px"><input type="text" id="dpr-exec-${idx}" value="${ev}" placeholder="실행..." oninput="updateDailyPlanRow(${idx})" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--blue);color:var(--blue);font-family:inherit;font-size:12px;outline:none"></td>
+    <td style="padding:3px 2px;text-align:center"><button onclick="removeDailyPlanRow(${idx})" style="background:transparent;border:none;color:var(--red);font-size:14px;cursor:pointer">×</button></td>`;
+  tbody.appendChild(tr);
+  const e=document.getElementById('daily-plan-empty'); if(e) e.style.display='none';
+}
+function updateDailyPlanRow(idx) {
+  if (dailyPlanRows[idx]!==undefined) {
+    dailyPlanRows[idx].time=document.getElementById('dpr-time-'+idx)?.value||'';
+    dailyPlanRows[idx].plan=document.getElementById('dpr-plan-'+idx)?.value||'';
+    dailyPlanRows[idx].exec=document.getElementById('dpr-exec-'+idx)?.value||'';
+    autoSave();
+  }
+}
+function removeDailyPlanRow(idx) {
+  dailyPlanRows[idx]=null;
+  const tr=document.getElementById('dpr-'+idx); if(tr) tr.remove();
+  autoSave();
+}
+function renderDailyPlan(rows) {
+  dailyPlanRows=[];
+  const tbody=document.getElementById('daily-plan-body'); if(tbody) tbody.innerHTML='';
+  const emptyEl=document.getElementById('daily-plan-empty');
+  if (!rows||rows.length===0) {
+    const mon=monStr(curDate);
+    const def=(wkPlanDefaults&&wkPlanDefaults[mon])||[];
+    if(def.length){ def.forEach(r=>{ if(r) addDailyPlanRow(r.time,r.plan,''); }); }
+    else{ if(emptyEl) emptyEl.style.display='block'; }
+  } else { rows.forEach(r=>{ if(r) addDailyPlanRow(r.time,r.plan,r.exec); }); }
+}
+
+function addWkPlanRow(time_v, plan_v) {
+  const idx = wkPlanRows.length;
+  wkPlanRows.push({ time: time_v||'', plan: plan_v||'' });
+  const tbody = document.getElementById('wk-plan-body');
+  if (!tbody) return;
+  const tr = document.createElement('tr');
+  tr.id = 'wkpr-'+idx;
+  tr.innerHTML = `<td style="padding:3px"><input type="time" id="wkpr-time-${idx}" value="${time_v||''}" oninput="updateWkPlanRow(${idx})" style="width:80px;background:transparent;border:none;border-bottom:1px solid var(--b1);color:var(--t1);font-size:12px"></td>
+    <td style="padding:3px"><input type="text" id="wkpr-plan-${idx}" value="${(plan_v||'').replace(/"/g,'&quot;')}" placeholder="계획..." oninput="updateWkPlanRow(${idx})" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--b1);color:var(--t1);font-size:12px"></td>
+    <td style="padding:3px;text-align:center"><button onclick="removeWkPlanRow(${idx})" style="background:transparent;border:none;color:var(--red);font-size:14px;cursor:pointer">×</button></td>`;
+  tbody.appendChild(tr);
+}
+function updateWkPlanRow(idx) {
+  if (wkPlanRows[idx] !== undefined) {
+    wkPlanRows[idx].time = document.getElementById('wkpr-time-'+idx)?.value||'';
+    wkPlanRows[idx].plan = document.getElementById('wkpr-plan-'+idx)?.value||'';
+    saveWeekly();
+  }
+}
+function removeWkPlanRow(idx) {
+  wkPlanRows[idx] = null;
+  const tr = document.getElementById('wkpr-'+idx);
+  if (tr) tr.remove();
+  saveWeekly();
+}
+function applyWkPlanToDaily() {
+  // 주간 기본값을 다음 주 일일에 적용 (Firebase에 저장)
+  const nextMon = (() => {
+    const dt = new Date(); const day=dt.getDay();
+    const diff = day===0?1:8-day; dt.setDate(dt.getDate()+diff);
+    return dt.toISOString().split('T')[0];
+  })();
+  const validRows = wkPlanRows.filter(r=>r&&(r.time||r.plan));
+  if (!wkPlanDefaults) wkPlanDefaults = {};
+  wkPlanDefaults[nextMon] = validRows;
+  if (window._fbSet) window._fbSet('diary/wk_plan_defaults', wkPlanDefaults);
+  alert('다음 주('+nextMon+'~) 일일 기본값으로 저장됐습니다.');
+}
+
+function today() { return new Date().toISOString().split('T')[0]; }
+
+// (load/save 함수들은 위 Firebase 섹션에서 정의됨)
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 일일 탭
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function gv(id) { const el = document.getElementById(id); return el ? el.value : ''; }
+function sv(id, v) { const el = document.getElementById(id); if(el) el.value = v || ''; }
+
+function readForm() {
+  return {
+    date: curDate,
+    depression: gv('f-dep'), anxiety: gv('f-anx'), dep_context: gv('f-dep-context'),
+    sleep_bed: gv('f-bed'), sleep_wake: gv('f-wake'), sleep_wakeups: gv('f-wakeups'),
+    action_checks: Object.assign({}, checks),
+    action_contact: gv('f-action-contact'),
+    action_record: gv('f-action-record'),
+    action_study: gv('f-action-study'),
+    action_apply: gv('f-action-apply'),
+    navig: gv('f-navig'),
+    hema: gv('f-hema'),
+    survived: gv('f-survived'),
+    alive: gv('f-alive'),
+    drained: gv('f-drained'),
+    wife: gv('f-wife'),
+    avoidance: gv('f-avoid'),
+    tension: gv('f-tension'), unsaid: gv('f-unsaid'),
+    exercise: Object.assign({}, checks),
+    exercise_etc: gv('f-exercise-etc'),
+    body_state: bodyState,
+    body: gv('f-body'),
+    tmr_action: gv('f-tmr-action'), tmr_goal: gv('f-tmr-goal'), tmr_ban: gv('f-tmr-ban'),
+    tmr_notdo: gv('f-tmr-notdo'),
+    daily_plan_rows: dailyPlanRows.filter(r=>r),
+  };
+}
+function fillForm(e) {
+  sv('f-dep', e.depression); sv('f-anx', e.anxiety); sv('f-dep-context', e.dep_context);
+  sv('f-bed', e.sleep_bed); sv('f-wake', e.sleep_wake); sv('f-wakeups', e.sleep_wakeups);
+  sv('f-action-contact', e.action_contact); sv('f-action-record', e.action_record);
+  sv('f-action-study', e.action_study); sv('f-action-apply', e.action_apply);
+  sv('f-navig', e.navig); sv('f-hema', e.hema);
+  sv('f-survived', e.survived); sv('f-alive', e.alive);
+  sv('f-drained', e.drained); sv('f-wife', e.wife);
+  sv('f-avoid', e.avoidance);
+  sv('f-tension', e.tension); sv('f-unsaid', e.unsaid);
+  sv('f-exercise-etc', e.exercise_etc); sv('f-body', e.body);
+  sv('f-tmr-action', e.tmr_action); sv('f-tmr-goal', e.tmr_goal); sv('f-tmr-ban', e.tmr_ban);
+  sv('f-tmr-notdo', e.tmr_notdo);
+  renderDailyPlan(e.daily_plan_rows||[]);
+  checks = Object.assign({ gicheon:false, hongik:false, mindful:false, run:false, strength:false,
+    'a-contact':false,'a-interview':false,'a-blog':false,'a-brunch':false,
+    'a-paper':false,'a-pmp':false,'a-lang':false,'a-ai':false,'a-adsp':false,'a-info':false,
+    'a-jobscan':false,'a-apply':false }, e.exercise || e.action_checks || {});
+  Object.keys(checks).forEach(k => renderChk(k));
+  bodyState = e.body_state || '';
+  ['ok','tired','pain'].forEach(s => {
+    const el = document.getElementById('chk-body-'+s);
+    if (!el) return;
+    const b = el.querySelector('.chk-box'), m = el.querySelector('.chk-mark');
+    if (bodyState===s) { b.classList.add('on'); el.classList.add('on'); m.style.display='block'; }
+    else { b.classList.remove('on'); el.classList.remove('on'); m.style.display='none'; }
+  });
+  calcSleep();
+}
+function autoSave() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    allDaily[curDate] = readForm();
+    saveDaily();
+    renderAlerts();
+  }, 350);
+}
+function manualSave() {
+  allDaily[curDate] = readForm();
+  saveDaily();
+  renderAlerts();
+  const btn = document.getElementById('save-btn');
+  btn.textContent = '✓ 저장됨'; btn.classList.add('ok');
+  setTimeout(() => { btn.textContent = '저장'; btn.classList.remove('ok'); }, 2000);
+}
+function calcSleep() {
+  const bed = gv('f-bed'), wake = gv('f-wake');
+  const hEl = document.getElementById('sleep-hrs'), bEl = document.getElementById('sleep-badge');
+  if (!bed || !wake) { hEl.textContent = ''; bEl.innerHTML = ''; return; }
+  const [bh,bm] = bed.split(':').map(Number), [wh,wm] = wake.split(':').map(Number);
+  let diff = (wh*60+wm)-(bh*60+bm);
+  if (diff < 0) diff += 1440;
+  const hrs = (diff/60).toFixed(1);
+  hEl.textContent = hrs + '시간';
+  hEl.style.color = diff < 360 ? 'var(--red)' : 'var(--green)';
+  bEl.innerHTML = diff < 360 ? '<span class="badge">6시간↓</span>' : '';
+}
+function calcAlerts(e) {
+  const a = [];
+  if (parseInt(e.depression) >= 7) a.push('우울 7점↑ — 상담사 연락');
+  if (e.sleep_bed && e.sleep_wake) {
+    const [bh,bm]=e.sleep_bed.split(':').map(Number),[wh,wm]=e.sleep_wake.split(':').map(Number);
+    let d=(wh*60+wm)-(bh*60+bm); if(d<0)d+=1440;
+    if(d<360) a.push('수면 6시간 미만');
+  }
+  const ac = e.action_checks || {};
+  const hasAction = Object.values(ac).some(v=>v);
+  if (!hasAction) a.push('화공 행동 미기록');
+  return a;
+}
+function renderAlerts() {
+  const e = readForm(), a = calcAlerts(e);
+  const box = document.getElementById('alert-box');
+  if (!a.length) { box.innerHTML = ''; return; }
+  box.innerHTML = '<div class="alert-box">' + a.map(x=>`<div class="alert-item">⚠ ${x}</div>`).join('') + '</div>';
+}
+function renderChk(k) {
+  const box = document.getElementById('chk-'+k);
+  if (!box) return;
+  const b = box.querySelector('.chk-box'), l = box.querySelector('.chk-label'), m = box.querySelector('.chk-mark');
+  if (checks[k]) { b.classList.add('on'); box.classList.add('on'); m.style.display='block'; }
+  else { b.classList.remove('on'); box.classList.remove('on'); m.style.display='none'; }
+}
+function toggleChk(k) { checks[k] = !checks[k]; renderChk(k); autoSave(); }
+function shiftDate(d) {
+  const dt = new Date(curDate+'T00:00:00'); dt.setDate(dt.getDate()+d);
+  curDate = dt.toISOString().split('T')[0]; loadDate();
+}
+function onDateChange() { curDate = gv('date-picker'); loadDate(); }
+function loadDate() {
+  const dt = new Date(curDate+'T00:00:00');
+  document.getElementById('date-label').textContent = `${dt.getMonth()+1}월 ${dt.getDate()}일 (${DAYS[dt.getDay()]})`;
+  document.getElementById('date-picker').value = curDate;
+  let e = allDaily[curDate] || {};
+  // 주간 기본값 적용 (해당 날짜 데이터 없을 때만)
+  if (!allDaily[curDate]) {
+    const mon = monStr(curDate);
+    const planDefault = (wkPlanDefaults&&wkPlanDefaults[mon])||[];
+    if (planDefault.length) e._planDefault = planDefault;
+  }
+  fillForm(e); renderAlerts();
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 주간 탭
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function monStr(d) {
+  const dt = new Date((d||today())+'T00:00:00'), day=dt.getDay();
+  const diff = day===0?-6:1-day; dt.setDate(dt.getDate()+diff);
+  return dt.toISOString().split('T')[0];
+}
+function getWk() { return allWeekly[monStr()] || {}; }
+function saveWeekly() {
+  const wk = monStr();
+  if (!allWeekly[wk]) allWeekly[wk] = {};
+  const w = allWeekly[wk];
+  CEO_QS.forEach(q => { const el = document.getElementById('wk-ceo-'+q.k); if(el) w[q.k]=el.value; });
+  w.output = gv('wk-output'); w.next = gv('wk-next');
+  w.alive = gv('wk-alive'); w.drained = gv('wk-drained');
+  w.review = gv('wk-review');
+  w.output_count = gv('wk-output-count');
+  w.small_output = gv('wk-small-output');
+  w.big_output = gv('wk-big-output');
+  w.finance = wkChecks.finance; w.emotion = wkChecks.emotion;
+  w.plan_rows = wkPlanRows.filter(r=>r);
+  PILLARS.filter(p=>!p.auto).forEach(p => {
+    const el = document.getElementById('pillar-slider-'+p.key); if(el) w['pillar_'+p.key]=parseInt(el.value)||0;
+  });
+  saveWeeklyStore();
+}
+function saveWeeklyBtn() {
+  saveWeekly(); renderWeekly();
+  const btn = document.getElementById('wk-save-btn');
+  btn.textContent='✓ 저장됨'; btn.classList.add('ok');
+  setTimeout(()=>{ btn.textContent='저장'; btn.classList.remove('ok'); },2000);
+}
+function toggleWkChk(k) {
+  wkChecks[k] = !wkChecks[k];
+  const el = document.getElementById('wk-'+k);
+  if (!el) return;
+  const b = el.querySelector('.chk-box'), m = el.querySelector('.chk-mark');
+  if (wkChecks[k]) { b.classList.add('on'); el.classList.add('on'); m.style.display='block'; }
+  else { b.classList.remove('on'); el.classList.remove('on'); m.style.display='none'; }
+  saveWeekly(); renderWeekly();
+}
+function calcAutoPillarScores() {
+  const wk = monStr();
+  const days = Object.entries(allDaily).filter(([d])=>monStr(d)===wk).map(([,e])=>e);
+  const scores = {};
+  // ── 회복 (10점): 우울역산(4) + 수면7h↑(3) + 수련횟수(3)
+  const deps = days.map(e=>parseFloat(e.depression)).filter(v=>!isNaN(v));
+  const depAvg = deps.length ? deps.reduce((a,b)=>a+b,0)/deps.length : null;
+  const sleepDays = days.filter(e=>{
+    if(!e.sleep_bed||!e.sleep_wake)return false;
+    const [bh,bm]=e.sleep_bed.split(':').map(Number),[wh,wm]=e.sleep_wake.split(':').map(Number);
+    let d=(wh*60+wm)-(bh*60+bm); if(d<0)d+=1440; return d>=420;
+  }).length;
+  const trainDays = days.filter(e=>e.exercise&&(e.exercise.gicheon||e.exercise.hongik||e.exercise.mindful)).length;
+  let rec = 0;
+  if (depAvg!==null) rec += depAvg<=3?4:depAvg<=5?3:depAvg<=7?2:0;
+  rec += sleepDays>=5?3:sleepDays>=3?2:sleepDays>=1?1:0;
+  rec += trainDays>=5?3:trainDays>=3?2:trainDays>=1?1:0;
+  scores.recovery = Math.min(rec, 10);
+  // ── 관계 (일부 자동): 긴장도역산(4) - 나머지는 수동
+  const tensions = days.map(e=>parseFloat(e.tension)).filter(v=>!isNaN(v));
+  const tensAvg = tensions.length ? tensions.reduce((a,b)=>a+b,0)/tensions.length : null;
+  const wifeDays = days.filter(e=>e.wife&&e.wife.trim()).length;
+  let rel = 0;
+  if (tensAvg!==null) rel += tensAvg<=2?4:tensAvg<=4?3:tensAvg<=6?2:0;
+  rel += wifeDays>=4?3:wifeDays>=2?2:wifeDays>=1?1:0;
+  scores.relation_auto = Math.min(rel, 7); // 감정대화(3) 수동과 합산
+  // ── 생계 (자동, 10점): 연락횟수(4) + 포트폴리오/기록진척(4) + 인터뷰보너스(2)
+  const contactDays = days.filter(e=>e.action_checks&&(e.action_checks['a-contact']||e.action_checks['a-interview'])).length;
+  const recordDays = days.filter(e=>e.action_checks&&(e.action_checks['a-blog']||e.action_checks['a-brunch'])).length;
+  const interviewDone = days.some(e=>e.action_checks&&e.action_checks['a-interview']);
+  let liv = 0;
+  liv += contactDays>=3?4:contactDays>=2?3:contactDays>=1?2:0;
+  liv += recordDays>=3?4:recordDays>=2?3:recordDays>=1?2:0;
+  if (interviewDone) liv += 2;
+  scores.livelihood = Math.min(liv, 10);
+  // ── 의미 (자동, 10점): 홍익(4) + 기천(3) + 게임(3)
+  const hongikDays = days.filter(e=>e.exercise&&e.exercise.hongik).length;
+  const gicheonDays = days.filter(e=>e.exercise&&e.exercise.gicheon).length;
+  const gameDays = days.filter(e=>e.action_checks&&(e.action_checks['a-blog'])&&e.action_record&&e.action_record.includes('게임')).length;
+  let mean = 0;
+  mean += hongikDays>=4?4:hongikDays>=3?3:hongikDays>=2?2:hongikDays>=1?1:0;
+  mean += gicheonDays>=4?3:gicheonDays>=3?2:gicheonDays>=1?1:0;
+  mean += gameDays>=1?3:0;
+  scores.meaning = Math.min(mean, 10);
+  return scores;
+}
+function renderWeekly() {
+  const w = getWk();
+  const autoScores = calcAutoPillarScores();
+  let html = '', warnings = [];
+  PILLARS.forEach(p => {
+    let score;
+    if (p.auto) {
+      score = autoScores[p.key]||0;
+    } else if (p.key === 'relation') {
+      // 관계: 자동(긴장도+아내따뜻=7점) + 수동(감정대화=3점)
+      const autoBase = autoScores.relation_auto||0;
+      const manualAdd = wkChecks.emotion ? 3 : 0;
+      score = Math.min(autoBase + manualAdd, 10);
+    } else {
+      score = parseInt(w['pillar_'+p.key])||0;
+    }
+    const sc = score>0?score:0;
+    const col = sc>=7?'var(--green)':sc>=4?'var(--yellow)':sc>0?'var(--red)':'var(--t3)';
+    if (sc>0&&sc<=p.warnTh) warnings.push(p.warn);
+    const autoTag = p.auto ? '<span style="font-size:10px;color:#3fb950;margin-left:4px">자동</span>' : '<span style="font-size:10px;color:#d29922;margin-left:4px">수동</span>';
+    html += `<div class="pillar-row">
+      <div class="pillar-head">
+        <div><span>${p.icon}</span><b style="font-size:13px;margin-left:4px">${p.label}</b>${autoTag}<div class="pillar-desc">${p.desc}</div></div>
+        <span class="pillar-score" style="color:${col}">${sc>0?sc:'—'}/10</span>
+      </div>`;
+    if (p.key === 'relation') {
+      const pct = sc*10;
+      html += `<div style="background:var(--b2);border-radius:4px;height:6px;margin:4px 0"><div style="background:${col};height:6px;border-radius:4px;width:${pct}%"></div></div>`;
+      html += `<div style="font-size:11px;color:var(--t3);margin-top:2px">긴장도+아내따뜻 자동 / 감정대화 아래에서 체크</div>`;
+    } else if (p.key === 'growth') {
+      // 성장: 소산출물(4) + 대산출물(4) + 블로그(2)
+      const sm = parseInt(w.small_output)||0;
+      const bg = parseInt(w.big_output)||0;
+      const bl = parseInt(w.output_count)||0;
+      const smPt = sm>=3?4:sm>=1?2:0;
+      const bgPt = bg>=1?4:0;
+      const blPt = bl>=1?2:0;
+      score = Math.min(smPt+bgPt+blPt, 10);
+    } else if (!p.auto) {
+      html += `<input type="range" id="pillar-slider-${p.key}" min="0" max="10" value="${sc}" oninput="saveWeekly();renderWeekly()" style="width:100%;accent-color:${col}">`;
+    } else {
+      const pct = sc*10;
+      html += `<div style="background:var(--b2);border-radius:4px;height:6px;margin:4px 0"><div style="background:${col};height:6px;border-radius:4px;width:${pct}%"></div></div>`;
+    }
+    html += `<div class="pillar-basis">${p.basis}</div></div>`;
+  });
+  document.getElementById('pillar-scores').innerHTML = html;
+  // 요약
+  const allScores = PILLARS.map(p=>p.auto?(autoScores[p.key]||0):(parseInt(w['pillar_'+p.key])||0)).filter(s=>s>0);
+  const avg = allScores.length ? (allScores.reduce((a,b)=>a+b,0)/allScores.length).toFixed(1) : '—';
+  const ac = parseFloat(avg)>=7?'var(--green)':parseFloat(avg)>=5?'var(--yellow)':'var(--red)';
+  let sumHTML = `<div style="background:var(--s3);border-radius:8px;padding:10px 12px;margin-top:4px;display:flex;justify-content:space-between;align-items:center">
+    <div><div style="font-size:12px;color:var(--t2)">주간 종합</div><div style="font-size:11px;color:var(--t3)">회복·생계 6점↑ · 관계 5점↑ = 잘 버티는 것</div></div>
+    <span style="font-size:22px;font-weight:700;color:${ac};font-family:monospace">${avg}/10</span>
+  </div>`;
+  if (warnings.length) sumHTML += '<div class="warn-box">' + warnings.map(x=>`<div style="color:var(--red);font-size:11px;margin-bottom:2px">⚠ ${x}</div>`).join('') + '</div>';
+  document.getElementById('pillar-summary').innerHTML = sumHTML;
+  // CEO 질문
+  let ceo = '';
+  CEO_QS.forEach(q => {
+    ceo += `<div style="margin-bottom:10px"><div class="m-label"><span style="color:var(--blue);font-weight:700">${q.n}.</span> ${q.q}</div>
+    <input type="text" id="wk-ceo-${q.k}" placeholder="${q.ph}" value="${(w[q.k]||'').replace(/"/g,'&quot;')}" oninput="saveWeekly()" style="width:100%"></div>`;
+  });
+  document.getElementById('ceo-questions').innerHTML = ceo;
+  // 결산 복원
+  sv('wk-output', w.output); sv('wk-next', w.next);
+  sv('wk-alive', w.alive); sv('wk-drained', w.drained);
+  sv('wk-review', w.review);
+  sv('wk-output-count', w.output_count);
+  sv('wk-small-output', w.small_output);
+  sv('wk-big-output', w.big_output);
+  // 일일 텍스트 자동 집계
+  const wk2 = monStr();
+  const days2 = Object.entries(allDaily).filter(([d])=>monStr(d)===wk2).sort(([a],[b])=>a>b?1:-1).map(([d,e])=>({d,e}));
+  const DAY_KR = ['일','월','화','수','목','금','토'];
+  function dayLabel(ds) { const dt=new Date(ds+'T00:00:00'); return (dt.getMonth()+1)+'/'+(dt.getDate())+'('+DAY_KR[dt.getDay()]+')'; }
+  // 살아난 순간 집계
+  const aliveItems = days2.filter(({e})=>e.alive&&e.alive.trim()).map(({d,e})=>`<div style="font-size:11px;padding:2px 0;border-bottom:1px solid var(--b2)"><span style="color:var(--t3);min-width:50px;display:inline-block">${dayLabel(d)}</span><span style="color:var(--green)">${e.alive}</span></div>`).join('');
+  const aliveSec = document.getElementById('wk-daily-alive');
+  if (aliveSec) aliveSec.innerHTML = aliveItems ? '<div style="font-size:11px;color:var(--green);font-weight:700;margin-bottom:3px">⬆ 살아난 순간</div>'+aliveItems : '';
+  // 기운 빠진 순간 집계
+  const drainItems = days2.filter(({e})=>e.drained&&e.drained.trim()).map(({d,e})=>`<div style="font-size:11px;padding:2px 0;border-bottom:1px solid var(--b2)"><span style="color:var(--t3);min-width:50px;display:inline-block">${dayLabel(d)}</span><span style="color:var(--red)">${e.drained}</span></div>`).join('');
+  const drainSec = document.getElementById('wk-daily-drained');
+  if (drainSec) drainSec.innerHTML = drainItems ? '<div style="font-size:11px;color:var(--red);font-weight:700;margin-bottom:3px">⬇ 기운 빠진 순간</div>'+drainItems : '';
+  // 항법 기록 집계
+  const navigItems = days2.filter(({e})=>e.navig&&e.navig.trim()).map(({d,e})=>`<div style="font-size:11px;padding:2px 0;border-bottom:1px solid var(--b2)"><span style="color:var(--t3);min-width:50px;display:inline-block">${dayLabel(d)}</span><span style="color:var(--blue)">${e.navig}</span></div>`).join('');
+  const navigSec = document.getElementById('wk-daily-navig');
+  if (navigSec) navigSec.innerHTML = navigItems ? '<div style="font-size:11px;color:var(--blue);font-weight:700;margin-bottom:3px">🧭 항법 기록</div>'+navigItems : '';
+  // 주간 계획 복원
+  wkPlanRows = [];
+  const tbody = document.getElementById('wk-plan-body');
+  if (tbody) tbody.innerHTML = '';
+  (w.plan_rows||[]).forEach(r => { if(r) addWkPlanRow(r.time, r.plan); });
+  wkChecks.finance = !!w.finance; wkChecks.emotion = !!w.emotion;
+  ['finance','emotion'].forEach(k => {
+    const el = document.getElementById('wk-'+k);
+    if (!el) return;
+    const b = el.querySelector('.chk-box'), m = el.querySelector('.chk-mark');
+    if (wkChecks[k]) { b.classList.add('on'); el.classList.add('on'); m.style.display='block'; }
+    else { b.classList.remove('on'); el.classList.remove('on'); m.style.display='none'; }
+  });
+  // PILLAR 슬라이더 복원
+  PILLARS.filter(p=>!p.auto).forEach(p => {
+    const el = document.getElementById('pillar-slider-'+p.key);
+    if (el) el.value = parseInt(w['pillar_'+p.key])||0;
+  });
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 월간 탭
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function monthKey() { const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'); }
+function saveMonthly() {
+  const mk = monthKey();
+  if (!allMonthly[mk]) allMonthly[mk]={};
+  const m = allMonthly[mk];
+  ['sinsin','strong','best','weak','avoid-pattern','reduce','maintain','experiment','finance','relation','livelihood','medical','meaning'].forEach(k=>{
+    const el=document.getElementById('m-'+k); if(el) m[k]=el.value;
+  });
+  saveMonthlyStore();
+}
+function saveMonthlyBtn() {
+  saveMonthly();
+  const btn=document.getElementById('m-save-btn');
+  btn.textContent='✓ 저장됨'; btn.classList.add('ok');
+  setTimeout(()=>{ btn.textContent='저장'; btn.classList.remove('ok'); },2000);
+}
+function renderMonthly() {
+  const mk = monthKey(), m = allMonthly[mk]||{};
+  ['sinsin','strong','best','weak','avoid-pattern','reduce','maintain','experiment','finance','relation','livelihood','medical','meaning'].forEach(k=>{
+    const el=document.getElementById('m-'+k); if(el) el.value=m[k]||'';
+  });
+  // 주간 데이터 요약
+  const weeks = Object.keys(allWeekly).sort().slice(-4);
+  if (weeks.length) {
+    let sumHTML = '<div class="card" style="margin-bottom:10px"><div class="sec-label">📈 최근 주간 데이터</div>';
+    // 나는 언제 살아나는가 누적
+    const alives = weeks.map(wk=>{
+      const w=allWeekly[wk]||{};
+      return w.alive||w.mood ? `<div style="font-size:12px;color:var(--t2);padding:5px 0;border-bottom:1px solid var(--b2)">${wk}: ${w.alive||''} ${w.mood?'(기분 '+w.mood+')':''}</div>` : '';
+    }).filter(Boolean).join('');
+    if (alives) sumHTML += '<div style="font-size:11px;color:var(--t3);margin-bottom:4px">나는 언제 살아나는가 — 4주 누적</div>' + alives;
+    // 기둥 평균
+    const pillarAvgs = {};
+    PILLARS.forEach(p => {
+      const scores = weeks.map(wk=>{
+        const w=allWeekly[wk]||{};
+        if(p.auto) return null; // 자동은 실시간만
+        return parseInt(w['pillar_'+p.key])||0;
+      }).filter(v=>v!==null&&v>0);
+      if(scores.length) pillarAvgs[p.label] = (scores.reduce((a,b)=>a+b,0)/scores.length).toFixed(1);
+    });
+    const avgKeys = Object.keys(pillarAvgs);
+    if(avgKeys.length) {
+      sumHTML += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">';
+      avgKeys.forEach(k=>{
+        const v=parseFloat(pillarAvgs[k]);
+        const c=v>=7?'var(--green)':v>=4?'var(--yellow)':'var(--red)';
+        sumHTML+=`<div style="background:var(--s3);border-radius:6px;padding:5px 10px;text-align:center"><div style="font-size:16px;font-weight:700;color:${c}">${pillarAvgs[k]}</div><div style="font-size:10px;color:var(--t3)">${k}</div></div>`;
+      });
+      sumHTML += '</div>';
+    }
+    sumHTML += '</div>';
+    document.getElementById('monthly-weekly-summary').innerHTML = sumHTML;
+  }
+  // 6.2 기둥 복구
+  const rec = PILLAR_RECOVERY;
+  document.getElementById('pillar-recovery').innerHTML = rec.map(r=>`
+    <div class="rec-item" style="border-left-color:${r.c}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:3px">
+        <b style="font-size:13px">${r.sit}</b>
+        <span style="font-size:11px;color:var(--red);font-weight:700;margin-left:8px">${r.shaky} 붕괴</span>
+      </div>
+      <div style="font-size:11px;color:var(--green);margin-bottom:2px">↑ ${r.order}</div>
+      <div style="font-size:11px;color:var(--t2);margin-bottom:1px">즉각: ${r.act}</div>
+      <div style="font-size:11px;color:var(--t3)">보류: ${r.hold}</div>
+    </div>`).join('');
+  // 역추적표
+  const bt = document.getElementById('backtrack-tbl');
+  bt.innerHTML = '<tr><th>오늘 행동</th><th>중기 산출물</th><th>최종 목표</th><th>막힌 지점</th><th>지금 당장</th></tr>' +
+    BACKTRACK.map((r,i)=>`<tr style="background:${i%2===0?'var(--s1)':'var(--s2)'}"><td style="color:#58a6ff;white-space:nowrap">${r.act}</td><td style="color:var(--t2)">${r.mid}</td><td style="color:var(--t1)">${r.goal}</td><td style="color:var(--red)">${r.block}</td><td style="color:var(--green)">${r.now}</td></tr>`).join('');
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 원칙 탭
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function renderPrinciple() {
+  if (document.getElementById('principle-list').innerHTML) return;
+  document.getElementById('principle-list').innerHTML = PRINCIPLES.map(p=>`
+    <div class="principle-card" style="border-left-color:${p.c}">
+      <div style="background:${p.c};color:#000;min-width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">${p.n}</div>
+      <div style="flex:1">
+        <div style="font-size:14px;font-weight:700;margin-bottom:2px">${p.title}</div>
+        <div style="font-size:12px;color:var(--t2);margin-bottom:5px">${p.desc}</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:3px">
+          <div style="font-size:11px;color:${p.c};font-style:italic">"${p.trigger}"</div>
+          <div style="font-size:10px;color:var(--t3);background:var(--s3);padding:1px 5px;border-radius:3px">→ ${p.ch}</div>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 루틴 탭
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function renderRoutine() {
+  if (document.getElementById('routine-content').innerHTML) return;
+  const D = ROUTINE_DATA;
+  const sec = (title,html) => `<div style="color:var(--t3);font-size:12px;font-weight:700;letter-spacing:.08em;margin:14px 0 8px">${title}</div>${html}`;
+  // 아침 루틴
+  const morn = D.morning.map(s=>`<div class="routine-item"><div class="step-num" style="background:#1f6feb;color:#fff">${s.n}</div><div style="flex:1"><div style="font-size:11px;color:var(--t2);margin-bottom:1px">${s.time}</div><div style="font-size:13px;font-weight:600">${s.act}</div><div style="font-size:11px;color:var(--t3)">${s.purpose}</div></div></div>`).join('');
+  // WMI
+  const wmi = D.wmi.map(s=>`<div class="routine-item"><div class="step-num" style="background:#276749;color:#fff">${s.n}</div><div style="flex:1"><div style="font-size:11px;color:var(--green)">${s.str} · ${s.time}</div><div style="font-size:13px">${s.act}</div></div></div>`).join('');
+  // 비구조
+  const proto = D.protocol.map(s=>`<div class="routine-item"><div class="step-num" style="background:#744210;color:#fff;font-size:11px">${s.n}</div><div style="flex:1;display:flex;justify-content:space-between;align-items:center"><div style="font-size:12px">${s.act}</div><div style="font-size:11px;color:var(--t3);text-align:right;margin-left:8px">${s.limit}<br>${s.result}</div></div></div>`).join('');
+  // 최소기준
+  const std = `<div style="display:flex;flex-direction:column;gap:6px">
+    <div style="background:#484f58;border-radius:7px;padding:9px 12px;display:flex;justify-content:space-between"><b>최소 성공</b><span style="font-size:12px;color:var(--t2)">25분 랩 1개 + 산출물 1개</span></div>
+    <div style="background:#276749;border-radius:7px;padding:9px 12px;display:flex;justify-content:space-between"><b>표준 성공</b><span style="font-size:12px;color:var(--t2)">25분 랩 3개 + 공유 가능한 초안 1개</span></div>
+    <div style="background:#1f6feb;border-radius:7px;padding:9px 12px;display:flex;justify-content:space-between"><b>고성과</b><span style="font-size:12px;color:var(--t2)">25분 랩 5개 + 외부 공유 또는 제출 1회</span></div>
+  </div>`;
+  // ZERO
+  const zero = D.zero.map(s=>`<div class="routine-item"><div class="step-num" style="background:${s.c};color:#fff;font-size:13px;font-weight:700">${s.s}</div><div style="flex:1"><div style="font-size:11px;color:var(--t2)">${s.time}</div><div style="font-size:12px">${s.act}</div></div></div>`).join('');
+  // 최종실행
+  const fin = D.final.map(s=>`<div class="routine-item"><div class="step-num" style="background:#1f6feb;color:#fff">${s.n}</div><div style="flex:1;display:flex;justify-content:space-between;align-items:center"><div style="font-size:12px">${s.act}</div><div style="font-size:11px;color:var(--t3);margin-left:8px;flex-shrink:0">${s.time}</div></div></div>`).join('');
+  // 도파민
+  const dopa = '<div style="background:var(--s1);border:1px solid var(--b1);border-radius:8px;overflow:hidden">' +
+    D.dopamine.map((d,i)=>`<div style="display:flex;padding:8px 12px;border-bottom:1px solid var(--b2);background:${i%2===0?'var(--s1)':'var(--s3)'}"><div style="flex:1;font-size:12px;color:var(--t2)">${d.b}</div><div style="font-size:12px;margin:0 8px;color:var(--t3)">→</div><div style="flex:1.2;font-size:12px;color:var(--green)">${d.a}</div></div>`).join('') + '</div>';
+  // 72시간 게이트
+  const gate = '<div style="background:var(--s1);border:1px solid var(--b1);border-radius:8px;overflow:hidden">' +
+    D.gate.map((g,i)=>`<div style="padding:10px 12px;border-bottom:1px solid var(--b2);display:flex;gap:10px;background:${i%2===0?'var(--s1)':'var(--s3)'}"><div style="background:${g.c};color:#fff;min-width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;margin-top:2px">${i+1}</div><div style="flex:1"><b style="font-size:12px">${g.step}</b><div style="font-size:11px;color:var(--t2);margin:2px 0">${g.q}</div><div style="font-size:11px"><span style="color:var(--green)">✓ ${g.yes}</span> <span style="color:var(--red)">✗ ${g.no}</span></div></div></div>`).join('') +
+    '<div style="padding:9px 12px;background:#1a0a0a;font-size:12px;color:var(--red)">⚠ 하나라도 NO → 문서화·무료 파일럿·1개월 보류 중 하나. 밤 10시 이후 결정 조건 없이 금지.</div></div>';
+  // 자동부결
+  const ar = '<div style="background:var(--s1);border:1px solid var(--b1);border-radius:8px;overflow:hidden">' +
+    D.autoreject.map((a,i)=>`<div style="padding:8px 12px;border-bottom:1px solid var(--b2);display:flex;gap:8px;align-items:flex-start;background:${i%2===0?'var(--s1)':'var(--s3)'}"><div style="background:var(--rdim);color:var(--red);min-width:56px;font-size:10px;font-weight:700;padding:2px 5px;border-radius:3px;text-align:center;flex-shrink:0">${a.cond}</div><div style="font-size:12px;color:var(--t1)">${a.rule}</div></div>`).join('') + '</div>';
+
+  document.getElementById('routine-content').innerHTML =
+    sec('🌅 아침 시동 루틴 — 판단 없는 30분', morn) +
+    sec('⚙ 핵심 실행 엔진: WMI→PSI 루프', wmi) +
+    sec('📋 비구조 과제 대응 프로토콜', proto) +
+    sec('🎯 하루 운영 최소 기준', std) +
+    sec('🔄 ZERO 프로토콜 — 오전 루틴 못 했을 때', zero) +
+    sec('🚀 최종 실행 프로토콜 8단계', fin) +
+    sec('⚡ 도파민 스프린트 변환표', dopa) +
+    sec('⏳ 72시간 의사결정 게이트', gate) +
+    sec('🚫 자동부결 조건', ar);
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 상황처방 탭
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function renderGuide() {
+  const sb = document.getElementById('sit-buttons');
+  if (!sb.innerHTML) {
+    SITUATIONS.forEach((s,i) => {
+      const b = document.createElement('button');
+      b.className = 'sit-btn'; b.textContent = s.icon+' '+s.label;
+      b.onclick = () => showSit(i); sb.appendChild(b);
+    });
+  }
+  const rb = document.getElementById('risk-buttons');
+  if (!rb.innerHTML) {
+    RISKS.forEach((r,i) => {
+      const b = document.createElement('button');
+      b.className = 'risk-btn'; b.textContent = r.icon+' '+r.label;
+      b.style.border = `1px solid ${r.c}`;
+      b.style.color = 'var(--t2)';
+      b.onclick = () => showRisk(i); rb.appendChild(b);
+    });
+  }
+  const pb = document.getElementById('planb-list');
+  if (!pb.innerHTML) {
+    pb.innerHTML = PLANB.map(p=>`
+      <div class="planb-card" style="border-left-color:${p.c}">
+        <div style="font-size:13px;font-weight:700;margin-bottom:3px">시나리오 ${p.s}: ${p.title}</div>
+        <div style="font-size:11px;color:var(--red);margin-bottom:2px">트리거: ${p.trigger}</div>
+        <div style="font-size:11px;color:${p.dist.includes('⚠')?'var(--red)':'var(--t3)'};margin-bottom:3px">현재 거리: ${p.dist}</div>
+        <div style="font-size:11px;color:var(--t2);margin-bottom:2px">전환: ${p.action}</div>
+        <div style="font-size:11px;color:var(--green)">원칙: ${p.principle}</div>
+      </div>`).join('');
+  }
+}
+function showSit(i) {
+  const s = SITUATIONS[i];
+  document.getElementById('sit-result').innerHTML = `
+    <div class="result-card" style="border:2px solid ${s.c}">
+      <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:8px">
+        <span style="font-size:20px">${s.icon}</span>
+        <div><div style="font-size:15px;font-weight:700">${s.label}</div>
+          <div style="font-size:11px;color:var(--t3)">실제 의미: ${s.meaning}</div>
+          <div style="font-size:13px;color:${s.c};font-weight:600;margin-top:2px">→ ${s.action}</div></div>
+      </div>
+      <div style="margin-bottom:8px">${s.steps.map((st,j)=>`<div style="display:flex;gap:8px;padding:7px 0;border-bottom:1px solid var(--b2)"><div style="background:${s.c};color:#fff;min-width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0">${j+1}</div><div style="font-size:13px;padding-top:1px">${st}</div></div>`).join('')}</div>
+      <div style="background:var(--s3);border-radius:6px;padding:9px 11px">
+        <div style="font-size:11px;color:var(--t3);margin-bottom:2px">트리거 문장</div>
+        <div style="font-size:13px;font-style:italic">"${s.trigger}"</div>
+      </div>
+    </div>`;
+  document.getElementById('sit-result').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function showRisk(i) {
+  const r = RISKS[i];
+  const row = (title,items,bg) => `<div style="background:${bg};border-radius:5px;padding:7px 10px;margin-bottom:5px"><div style="font-size:10px;font-weight:700;color:var(--t3);margin-bottom:3px">${title}</div>${items.map(x=>`<div style="font-size:11px;margin-bottom:1px">• ${x}</div>`).join('')}</div>`;
+  document.getElementById('risk-result').innerHTML = `
+    <div class="result-card" style="border:2px solid ${r.c}">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+        <span style="font-size:20px">${r.icon}</span>
+        <div><div style="font-size:15px;font-weight:700">${r.label}</div>
+          <div style="font-size:11px;background:${r.c};color:#fff;padding:1px 6px;border-radius:3px;display:inline-block">${r.priority}</div></div>
+      </div>
+      ${row('🟡 초기 신호',r.early,'#2d2800')}${row('🟠 중기 신호',r.mid,'#3d1a00')}${row('🔴 심각 신호',r.severe,'#2a0000')}
+      <div style="background:#0f2d1a;border-radius:5px;padding:7px 10px;margin-bottom:5px">
+        <div style="font-size:10px;font-weight:700;color:var(--green);margin-bottom:3px">✅ 차단·복구 행동</div>
+        ${r.action.map(x=>`<div style="font-size:11px;margin-bottom:1px">• ${x}</div>`).join('')}
+      </div>
+      <div style="background:#1a0a0a;border-radius:5px;padding:7px 10px;font-size:11px;color:var(--red)">⛔ ${r.forbidden}</div>
+    </div>`;
+  document.getElementById('risk-result').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 기록 탭
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function renderHistory() {
+  const dates = Object.keys(allDaily).sort().reverse().slice(0,30);
+  const el = document.getElementById('history-list');
+  if (!dates.length) { el.innerHTML = '<div style="color:var(--t3);text-align:center;padding:40px 0">기록이 없습니다</div>'; return; }
+  el.innerHTML = dates.map(d=>{
+    const e = allDaily[d], a = calcAlerts(e);
+    const dt = new Date(d+'T00:00:00');
+    const dep = parseInt(e.depression);
+    const dc = !isNaN(dep) ? dep>=7?'var(--red)':dep<=4?'var(--green)':'var(--yellow)' : 'var(--t3)';
+    return `<div class="hist-item" onclick="goDate('${d}')">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <b style="font-size:14px">${dt.getMonth()+1}/${dt.getDate()} (${DAYS[dt.getDay()]})</b>
+        <div style="display:flex;gap:6px;align-items:center">
+          ${!isNaN(dep)?`<span style="font-size:12px;color:${dc}">우울 ${dep}</span>`:''}
+          ${a.length?`<span class="badge">⚠ ${a.length}</span>`:''}
+        </div>
+      </div>
+      ${e.action?`<div style="font-size:12px;color:var(--t2);margin-top:3px">행동: ${e.action}</div>`:''}
+    </div>`;
+  }).join('');
+}
+function goDate(d) { curDate=d; switchTab('today'); loadDate(); }
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 탭 전환
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function switchTab(v) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('on', t.dataset.v===v));
+  document.querySelectorAll('.view').forEach(vEl => vEl.classList.toggle('on', vEl.id==='v-'+v));
+  if (v==='weekly') renderWeekly();
+  if (v==='monthly') renderMonthly();
+  if (v==='principle') renderPrinciple();
+  if (v==='routine') renderRoutine();
+  if (v==='guide') renderGuide();
+  if (v==='history') renderHistory();
+}
+document.getElementById('tabs').addEventListener('click', e => {
+  if (e.target.classList.contains('tab')) switchTab(e.target.dataset.v);
+});
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 초기화
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+load();
+loadDate();
+</script>
+</body>
+</html>
