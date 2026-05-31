@@ -238,12 +238,12 @@ textarea{resize:none;font-size:13px;border:1px solid var(--b1);border-radius:4px
   </div>
   <div id="alert-box"></div>
 
-  <!-- 이번 주 목표 (주간 탭에서 설정한 다음주 목표 → 읽기 전용) -->
+  <!-- 이번 주 목표 (주간 탭 다음주 목표 → 읽기 전용 리스트) -->
   <div id="daily-week-goal" style="display:none;background:#0a1a2a;border:1px solid #1e4a7f;border-radius:8px;padding:10px 14px;margin-bottom:10px">
-    <div style="font-size:11px;color:var(--blue);font-weight:700;letter-spacing:.06em;margin-bottom:6px">📌 이번 주 목표</div>
-    <div id="daily-week-goal-text" style="font-size:13px;color:var(--t1);margin-bottom:6px"></div>
+    <div style="font-size:11px;color:var(--blue);font-weight:700;letter-spacing:.06em;margin-bottom:5px">📌 이번 주 목표</div>
+    <div id="daily-week-goals-list" style="margin-bottom:8px"></div>
     <div style="font-size:11px;color:var(--t3);font-weight:700;margin-bottom:3px">세부 실천사항</div>
-    <div id="daily-week-detail-text" style="font-size:12px;color:var(--t2);white-space:pre-wrap"></div>
+    <div id="daily-week-details-list"></div>
   </div>
 
   <!-- 계획/실행표 -->
@@ -289,8 +289,9 @@ textarea{resize:none;font-size:13px;border:1px solid var(--b1);border-radius:4px
           <label style="font-size:12px;color:var(--t2)">취침 <input type="time" id="f-bed" style="width:88px" oninput="autoSave();calcSleep()"></label>
           <label style="font-size:12px;color:var(--t2)">기상 <input type="time" id="f-wake" style="width:88px" oninput="autoSave();calcSleep()"></label>
         </div>
-        <div style="display:flex;align-items:center;gap:6px">
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
           <label style="font-size:12px;color:var(--t2)">중간각성 <input type="number" id="f-wakeups" min="0" max="20" placeholder="회" style="width:44px" oninput="autoSave()"></label>
+          <label style="font-size:12px;color:var(--t2)">낮잠 <input type="text" id="f-nap" placeholder="0" style="width:36px;text-align:center" oninput="autoSave()"> 시간</label>
           <span id="sleep-hrs" class="sleep-hrs"></span>
         </div>
       </div>
@@ -450,77 +451,85 @@ textarea{resize:none;font-size:13px;border:1px solid var(--b1);border-radius:4px
     <div style="font-size:11px;color:var(--t3);margin-bottom:10px">7점↑ 유지 / 4~6 조정 / 3↓ 복구 · 회복 4점↓ → 전 기둥 50% 즉시 축소</div>
     <div id="pillar-scores"></div>
     <div id="pillar-summary"></div>
-
-    <!-- 관계·성장 수동 보조 입력 -->
-    <div style="background:var(--s3);border-radius:6px;padding:10px 12px;margin-top:10px">
-      <div style="font-size:11px;color:var(--t3);margin-bottom:8px">수동 입력 항목 (자동 계산 불가)</div>
-      <div style="display:flex;gap:12px;flex-wrap:wrap">
-        <div>
-          <div style="font-size:11px;color:var(--t2);margin-bottom:4px">관계 — 이번 주 대화</div>
-          <div style="display:flex;gap:8px">
-            <span class="chk" id="wk-finance" onclick="toggleWkChk('finance')"><span class="chk-box"><span class="chk-mark">✓</span></span><span class="chk-label" style="font-size:12px">재무 대화</span></span>
-            <span class="chk" id="wk-emotion" onclick="toggleWkChk('emotion')"><span class="chk-box"><span class="chk-mark">✓</span></span><span class="chk-label" style="font-size:12px">감정 대화</span></span>
-          </div>
-        </div>
-        <div>
-          <div style="font-size:11px;color:var(--t2);margin-bottom:4px">성장 — 이번 주 산출물 (10점)</div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <label style="font-size:12px;color:var(--t2)">소산출물 <input type="number" id="wk-small-output" min="0" max="20" style="width:36px" oninput="saveWeekly();renderWeekly()"> 회</label>
-            <label style="font-size:12px;color:var(--t2)">대산출물 <input type="number" id="wk-big-output" min="0" max="5" style="width:36px" oninput="saveWeekly();renderWeekly()"> 개</label>
-            <label style="font-size:12px;color:var(--t2)">블로그/브런치 <input type="number" id="wk-output-count" min="0" max="5" style="width:36px" oninput="saveWeekly();renderWeekly()"> 개</label>
-          </div>
-          <div style="font-size:10px;color:var(--t3);margin-top:2px">소산출물=공부정리 1페이지급 / 대산출물=논문·PPT·포트폴리오급</div>
-        </div>
-      </div>
-    </div>
   </div>
 
-  <!-- CEO 회의 질문 -->
-  <div class="card">
-    <div class="sec-label">🎯 CEO 회의 질문 (다음 주 기준)</div>
-    <div id="ceo-questions"></div>
-  </div>
-
-  <!-- 주간 결산 -->
+  <!-- 주간 결산 (CEO질문 통합) -->
   <div class="card">
     <div class="sec-label">📝 주간 결산</div>
-    <!-- 일일 데이터 자동 집계 -->
+
+    <!-- 이번달 목표 (월간 탭에서 설정) -->
+    <div id="wk-month-goal" style="display:none;background:#1a0a2a;border:1px solid #4a1f7f;border-radius:7px;padding:9px 12px;margin-bottom:10px">
+      <div style="font-size:11px;color:var(--purple);font-weight:700;margin-bottom:4px">🎯 이번달 목표</div>
+      <div id="wk-month-goals-list" style="margin-bottom:6px"></div>
+      <div style="font-size:11px;color:var(--t3);font-weight:700;margin-bottom:3px">세부 실천사항</div>
+      <div id="wk-month-details-list"></div>
+    </div>
+
+    <!-- 관계 -->
+    <div style="border-bottom:1px solid var(--b2);padding:8px 0;margin-bottom:8px">
+      <div style="font-size:12px;color:var(--t2);font-weight:700;margin-bottom:5px">◽ 관계: 이번주 대화</div>
+      <div style="display:flex;gap:10px">
+        <span class="chk" id="wk-finance" onclick="toggleWkChk('finance')"><span class="chk-box"><span class="chk-mark">✓</span></span><span class="chk-label" style="font-size:12px">재무 대화</span></span>
+        <span class="chk" id="wk-emotion" onclick="toggleWkChk('emotion')"><span class="chk-box"><span class="chk-mark">✓</span></span><span class="chk-label" style="font-size:12px">감정 대화</span></span>
+      </div>
+    </div>
+
+    <!-- 성장 -->
+    <div style="border-bottom:1px solid var(--b2);padding-bottom:8px;margin-bottom:8px">
+      <div style="font-size:12px;color:var(--t2);font-weight:700;margin-bottom:5px">◽ 성장: 이번주 산출물</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <label style="font-size:12px;color:var(--t2)">소산출물 <input type="number" id="wk-small-output" min="0" max="20" style="width:36px" oninput="saveWeekly();renderWeekly()"> 개</label>
+        <label style="font-size:12px;color:var(--t2)">대산출물 <input type="number" id="wk-big-output" min="0" max="5" style="width:36px" oninput="saveWeekly();renderWeekly()"> 개</label>
+        <label style="font-size:12px;color:var(--t2)">블로그/브런치 <input type="number" id="wk-output-count" min="0" max="5" style="width:36px" oninput="saveWeekly();renderWeekly()"> 개</label>
+      </div>
+      <div style="font-size:10px;color:var(--t3);margin-top:3px">소산출물=공부정리 1페이지급 / 대산출물=논문·PPT·포트폴리오급</div>
+    </div>
+
+    <!-- 이번주 완성한 산출물 -->
+    <div class="m-field">
+      <div class="m-label">◽ 이번주 완성한 산출물</div>
+      <input type="text" id="wk-output" placeholder="논문 1문단 / AI샘플 1개 / 브런치 1편..." oninput="saveWeekly()">
+    </div>
+
+    <!-- 다음주 CEO 질문 (통합) -->
+    <div class="m-field"><div class="m-label">◽ 다음주 가장 중요한 전장(업무)은 무엇인가?</div><input type="text" id="wk-ceo-q1" placeholder="주간 핵심 목표 1개" oninput="saveWeekly()"></div>
+    <div class="m-field"><div class="m-label">◽ 다음주 반드시 남길 산출물은 무엇인가?</div><input type="text" id="wk-ceo-q2" placeholder="문서·계약·콘텐츠·제품 중 1개" oninput="saveWeekly()"></div>
+    <div class="m-field"><div class="m-label">◽ 다음주 회피가 예상되는 과제는 무엇인가?</div><input type="text" id="wk-ceo-q3" placeholder="위험 과제 1개" oninput="saveWeekly()"></div>
+    <div class="m-field"><div class="m-label">◽ 그 과제를 언제 첫 25분 실행할 것인가?</div><input type="text" id="wk-ceo-q4" placeholder="캘린더 고정 시간" oninput="saveWeekly()"></div>
+    <div class="m-field"><div class="m-label">◽ 누구에게 언제 공유할 것인가?</div><input type="text" id="wk-ceo-q5" placeholder="외부 마감 설정" oninput="saveWeekly()"></div>
+    <div class="m-field"><div class="m-label">◽ 다음주 하지 않을 것은 무엇인가?</div><input type="text" id="wk-ceo-q6" placeholder="제거 항목 1개" oninput="saveWeekly()"></div>
+
+    <!-- 일일 자동 집계 -->
     <div style="background:var(--s3);border-radius:6px;padding:10px;margin-bottom:10px">
-      <div style="font-size:11px;color:var(--t3);font-weight:700;margin-bottom:6px">이번 주 일일 기록 자동 집계</div>
+      <div style="font-size:11px;color:var(--t3);font-weight:700;margin-bottom:6px">◽ 이번주 일일기록 자동 집계</div>
       <div id="wk-daily-alive" style="margin-bottom:6px"></div>
       <div id="wk-daily-drained" style="margin-bottom:6px"></div>
       <div id="wk-daily-navig"></div>
     </div>
+
+    <!-- 패턴 요약 -->
     <div class="m-field">
-      <div class="m-label">이번 주 완성한 산출물</div>
-      <input type="text" id="wk-output" placeholder="논문 1문단 / AI샘플 1개 / 브런치 1편..." oninput="saveWeekly()">
+      <div class="m-label">◽ 나는 언제 살아나는가? <span style="color:var(--t3);font-size:11px">— 집계 보고 종합</span></div>
+      <input type="text" id="wk-alive" placeholder="패턴 요약..." oninput="saveWeekly()">
     </div>
     <div class="m-field">
-      <div class="m-label">다음 주 과제를 하나만 고른다면</div>
-      <input type="text" id="wk-next" placeholder="가장 중요한 과제 하나..." oninput="saveWeekly()">
-    </div>
-    <div class="m-field">
-      <div class="m-label">나는 언제 살아나는가 <span style="color:var(--t3);font-size:11px">— 위 집계 보고 종합</span></div>
-      <input type="text" id="wk-alive" placeholder="패턴 요약..." oninput="saveWeekly()" style="flex:1">
-    </div>
-    <div class="m-field">
-      <div class="m-label">나는 언제 기운 빠지는가 <span style="color:var(--t3);font-size:11px">— 위 집계 보고 종합</span></div>
+      <div class="m-label">◽ 나는 언제 기운 빠지는가? <span style="color:var(--t3);font-size:11px">— 집계 보고 종합</span></div>
       <input type="text" id="wk-drained" placeholder="패턴 요약..." oninput="saveWeekly()">
     </div>
     <div class="m-field">
-      <div class="m-label">주간 결산 느낀 점 / 다음 주 각오</div>
+      <div class="m-label">◽ 주간결산 느낀 점 / 다음주 각오</div>
       <textarea id="wk-review" rows="2" placeholder="이번 주를 돌아보며..." oninput="saveWeekly()"></textarea>
     </div>
-    <div style="background:#0d1f30;border:1px solid #1e4a7f;border-radius:7px;padding:10px 12px;margin-top:4px">
-      <div style="font-size:11px;color:var(--blue);font-weight:700;margin-bottom:8px">📌 다음 주 목표 — 일일 탭에 자동 표시</div>
-      <div class="m-field">
-        <div class="m-label">다음 주 목표</div>
-        <input type="text" id="wk-next-goal" placeholder="다음 주 핵심 목표 한 줄..." oninput="saveWeekly()">
-      </div>
-      <div class="m-field" style="margin-bottom:0">
-        <div class="m-label">세부 실천사항</div>
-        <textarea id="wk-next-detail" rows="2" placeholder="구체적인 실천 내용..." oninput="saveWeekly()"></textarea>
-      </div>
+
+    <!-- 다음주 목표 (행추가/삭제) -->
+    <div style="background:#0d1f30;border:1px solid #1e4a7f;border-radius:7px;padding:10px 12px;margin-top:6px">
+      <div style="font-size:11px;color:var(--blue);font-weight:700;margin-bottom:6px">📌 다음주 목표 — 일일 탭에 자동 표시</div>
+      <div style="font-size:12px;color:var(--t2);margin-bottom:4px">◽ 다음주 목표</div>
+      <div id="wk-goals-list"></div>
+      <button onclick="addWkGoalRow()" style="margin-top:4px;background:transparent;border:1px dashed var(--b1);color:var(--t3);border-radius:4px;padding:3px 10px;font-size:11px;cursor:pointer">+ 항목</button>
+      <div style="font-size:12px;color:var(--t2);margin:8px 0 4px">◽ 세부 실천사항</div>
+      <div id="wk-details-list"></div>
+      <button onclick="addWkDetailRow()" style="margin-top:4px;background:transparent;border:1px dashed var(--b1);color:var(--t3);border-radius:4px;padding:3px 10px;font-size:11px;cursor:pointer">+ 항목</button>
     </div>
   </div>
 
@@ -649,6 +658,17 @@ textarea{resize:none;font-size:13px;border:1px solid var(--b1);border-radius:4px
     </div>
   </div>
 
+  <!-- 다음달 목표 (행추가/삭제) -->
+  <div class="monthly-sec" style="border-left:3px solid var(--blue)">
+    <div class="monthly-sec-title" style="color:var(--blue)">📌 다음달 목표 — 다음달 주간 결산에 자동 표시</div>
+    <div class="m-label" style="margin-bottom:6px">◽ 다음달 목표</div>
+    <div id="m-goals-list"></div>
+    <button onclick="addMonGoalRow()" style="margin-top:4px;background:transparent;border:1px dashed var(--b1);color:var(--t3);border-radius:4px;padding:3px 10px;font-size:11px;cursor:pointer">+ 항목</button>
+    <div class="m-label" style="margin-top:10px;margin-bottom:6px">◽ 세부 실천사항</div>
+    <div id="m-details-list"></div>
+    <button onclick="addMonDetailRow()" style="margin-top:4px;background:transparent;border:1px dashed var(--b1);color:var(--t3);border-radius:4px;padding:3px 10px;font-size:11px;cursor:pointer">+ 항목</button>
+  </div>
+
   <!-- 6.2 기둥 복구 순서 -->
   <div class="card">
     <div class="sec-label">🔧 6.2 기둥 복구 순서</div>
@@ -726,12 +746,12 @@ const PILLARS = [
 ];
 
 const CEO_QS = [
-  { n:1, q:'다음 주 가장 중요한 전장은 무엇인가?', ph:'주간 핵심 목표 1개', k:'q1' },
-  { n:2, q:'다음 주 반드시 남길 산출물은 무엇인가?', ph:'문서·계약·콘텐츠·제품 중 1개', k:'q2' },
-  { n:3, q:'다음 주 회피가 예상되는 과제는 무엇인가?', ph:'위험 과제 1개', k:'q3' },
-  { n:4, q:'그 과제를 언제 첫 25분 실행할 것인가?', ph:'캘린더 고정 시간', k:'q4' },
-  { n:5, q:'누구에게 언제 공유할 것인가?', ph:'외부 마감 설정', k:'q5' },
-  { n:6, q:'다음 주 하지 않을 것은 무엇인가?', ph:'제거 항목 1개', k:'q6' },
+  { q:'다음주 가장 중요한 전장(업무)은 무엇인가?', ph:'주간 핵심 목표 1개', k:'q1' },
+  { q:'다음주 반드시 남길 산출물은 무엇인가?', ph:'문서·계약·콘텐츠·제품 중 1개', k:'q2' },
+  { q:'다음주 회피가 예상되는 과제는 무엇인가?', ph:'위험 과제 1개', k:'q3' },
+  { q:'그 과제를 언제 첫 25분 실행할 것인가?', ph:'캘린더 고정 시간', k:'q4' },
+  { q:'누구에게 언제 공유할 것인가?', ph:'외부 마감 설정', k:'q5' },
+  { q:'다음주 하지 않을 것은 무엇인가?', ph:'제거 항목 1개', k:'q6' },
 ];
 
 const PRINCIPLES = [
@@ -994,6 +1014,18 @@ function toggleChkSingle(group, val) {
     autoSave();
   }
 }
+// ── 시간 정렬 헬퍼
+function timeToMin(t) {
+  if(!t) return 9999;
+  const parts = t.split(':').map(Number);
+  if(parts.length<2||isNaN(parts[0])||isNaN(parts[1])) return 9999;
+  return parts[0]*60+parts[1];
+}
+function sortRowsByTime(rows) {
+  if(!rows) return [];
+  return [...rows].filter(r=>r).sort((a,b)=>timeToMin(a.time)-timeToMin(b.time));
+}
+
 // ── 일일 계획/실행표
 function addDailyPlanRow(time_v, plan_v, exec_v) {
   const idx = dailyPlanRows.length;
@@ -1004,7 +1036,7 @@ function addDailyPlanRow(time_v, plan_v, exec_v) {
   tr.id = 'dpr-'+idx;
   const pv = (plan_v||'').replace(/"/g,'&quot;');
   const ev = (exec_v||'').replace(/"/g,'&quot;');
-  tr.innerHTML = `<td style="padding:3px 2px"><input type="time" id="dpr-time-${idx}" value="${time_v||''}" oninput="updateDailyPlanRow(${idx})" style="width:72px;background:transparent;border:none;border-bottom:1px solid var(--b1);color:var(--t1);font-family:inherit;font-size:12px;outline:none"></td>
+  tr.innerHTML = `<td style="padding:3px 2px"><input type="text" id="dpr-time-${idx}" value="${time_v||''}" placeholder="HH:MM" maxlength="5" oninput="updateDailyPlanRow(${idx})" style="width:46px;background:transparent;border:none;border-bottom:1px solid var(--b1);color:var(--t1);font-family:inherit;font-size:12px;outline:none;text-align:center"></td>
     <td style="padding:3px 2px"><input type="text" id="dpr-plan-${idx}" value="${pv}" placeholder="계획..." oninput="updateDailyPlanRow(${idx})" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--b1);color:var(--t1);font-family:inherit;font-size:12px;outline:none"></td>
     <td style="padding:3px 2px"><input type="text" id="dpr-exec-${idx}" value="${ev}" placeholder="실행..." oninput="updateDailyPlanRow(${idx})" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--blue);color:var(--blue);font-family:inherit;font-size:12px;outline:none"></td>
     <td style="padding:3px 2px;text-align:center"><button onclick="removeDailyPlanRow(${idx})" style="background:transparent;border:none;color:var(--red);font-size:14px;cursor:pointer">×</button></td>`;
@@ -1033,12 +1065,38 @@ function renderDailyPlan(rows) {
     const def=(wkPlanDefaults&&wkPlanDefaults[mon])||[];
     if(def.length){
       const dayName=DAYS[new Date(curDate+'T00:00:00').getDay()];
-      const filtered=def.filter(r=>!r||!r.days||r.days.length===0||r.days.includes(dayName));
+      const filtered=sortRowsByTime(def.filter(r=>!r||!r.days||r.days.length===0||r.days.includes(dayName)));
       filtered.forEach(r=>{ if(r) addDailyPlanRow(r.time,r.plan,''); });
     }
     else{ if(emptyEl) emptyEl.style.display='block'; }
-  } else { rows.forEach(r=>{ if(r) addDailyPlanRow(r.time,r.plan,r.exec); }); }
+  } else {
+    sortRowsByTime(rows).forEach(r=>{ if(r) addDailyPlanRow(r.time,r.plan,r.exec); });
+  }
 }
+
+// ── 주간 목표/세부 행 관리
+let wkGoalRows = [], wkDetailRows = [];
+function _makeListRow(prefix, idx, text, removeFn) {
+  const div = document.createElement('div');
+  div.id = prefix+'-'+idx;
+  div.style.cssText = 'display:flex;align-items:center;gap:6px;margin-bottom:4px';
+  div.innerHTML = `<span style="color:var(--blue);font-weight:700;font-size:12px;flex-shrink:0">•</span>
+    <input type="text" id="${prefix}-text-${idx}" value="${(text||'').replace(/"/g,'&quot;')}" placeholder="항목..." oninput="${prefix==='wkgr'?'updateWkGoalRow':'updateWkDetailRow'}(${idx})" style="flex:1;background:transparent;border:none;border-bottom:1px solid var(--b1);color:var(--t1);font-family:inherit;font-size:12px;outline:none">
+    <button onclick="${removeFn}(${idx})" style="background:transparent;border:none;color:var(--red);font-size:14px;cursor:pointer;flex-shrink:0">×</button>`;
+  return div;
+}
+function addWkGoalRow(text) {
+  const idx=wkGoalRows.length; wkGoalRows.push({text:text||''});
+  const el=document.getElementById('wk-goals-list'); if(el) el.appendChild(_makeListRow('wkgr',idx,text,'removeWkGoalRow'));
+}
+function updateWkGoalRow(idx) { if(wkGoalRows[idx]) { wkGoalRows[idx].text=document.getElementById('wkgr-text-'+idx)?.value||''; saveWeekly(); } }
+function removeWkGoalRow(idx) { wkGoalRows[idx]=null; const e=document.getElementById('wkgr-'+idx); if(e) e.remove(); saveWeekly(); }
+function addWkDetailRow(text) {
+  const idx=wkDetailRows.length; wkDetailRows.push({text:text||''});
+  const el=document.getElementById('wk-details-list'); if(el) el.appendChild(_makeListRow('wkdr',idx,text,'removeWkDetailRow'));
+}
+function updateWkDetailRow(idx) { if(wkDetailRows[idx]) { wkDetailRows[idx].text=document.getElementById('wkdr-text-'+idx)?.value||''; saveWeekly(); } }
+function removeWkDetailRow(idx) { wkDetailRows[idx]=null; const e=document.getElementById('wkdr-'+idx); if(e) e.remove(); saveWeekly(); }
 
 const WK_DAYS = ['월','화','수','목','금','토','일'];
 function addWkPlanRow(time_v, plan_v, days_v) {
@@ -1054,7 +1112,7 @@ function addWkPlanRow(time_v, plan_v, days_v) {
     const s = on?'background:var(--blue);color:#000':'background:var(--s3);color:var(--t3)';
     return `<span id="wkpr-day-${idx}-${d}" onclick="toggleWkPlanDay(${idx},'${d}')" style="cursor:pointer;font-size:10px;font-weight:700;padding:1px 4px;border-radius:3px;${s};margin:1px">${d}</span>`;
   }).join('');
-  tr.innerHTML = `<td style="padding:3px"><input type="time" id="wkpr-time-${idx}" value="${time_v||''}" oninput="updateWkPlanRow(${idx})" style="width:80px;background:transparent;border:none;border-bottom:1px solid var(--b1);color:var(--t1);font-size:12px"></td>
+  tr.innerHTML = `<td style="padding:3px"><input type="text" id="wkpr-time-${idx}" value="${time_v||''}" placeholder="HH:MM" maxlength="5" oninput="updateWkPlanRow(${idx})" style="width:46px;background:transparent;border:none;border-bottom:1px solid var(--b1);color:var(--t1);font-size:12px;text-align:center"></td>
     <td style="padding:3px"><input type="text" id="wkpr-plan-${idx}" value="${(plan_v||'').replace(/"/g,'&quot;')}" placeholder="계획..." oninput="updateWkPlanRow(${idx})" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--b1);color:var(--t1);font-size:12px"></td>
     <td style="padding:3px;white-space:nowrap">${dayChks}</td>
     <td style="padding:3px;text-align:center"><button onclick="removeWkPlanRow(${idx})" style="background:transparent;border:none;color:var(--red);font-size:14px;cursor:pointer">×</button></td>`;
@@ -1127,7 +1185,7 @@ function readForm() {
   return {
     date: curDate,
     depression: gv('f-dep'), anxiety: gv('f-anx'), dep_context: gv('f-dep-context'),
-    sleep_bed: gv('f-bed'), sleep_wake: gv('f-wake'), sleep_wakeups: gv('f-wakeups'),
+    sleep_bed: gv('f-bed'), sleep_wake: gv('f-wake'), sleep_wakeups: gv('f-wakeups'), nap: gv('f-nap'),
     action_checks: Object.assign({}, checks),
     action_contact: gv('f-action-contact'),
     action_record: gv('f-action-record'),
@@ -1152,7 +1210,7 @@ function readForm() {
 }
 function fillForm(e) {
   sv('f-dep', e.depression); sv('f-anx', e.anxiety); sv('f-dep-context', e.dep_context);
-  sv('f-bed', e.sleep_bed); sv('f-wake', e.sleep_wake); sv('f-wakeups', e.sleep_wakeups);
+  sv('f-bed', e.sleep_bed); sv('f-wake', e.sleep_wake); sv('f-wakeups', e.sleep_wakeups); sv('f-nap', e.nap);
   sv('f-action-contact', e.action_contact); sv('f-action-record', e.action_record);
   sv('f-action-study', e.action_study); sv('f-action-apply', e.action_apply);
   sv('f-navig', e.navig); sv('f-hema', e.hema);
@@ -1183,9 +1241,16 @@ function autoSave() {
   clearTimeout(saveTimer);
   saveTimer = setTimeout(() => {
     allDaily[curDate] = readForm();
+    // 시간순 정렬 — 순서 변경 시 재렌더
+    const sorted = sortRowsByTime(allDaily[curDate].daily_plan_rows);
+    const before = JSON.stringify(allDaily[curDate].daily_plan_rows);
+    if(JSON.stringify(sorted) !== before) {
+      allDaily[curDate].daily_plan_rows = sorted;
+      renderDailyPlan(sorted);
+    }
     saveDaily();
     renderAlerts();
-  }, 350);
+  }, 600);
 }
 function manualSave() {
   allDaily[curDate] = readForm();
@@ -1264,13 +1329,17 @@ function loadDate() {
   const curWeekMon = monStr(curDate);
   const prevDt = new Date(curWeekMon+'T00:00:00'); prevDt.setDate(prevDt.getDate()-7);
   const prevWkMon = localDateStr(prevDt);
-  const wkGoal   = (allWeekly[prevWkMon]||{}).next_goal   || '';
-  const wkDetail = (allWeekly[prevWkMon]||{}).next_detail || '';
+  const prevWkData = allWeekly[prevWkMon] || {};
+  // 구 버전(string) 데이터 호환
+  const wkGoals   = prevWkData.next_goals   || (prevWkData.next_goal   ? [{text:prevWkData.next_goal}]   : []);
+  const wkDetails = prevWkData.next_details || (prevWkData.next_detail ? [{text:prevWkData.next_detail}] : []);
   const goalBox = document.getElementById('daily-week-goal');
   if (goalBox) {
-    goalBox.style.display = (wkGoal||wkDetail) ? 'block' : 'none';
-    const gt = document.getElementById('daily-week-goal-text');   if(gt) gt.textContent = wkGoal;
-    const dt2 = document.getElementById('daily-week-detail-text'); if(dt2) dt2.textContent = wkDetail;
+    goalBox.style.display = (wkGoals.length||wkDetails.length) ? 'block' : 'none';
+    const gl = document.getElementById('daily-week-goals-list');
+    if(gl) gl.innerHTML = wkGoals.filter(r=>r&&r.text).map(r=>`<div style="font-size:13px;color:var(--t1);padding:2px 0">• ${r.text}</div>`).join('');
+    const dl = document.getElementById('daily-week-details-list');
+    if(dl) dl.innerHTML = wkDetails.filter(r=>r&&r.text).map(r=>`<div style="font-size:12px;color:var(--t2);padding:2px 0">• ${r.text}</div>`).join('');
   }
 }
 
@@ -1295,8 +1364,8 @@ function saveWeekly() {
   w.small_output = gv('wk-small-output');
   w.big_output = gv('wk-big-output');
   w.finance = wkChecks.finance; w.emotion = wkChecks.emotion;
-  w.next_goal   = gv('wk-next-goal');
-  w.next_detail = gv('wk-next-detail');
+  w.next_goals   = wkGoalRows.filter(r=>r&&r.text);
+  w.next_details = wkDetailRows.filter(r=>r&&r.text);
   w.plan_rows = wkPlanRows.filter(r=>r);
   PILLARS.filter(p=>!p.auto).forEach(p => {
     const el = document.getElementById('pillar-slider-'+p.key); if(el) w['pillar_'+p.key]=parseInt(el.value)||0;
@@ -1423,23 +1492,39 @@ function renderWeekly() {
   </div>`;
   if (warnings.length) sumHTML += '<div class="warn-box">' + warnings.map(x=>`<div style="color:var(--red);font-size:11px;margin-bottom:2px">⚠ ${x}</div>`).join('') + '</div>';
   document.getElementById('pillar-summary').innerHTML = sumHTML;
-  // CEO 질문
-  let ceo = '';
-  CEO_QS.forEach(q => {
-    ceo += `<div style="margin-bottom:10px"><div class="m-label"><span style="color:var(--blue);font-weight:700">${q.n}.</span> ${q.q}</div>
-    <input type="text" id="wk-ceo-${q.k}" placeholder="${q.ph}" value="${(w[q.k]||'').replace(/"/g,'&quot;')}" oninput="saveWeekly()" style="width:100%"></div>`;
-  });
-  document.getElementById('ceo-questions').innerHTML = ceo;
-  // 결산 복원
-  sv('wk-output', w.output); sv('wk-next', w.next);
+  // 결산 필드 복원
+  sv('wk-output', w.output);
   sv('wk-alive', w.alive); sv('wk-drained', w.drained);
   sv('wk-review', w.review);
   sv('wk-output-count', w.output_count);
   sv('wk-small-output', w.small_output);
   sv('wk-big-output', w.big_output);
-  // 목표 필드 복원
-  sv('wk-next-goal', w.next_goal);
-  sv('wk-next-detail', w.next_detail);
+  // CEO 질문 값 복원 (이미 static HTML)
+  CEO_QS.forEach(q => { sv('wk-ceo-'+q.k, w[q.k]); });
+  // 목표/세부 행 복원
+  wkGoalRows=[]; wkDetailRows=[];
+  const wgl=document.getElementById('wk-goals-list'); if(wgl) wgl.innerHTML='';
+  const wdl=document.getElementById('wk-details-list'); if(wdl) wdl.innerHTML='';
+  const savedGoals   = w.next_goals   || (w.next_goal   ? [{text:w.next_goal}]   : []);
+  const savedDetails = w.next_details || (w.next_detail ? [{text:w.next_detail}] : []);
+  savedGoals.filter(r=>r).forEach(r=>addWkGoalRow(r.text));
+  savedDetails.filter(r=>r).forEach(r=>addWkDetailRow(r.text));
+  // 이번달 목표 표시 (월간 탭의 전달 next_goals)
+  const wkYM = curWk.slice(0,7);
+  const [wy,wm] = wkYM.split('-').map(Number);
+  let pmy=wy, pmm=wm-1; if(pmm<1){pmm=12;pmy--;}
+  const prevMonKey = pmy+'-'+String(pmm).padStart(2,'0');
+  const prevMonData = allMonthly[prevMonKey]||{};
+  const monGoals   = prevMonData.next_goals   || [];
+  const monDetails = prevMonData.next_details || [];
+  const mbox=document.getElementById('wk-month-goal');
+  if(mbox){
+    mbox.style.display=(monGoals.length||monDetails.length)?'block':'none';
+    const mgl=document.getElementById('wk-month-goals-list');
+    if(mgl) mgl.innerHTML=monGoals.filter(r=>r&&r.text).map(r=>`<div style="font-size:13px;color:var(--t1);padding:2px 0">• ${r.text}</div>`).join('');
+    const mdl=document.getElementById('wk-month-details-list');
+    if(mdl) mdl.innerHTML=monDetails.filter(r=>r&&r.text).map(r=>`<div style="font-size:12px;color:var(--t2);padding:2px 0">• ${r.text}</div>`).join('');
+  }
   // 일일 텍스트 자동 집계
   const wk2 = curWk;
   const days2 = Object.entries(allDaily).filter(([d])=>monStr(d)===wk2).sort(([a],[b])=>a>b?1:-1).map(([d,e])=>({d,e}));
@@ -1480,6 +1565,21 @@ function renderWeekly() {
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // 월간 탭
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ── 월간 목표/세부 행 관리
+let monGoalRows = [], monDetailRows = [];
+function addMonGoalRow(text) {
+  const idx=monGoalRows.length; monGoalRows.push({text:text||''});
+  const el=document.getElementById('m-goals-list'); if(el) el.appendChild(_makeListRow('mngr',idx,text,'removeMonGoalRow'));
+}
+function updateMonGoalRow(idx) { if(monGoalRows[idx]) { monGoalRows[idx].text=document.getElementById('mngr-text-'+idx)?.value||''; saveMonthly(); } }
+function removeMonGoalRow(idx) { monGoalRows[idx]=null; const e=document.getElementById('mngr-'+idx); if(e) e.remove(); saveMonthly(); }
+function addMonDetailRow(text) {
+  const idx=monDetailRows.length; monDetailRows.push({text:text||''});
+  const el=document.getElementById('m-details-list'); if(el) el.appendChild(_makeListRow('mndr',idx,text,'removeMonDetailRow'));
+}
+function updateMonDetailRow(idx) { if(monDetailRows[idx]) { monDetailRows[idx].text=document.getElementById('mndr-text-'+idx)?.value||''; saveMonthly(); } }
+function removeMonDetailRow(idx) { monDetailRows[idx]=null; const e=document.getElementById('mndr-'+idx); if(e) e.remove(); saveMonthly(); }
+
 function monthKey() { return curMon; }
 function saveMonthly() {
   const mk = curMon;
@@ -1488,6 +1588,8 @@ function saveMonthly() {
   ['sinsin','strong','best','weak','avoid-pattern','reduce','maintain','experiment','finance','relation','livelihood','medical','meaning'].forEach(k=>{
     const el=document.getElementById('m-'+k); if(el) m[k]=el.value;
   });
+  m.next_goals   = monGoalRows.filter(r=>r&&r.text);
+  m.next_details = monDetailRows.filter(r=>r&&r.text);
   saveMonthlyStore();
 }
 function saveMonthlyBtn() {
@@ -1503,6 +1605,12 @@ function renderMonthly() {
   ['sinsin','strong','best','weak','avoid-pattern','reduce','maintain','experiment','finance','relation','livelihood','medical','meaning'].forEach(k=>{
     const el=document.getElementById('m-'+k); if(el) el.value=m[k]||'';
   });
+  // 다음달 목표 행 복원
+  monGoalRows=[]; monDetailRows=[];
+  const mgl=document.getElementById('m-goals-list'); if(mgl) mgl.innerHTML='';
+  const mdl=document.getElementById('m-details-list'); if(mdl) mdl.innerHTML='';
+  (m.next_goals||[]).filter(r=>r).forEach(r=>addMonGoalRow(r.text));
+  (m.next_details||[]).filter(r=>r).forEach(r=>addMonDetailRow(r.text));
   // 주간 데이터 요약
   const weeks = Object.keys(allWeekly).sort().slice(-4);
   if (weeks.length) {
