@@ -18,16 +18,45 @@
 html,body{height:100%;background:var(--bg);color:var(--t1);font-family:'Apple SD Gothic Neo','Noto Sans KR',sans-serif;font-size:15px;overscroll-behavior:none}
 /* ── 탭 ── */
 .topbar{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--s1);border-bottom:1px solid var(--b2)}
-.title-row{display:flex;align-items:center;justify-content:space-between;padding:10px 16px 0}
+.title-row{display:flex;align-items:center;justify-content:space-between;padding:8px 16px 0}
 .title-main{font-size:13px;font-weight:700;color:var(--t2);letter-spacing:.06em}
 .title-sub{font-size:10px;color:var(--t3);margin-top:1px}
-.tabs{display:flex;overflow-x:auto;padding:8px 16px 0;gap:4px;scrollbar-width:none}
+.tabs{display:flex;overflow-x:auto;padding:5px 16px 0;gap:4px;scrollbar-width:none}
 .tabs::-webkit-scrollbar{display:none}
-.tab{flex-shrink:0;padding:6px 12px;font-size:12px;font-family:inherit;border:1px solid var(--b1);border-radius:6px 6px 0 0;background:transparent;color:var(--t3);cursor:pointer;border-bottom:none;margin-bottom:-1px;transition:all .15s}
+.tab{flex-shrink:0;padding:5px 10px;font-size:12px;font-family:inherit;border:1px solid var(--b1);border-radius:6px 6px 0 0;background:transparent;color:var(--t3);cursor:pointer;border-bottom:none;margin-bottom:-1px;transition:all .15s}
 .tab.on{background:var(--s1);color:var(--blue);border-color:var(--b1);border-bottom:1px solid var(--s1);font-weight:700}
+.tabs-row2{display:flex;overflow-x:auto;padding:3px 16px 0;gap:4px;scrollbar-width:none;border-top:1px solid var(--b2)}
+.tabs-row2::-webkit-scrollbar{display:none}
+.tab2{flex-shrink:0;padding:4px 9px;font-size:11px;font-family:inherit;border:1px solid var(--b1);border-radius:5px 5px 0 0;background:transparent;color:var(--t3);cursor:pointer;border-bottom:none;margin-bottom:-1px;transition:all .15s}
+.tab2.on{background:var(--s1);color:var(--purple);border-color:var(--b1);border-bottom:1px solid var(--s1);font-weight:700}
+/* ── 서브탭 ── */
+.subtabs{display:flex;gap:0;border-bottom:1px solid var(--b1);margin-bottom:12px;overflow-x:auto;scrollbar-width:none}
+.subtabs::-webkit-scrollbar{display:none}
+.subtab{flex-shrink:0;padding:6px 12px;font-size:12px;font-family:inherit;background:transparent;border:none;color:var(--t3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;font-weight:600;transition:all .15s}
+.subtab.on{color:var(--blue);border-bottom-color:var(--blue)}
+.subview{display:none}
+.subview.on{display:block}
 /* ── 뷰 ── */
-.view{display:none;padding:16px 16px 100px;margin-top:82px}
+.view{display:none;padding:16px 16px 100px;margin-top:108px}
 .view.on{display:block}
+/* ── 집중도 버튼 ── */
+.focus-btn{background:transparent;border:1px solid var(--b1);border-radius:3px;padding:1px 4px;font-size:12px;cursor:pointer;font-family:inherit;color:var(--t3);transition:all .15s;line-height:1.4;margin-right:1px}
+.focus-btn.on-o{background:#0f2d1a;border-color:var(--green);color:var(--green);font-weight:700}
+.focus-btn.on-d{background:#2d2800;border-color:var(--yellow);color:var(--yellow);font-weight:700}
+.focus-btn.on-x{background:var(--rdim);border-color:var(--red);color:var(--red);font-weight:700}
+/* ── 연간/인생계획 표 ── */
+.plan-table{width:100%;border-collapse:collapse;font-size:12px}
+.plan-table th{background:var(--s3);padding:6px 8px;text-align:left;color:var(--t2);border:1px solid var(--b1);font-weight:600}
+.plan-table td{padding:5px 7px;border:1px solid var(--b1);vertical-align:top}
+.plan-table td input[type=text]{border-bottom:1px solid var(--b2);font-size:12px;width:100%}
+.plan-table td textarea{font-size:12px;border:none;padding:2px 0;border-bottom:1px solid var(--b2);min-height:36px;width:100%}
+/* ── 오늘 주요 일정 ── */
+.today-sched-box{background:#0a1a10;border:1px solid #1e4a2f;border-radius:8px;padding:10px 14px;margin-bottom:10px}
+/* ── 반복 일정 ── */
+.rec-event-item{background:var(--s1);border:1px solid var(--b1);border-radius:6px;padding:7px 10px;margin-bottom:4px;display:flex;align-items:center;gap:8px}
+/* ── 목표 섹션 ── */
+.goal-sec{background:var(--s1);border:1px solid var(--b1);border-radius:10px;padding:12px 14px;margin-bottom:10px}
+.goal-sec-title{font-size:12px;font-weight:700;color:var(--t2);margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
 /* ── 카드 ── */
 .card{background:var(--s1);border:1px solid var(--b1);border-radius:10px;padding:4px 14px 10px;margin-bottom:10px}
 .sec-label{font-size:11px;font-weight:700;color:var(--t3);letter-spacing:.08em;padding:10px 0 4px}
@@ -181,12 +210,15 @@ textarea{resize:none;font-size:13px;border:1px solid var(--b1);border-radius:4px
       window.allWeekly  = data.weekly_v2  || {};
       window.allMonthly = data.monthly_v2 || {};
       window.wkPlanDefaults = data.wk_plan_defaults || {};
+      window.allAnnual  = data.annual_v2  || {};
+      window.annualSched = data.annual_sched || {};
+      window.lifeGoals  = data.life_goals  || {};
+      window.tenYearPlan = data.ten_year_plan || {};
+      window.recurringEvt = data.recurring || {annual:[], weekly:[]};
     } catch(e) {
-      // 오프라인이면 빈 객체로 시작
-      window.allDaily   = {};
-      window.allWeekly  = {};
-      window.allMonthly = {};
-      window.wkPlanDefaults = {};
+      window.allDaily   = {}; window.allWeekly  = {}; window.allMonthly = {};
+      window.wkPlanDefaults = {}; window.allAnnual = {}; window.annualSched = {};
+      window.lifeGoals = {}; window.tenYearPlan = {}; window.recurringEvt = {annual:[], weekly:[]};
     }
     showSpinner(false);
     window._dataReady = true;
@@ -219,10 +251,15 @@ textarea{resize:none;font-size:13px;border:1px solid var(--b1);border-radius:4px
     <button class="tab on" data-v="today">일일</button>
     <button class="tab" data-v="weekly">주간</button>
     <button class="tab" data-v="monthly">월간</button>
-    <button class="tab" data-v="principle">원칙</button>
-    <button class="tab" data-v="routine">루틴</button>
-    <button class="tab" data-v="guide">상황처방</button>
-    <button class="tab" data-v="history">기록</button>
+    <button class="tab" data-v="annual">연간</button>
+    <button class="tab" data-v="tenyear">10년계획</button>
+  </div>
+  <div class="tabs-row2" id="tabs2">
+    <button class="tab2" data-v="lifeplan">인생계획</button>
+    <button class="tab2" data-v="principle">원칙</button>
+    <button class="tab2" data-v="routine">루틴</button>
+    <button class="tab2" data-v="guide">상황처방</button>
+    <button class="tab2" data-v="history">기록</button>
   </div>
 </div>
 
@@ -246,22 +283,26 @@ textarea{resize:none;font-size:13px;border:1px solid var(--b1);border-radius:4px
     <div id="daily-week-details-list"></div>
   </div>
 
+  <!-- 오늘 주요 일정 (전날 입력 + 월간/연간/반복 자동 표시) -->
+  <div id="today-sched-box" class="today-sched-box" style="display:none">
+    <div style="font-size:11px;color:var(--green);font-weight:700;letter-spacing:.06em;margin-bottom:5px">📌 오늘 주요 일정</div>
+    <div id="today-sched-list"></div>
+  </div>
+
   <!-- 계획/실행표 -->
   <div class="card">
     <div class="sec-label" style="display:flex;justify-content:space-between;align-items:center">
       📋 계획 / 실행표
-      <span style="display:flex;gap:6px">
-        <button onclick="addDailyPlanRow()" style="background:transparent;border:1px solid var(--b1);color:var(--t3);border-radius:4px;padding:2px 8px;font-size:11px;cursor:pointer">+ 행</button>
-      </span>
+      <button onclick="addDailyPlanRow()" style="background:transparent;border:1px solid var(--b1);color:var(--t3);border-radius:4px;padding:2px 8px;font-size:11px;cursor:pointer">+ 행</button>
     </div>
     <div style="overflow-x:auto">
       <table style="width:100%;border-collapse:collapse;font-size:12px">
         <thead>
           <tr>
-            <th style="background:var(--s3);padding:5px;text-align:left;color:var(--t2);width:72px">시간</th>
+            <th style="background:var(--s3);padding:5px;text-align:left;color:var(--t2);width:58px">시간</th>
             <th style="background:var(--s3);padding:5px;text-align:left;color:var(--t2)">계획</th>
-            <th style="background:var(--s3);padding:5px;text-align:left;color:var(--t2)">실행</th>
-            <th style="background:var(--s3);padding:5px;width:24px"></th>
+            <th style="background:var(--s3);padding:5px;text-align:center;color:var(--t2);width:66px">집중도</th>
+            <th style="background:var(--s3);padding:5px;width:22px"></th>
           </tr>
         </thead>
         <tbody id="daily-plan-body"></tbody>
@@ -406,6 +447,16 @@ textarea{resize:none;font-size:13px;border:1px solid var(--b1);border-radius:4px
         <input type="text" id="f-body" placeholder="메모..." oninput="autoSave()" style="flex:1;min-width:80px">
       </div>
     </div>
+  </div>
+
+  <!-- 내일 주요 일정 입력 -->
+  <div class="card" style="margin-top:10px">
+    <div class="sec-label" style="display:flex;justify-content:space-between;align-items:center">
+      📅 내일 주요 일정
+      <button onclick="addTmrSchedRow()" style="background:transparent;border:1px solid var(--b1);color:var(--t3);border-radius:4px;padding:2px 8px;font-size:11px;cursor:pointer">+ 행</button>
+    </div>
+    <div id="tmr-sched-list"></div>
+    <div id="tmr-sched-empty" style="font-size:11px;color:var(--t3);padding:4px 0">+ 행으로 내일 일정을 추가하세요</div>
   </div>
 
   <div class="tomorrow-box">
@@ -563,15 +614,103 @@ textarea{resize:none;font-size:13px;border:1px solid var(--b1);border-radius:4px
 <!-- ═══════════════════ 월간 ═══════════════════ -->
 <div class="view" id="v-monthly">
   <!-- 월 내비게이션 -->
-  <div class="date-nav" style="padding:6px 0 10px">
+  <div class="date-nav" style="padding:6px 0 6px">
     <button class="date-arrow" onclick="shiftMonth(-1)">‹</button>
     <div style="text-align:center;flex:1">
       <div id="m-label" style="font-weight:700;font-size:17px;color:var(--t1)"></div>
-      <div style="font-size:10px;color:var(--t3);margin-top:2px">📅 60분 운영회의 — 매월 말 · 강점→약점→결정→공유→의미</div>
     </div>
     <button class="date-arrow" onclick="shiftMonth(1)">›</button>
   </div>
 
+  <!-- 서브탭 -->
+  <div class="subtabs">
+    <button class="subtab on" id="msub-btn-goals" onclick="switchMonSub('goals')">목표</button>
+    <button class="subtab" id="msub-btn-schedule" onclick="switchMonSub('schedule')">주요일정/기록</button>
+    <button class="subtab" id="msub-btn-review" onclick="switchMonSub('review')">60분 운영회의</button>
+  </div>
+
+  <!-- ── 0월 목표 ── -->
+  <div class="subview on" id="msub-goals">
+    <!-- 종합목표 -->
+    <div class="goal-sec">
+      <div class="goal-sec-title">
+        <span>□ 종합목표</span>
+        <button onclick="addMonCompRow()" style="background:transparent;border:1px dashed var(--b1);color:var(--t3);border-radius:4px;padding:2px 8px;font-size:11px;cursor:pointer">+ 행</button>
+      </div>
+      <div id="mgoal-comp-list"></div>
+    </div>
+    <!-- 세부목표 표 -->
+    <div class="goal-sec">
+      <div class="goal-sec-title"><span>□ 세부목표</span></div>
+      <div style="overflow-x:auto">
+        <table class="plan-table">
+          <thead><tr>
+            <th style="width:64px">구분</th>
+            <th>내 용</th>
+          </tr></thead>
+          <tbody>
+            <tr><td style="color:var(--blue);font-weight:600">회복</td><td><textarea id="mg-recovery" rows="2" oninput="saveMonthly()" placeholder="..."></textarea></td></tr>
+            <tr><td style="color:var(--yellow);font-weight:600">관계</td><td><textarea id="mg-relation" rows="2" oninput="saveMonthly()" placeholder="..."></textarea></td></tr>
+            <tr><td style="color:var(--green);font-weight:600">생계</td><td><textarea id="mg-livelihood" rows="2" oninput="saveMonthly()" placeholder="..."></textarea></td></tr>
+            <tr><td style="color:var(--blue);font-weight:600">성장</td><td><textarea id="mg-growth" rows="2" oninput="saveMonthly()" placeholder="..."></textarea></td></tr>
+            <tr><td style="color:var(--purple);font-weight:600">의미</td><td><textarea id="mg-meaning" rows="2" oninput="saveMonthly()" placeholder="..."></textarea></td></tr>
+            <tr><td style="color:var(--t2)">기타</td><td><textarea id="mg-other" rows="2" oninput="saveMonthly()" placeholder="..."></textarea></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <!-- 업무중점 -->
+    <div class="goal-sec">
+      <div class="goal-sec-title">
+        <span>□ 업무중점</span>
+        <button onclick="addMonWorkRow()" style="background:transparent;border:1px dashed var(--b1);color:var(--t3);border-radius:4px;padding:2px 8px;font-size:11px;cursor:pointer">+ 행</button>
+      </div>
+      <div id="mgoal-work-list"></div>
+    </div>
+    <!-- 다음달 목표 (주간탭 연동) -->
+    <div class="monthly-sec" style="border-left:3px solid var(--blue)">
+      <div class="monthly-sec-title" style="color:var(--blue)">📌 다음달 목표 — 다음달 주간 결산에 자동 표시</div>
+      <div class="m-label" style="margin-bottom:6px">◽ 다음달 목표</div>
+      <div id="m-goals-list"></div>
+      <button onclick="addMonGoalRow()" style="margin-top:4px;background:transparent;border:1px dashed var(--b1);color:var(--t3);border-radius:4px;padding:3px 10px;font-size:11px;cursor:pointer">+ 항목</button>
+      <div class="m-label" style="margin-top:10px;margin-bottom:6px">◽ 세부 실천사항</div>
+      <div id="m-details-list"></div>
+      <button onclick="addMonDetailRow()" style="margin-top:4px;background:transparent;border:1px dashed var(--b1);color:var(--t3);border-radius:4px;padding:3px 10px;font-size:11px;cursor:pointer">+ 항목</button>
+    </div>
+    <div class="save-btn"><button class="btn" onclick="saveMonthlyBtn()">저장</button></div>
+  </div>
+
+  <!-- ── 0월 주요일정/기록 ── -->
+  <div class="subview" id="msub-schedule">
+    <div style="font-size:11px;color:var(--t3);margin-bottom:8px">일정을 입력하면 해당 날짜 일일탭 '오늘 주요 일정'에 자동 표시됩니다</div>
+    <div id="msched-calendar"></div>
+    <div id="msched-day-section" style="display:none;background:var(--s1);border:1px solid var(--b1);border-radius:8px;padding:10px 12px;margin-top:8px">
+      <div id="msched-day-label" style="font-size:12px;font-weight:700;color:var(--blue);margin-bottom:6px"></div>
+      <div id="msched-day-items"></div>
+      <div style="display:flex;gap:6px;margin-top:6px;align-items:center">
+        <input type="text" id="msched-time-input" placeholder="HH:MM" maxlength="5" style="width:52px;font-size:12px">
+        <input type="text" id="msched-text-input" placeholder="일정 입력..." style="flex:1;font-size:12px">
+        <button onclick="addMonSchedItem()" style="background:var(--bdim);border:1px solid var(--acc);color:var(--blue);border-radius:4px;padding:4px 10px;font-size:12px;cursor:pointer;font-family:inherit;flex-shrink:0">추가</button>
+      </div>
+    </div>
+    <!-- 월간 트래킹 표 -->
+    <div style="margin-top:12px">
+      <div style="font-size:11px;font-weight:700;color:var(--t3);margin-bottom:6px">□ 월간 기록</div>
+      <div style="overflow-x:auto">
+        <table class="plan-table" id="msched-tracking-table">
+          <thead><tr>
+            <th style="width:56px">주차</th>
+            <th>독서</th><th>자격증</th><th>호흡/영상</th><th>운동/체중</th><th>실시사항</th>
+          </tr></thead>
+          <tbody id="msched-tracking-body"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="save-btn"><button class="btn" onclick="saveMonthlyBtn()">저장</button></div>
+  </div>
+
+  <!-- ── 60분 운영회의 ── -->
+  <div class="subview" id="msub-review">
   <!-- 주간 데이터 요약 -->
   <div id="monthly-weekly-summary"></div>
 
@@ -658,17 +797,6 @@ textarea{resize:none;font-size:13px;border:1px solid var(--b1);border-radius:4px
     </div>
   </div>
 
-  <!-- 다음달 목표 (행추가/삭제) -->
-  <div class="monthly-sec" style="border-left:3px solid var(--blue)">
-    <div class="monthly-sec-title" style="color:var(--blue)">📌 다음달 목표 — 다음달 주간 결산에 자동 표시</div>
-    <div class="m-label" style="margin-bottom:6px">◽ 다음달 목표</div>
-    <div id="m-goals-list"></div>
-    <button onclick="addMonGoalRow()" style="margin-top:4px;background:transparent;border:1px dashed var(--b1);color:var(--t3);border-radius:4px;padding:3px 10px;font-size:11px;cursor:pointer">+ 항목</button>
-    <div class="m-label" style="margin-top:10px;margin-bottom:6px">◽ 세부 실천사항</div>
-    <div id="m-details-list"></div>
-    <button onclick="addMonDetailRow()" style="margin-top:4px;background:transparent;border:1px dashed var(--b1);color:var(--t3);border-radius:4px;padding:3px 10px;font-size:11px;cursor:pointer">+ 항목</button>
-  </div>
-
   <!-- 6.2 기둥 복구 순서 -->
   <div class="card">
     <div class="sec-label">🔧 6.2 기둥 복구 순서</div>
@@ -684,6 +812,176 @@ textarea{resize:none;font-size:13px;border:1px solid var(--b1);border-radius:4px
   </div>
 
   <div class="save-btn"><button class="btn" id="m-save-btn" onclick="saveMonthlyBtn()">저장</button></div>
+  </div><!-- /msub-review -->
+</div>
+
+<!-- ═══════════════════ 인생계획 ═══════════════════ -->
+<div class="view" id="v-lifeplan">
+  <div style="text-align:center;font-size:16px;font-weight:700;color:var(--t1);margin-bottom:16px;padding:8px 0;border-bottom:2px solid var(--b1)">난 죽을 때 어떤 사람이 되고 싶은가?</div>
+  <!-- 종합목표 -->
+  <div class="goal-sec">
+    <div class="goal-sec-title">
+      <span style="color:var(--blue)">□ 종합목표</span>
+      <button onclick="addLifeRow('comp')" style="background:transparent;border:1px dashed var(--b1);color:var(--t3);border-radius:4px;padding:2px 8px;font-size:11px;cursor:pointer">+ 행 추가·삭제</button>
+    </div>
+    <div id="life-comp-list"></div>
+  </div>
+  <!-- 육체적 측면 -->
+  <div class="goal-sec">
+    <div class="goal-sec-title">
+      <span style="color:var(--green)">□ 육체적 측면</span>
+      <button onclick="addLifeRow('phys')" style="background:transparent;border:1px dashed var(--b1);color:var(--t3);border-radius:4px;padding:2px 8px;font-size:11px;cursor:pointer">+ 행</button>
+    </div>
+    <div id="life-phys-list"></div>
+  </div>
+  <!-- 정신적 측면 -->
+  <div class="goal-sec">
+    <div class="goal-sec-title">
+      <span style="color:var(--purple)">□ 정신적 측면</span>
+      <button onclick="addLifeRow('ment')" style="background:transparent;border:1px dashed var(--b1);color:var(--t3);border-radius:4px;padding:2px 8px;font-size:11px;cursor:pointer">+ 행</button>
+    </div>
+    <div id="life-ment-list"></div>
+  </div>
+  <!-- 능력적 측면 -->
+  <div class="goal-sec">
+    <div class="goal-sec-title">
+      <span style="color:var(--yellow)">□ 능력적 측면</span>
+      <button onclick="addLifeRow('abil')" style="background:transparent;border:1px dashed var(--b1);color:var(--t3);border-radius:4px;padding:2px 8px;font-size:11px;cursor:pointer">+ 행</button>
+    </div>
+    <div id="life-abil-list"></div>
+  </div>
+  <!-- 10년단위 인생 계획 -->
+  <div class="goal-sec">
+    <div class="goal-sec-title"><span>□ 10년단위 인생 계획</span></div>
+    <div style="overflow-x:auto">
+      <table class="plan-table">
+        <thead><tr><th style="width:54px">구분</th><th>내 용</th><th style="width:80px">비 고</th></tr></thead>
+        <tbody>
+          <tr><td style="color:var(--blue);font-weight:700">40대</td><td><textarea id="life-dec-40" rows="2" oninput="saveLifeGoals()" placeholder="내용..."></textarea></td><td><textarea id="life-dec-40n" rows="2" oninput="saveLifeGoals()" placeholder="비고..."></textarea></td></tr>
+          <tr><td style="color:var(--green);font-weight:700">50대</td><td><textarea id="life-dec-50" rows="2" oninput="saveLifeGoals()" placeholder="내용..."></textarea></td><td><textarea id="life-dec-50n" rows="2" oninput="saveLifeGoals()" placeholder="비고..."></textarea></td></tr>
+          <tr><td style="color:var(--yellow);font-weight:700">60대</td><td><textarea id="life-dec-60" rows="2" oninput="saveLifeGoals()" placeholder="내용..."></textarea></td><td><textarea id="life-dec-60n" rows="2" oninput="saveLifeGoals()" placeholder="비고..."></textarea></td></tr>
+          <tr><td style="color:var(--purple);font-weight:700">70대</td><td><textarea id="life-dec-70" rows="2" oninput="saveLifeGoals()" placeholder="내용..."></textarea></td><td><textarea id="life-dec-70n" rows="2" oninput="saveLifeGoals()" placeholder="비고..."></textarea></td></tr>
+          <tr><td style="color:var(--t2);font-weight:700">80대</td><td><textarea id="life-dec-80" rows="2" oninput="saveLifeGoals()" placeholder="내용..."></textarea></td><td><textarea id="life-dec-80n" rows="2" oninput="saveLifeGoals()" placeholder="비고..."></textarea></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="save-btn"><button class="btn" id="life-save-btn" onclick="saveLifeGoalsBtn()">저장</button></div>
+</div>
+
+<!-- ═══════════════════ 10년 계획 ═══════════════════ -->
+<div class="view" id="v-tenyear">
+  <div style="text-align:center;font-size:15px;font-weight:700;color:var(--t1);margin-bottom:14px;padding:6px 0;border-bottom:2px solid var(--b1)">10개년 계획</div>
+  <div style="overflow-x:auto">
+    <table class="plan-table" id="tenyear-table">
+      <thead><tr>
+        <th style="width:72px">연 도</th>
+        <th>일반 계획/목표</th>
+        <th>세부계획</th>
+      </tr></thead>
+      <tbody id="tenyear-body"></tbody>
+    </table>
+  </div>
+  <div class="save-btn"><button class="btn" id="tenyear-save-btn" onclick="saveTenYearBtn()">저장</button></div>
+</div>
+
+<!-- ═══════════════════ 연간 ═══════════════════ -->
+<div class="view" id="v-annual">
+  <!-- 연도 내비게이션 -->
+  <div class="date-nav" style="padding:6px 0 6px">
+    <button class="date-arrow" onclick="shiftYear(-1)">‹</button>
+    <div style="text-align:center;flex:1">
+      <div id="yr-label" style="font-weight:700;font-size:17px;color:var(--t1)"></div>
+    </div>
+    <button class="date-arrow" onclick="shiftYear(1)">›</button>
+  </div>
+  <!-- 서브탭 -->
+  <div class="subtabs">
+    <button class="subtab on" id="asub-btn-goals" onclick="switchAnnualSub('goals')">연간 목표</button>
+    <button class="subtab" id="asub-btn-schedule" onclick="switchAnnualSub('schedule')">월간 주요일정</button>
+  </div>
+  <!-- 연간 목표 -->
+  <div class="subview on" id="asub-goals">
+    <!-- 종합목표 -->
+    <div class="goal-sec">
+      <div class="goal-sec-title">
+        <span style="color:var(--blue)">□ 종합목표</span>
+        <button onclick="addAnnualRow('comp')" style="background:transparent;border:1px dashed var(--b1);color:var(--t3);border-radius:4px;padding:2px 8px;font-size:11px;cursor:pointer">+ 행</button>
+      </div>
+      <div id="annual-comp-list"></div>
+    </div>
+    <!-- 돌아보기 -->
+    <div class="goal-sec">
+      <div class="goal-sec-title"><span id="annual-review-label">□ 전년도 돌아보기</span><span style="font-size:10px;color:var(--t3);font-weight:400">3칸까지 입력</span></div>
+      <textarea id="annual-review" rows="3" oninput="saveAnnual()" placeholder="전년도를 돌아보며..."></textarea>
+    </div>
+    <!-- 세부목표 표 -->
+    <div class="goal-sec">
+      <div class="goal-sec-title"><span>□ 세부목표</span></div>
+      <div style="overflow-x:auto">
+        <table class="plan-table">
+          <thead><tr><th style="width:54px">구분</th><th>전 반 기</th><th>후 반 기</th></tr></thead>
+          <tbody>
+            <tr><td style="color:var(--blue);font-weight:600">회복</td><td><textarea id="ag-rec-f" rows="2" oninput="saveAnnual()" placeholder="..."></textarea></td><td><textarea id="ag-rec-s" rows="2" oninput="saveAnnual()" placeholder="..."></textarea></td></tr>
+            <tr><td style="color:var(--yellow);font-weight:600">관계</td><td><textarea id="ag-rel-f" rows="2" oninput="saveAnnual()" placeholder="..."></textarea></td><td><textarea id="ag-rel-s" rows="2" oninput="saveAnnual()" placeholder="..."></textarea></td></tr>
+            <tr><td style="color:var(--green);font-weight:600">생계</td><td><textarea id="ag-liv-f" rows="2" oninput="saveAnnual()" placeholder="..."></textarea></td><td><textarea id="ag-liv-s" rows="2" oninput="saveAnnual()" placeholder="..."></textarea></td></tr>
+            <tr><td style="color:var(--blue);font-weight:600">성장</td><td><textarea id="ag-gro-f" rows="2" oninput="saveAnnual()" placeholder="..."></textarea></td><td><textarea id="ag-gro-s" rows="2" oninput="saveAnnual()" placeholder="..."></textarea></td></tr>
+            <tr><td style="color:var(--purple);font-weight:600">의미</td><td><textarea id="ag-mea-f" rows="2" oninput="saveAnnual()" placeholder="..."></textarea></td><td><textarea id="ag-mea-s" rows="2" oninput="saveAnnual()" placeholder="..."></textarea></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <!-- 분기별 자기계발 계획 -->
+    <div class="goal-sec">
+      <div class="goal-sec-title"><span>□ 분기별 자기계발 계획</span></div>
+      <div style="overflow-x:auto">
+        <table class="plan-table">
+          <thead><tr><th style="width:54px">구분</th><th>1/4분기</th><th>2/4분기</th><th>3/4분기</th><th>4/4분기</th></tr></thead>
+          <tbody>
+            <tr><td style="color:var(--blue);font-weight:600">호흡</td>
+              <td><input type="text" id="aq-br-1" oninput="saveAnnual()" placeholder="..."></td>
+              <td><input type="text" id="aq-br-2" oninput="saveAnnual()" placeholder="..."></td>
+              <td><input type="text" id="aq-br-3" oninput="saveAnnual()" placeholder="..."></td>
+              <td><input type="text" id="aq-br-4" oninput="saveAnnual()" placeholder="..."></td></tr>
+            <tr><td style="color:var(--yellow);font-weight:600">공부</td>
+              <td><input type="text" id="aq-st-1" oninput="saveAnnual()" placeholder="..."></td>
+              <td><input type="text" id="aq-st-2" oninput="saveAnnual()" placeholder="..."></td>
+              <td><input type="text" id="aq-st-3" oninput="saveAnnual()" placeholder="..."></td>
+              <td><input type="text" id="aq-st-4" oninput="saveAnnual()" placeholder="..."></td></tr>
+            <tr><td style="color:var(--green);font-weight:600">운동</td>
+              <td><input type="text" id="aq-ex-1" oninput="saveAnnual()" placeholder="..."></td>
+              <td><input type="text" id="aq-ex-2" oninput="saveAnnual()" placeholder="..."></td>
+              <td><input type="text" id="aq-ex-3" oninput="saveAnnual()" placeholder="..."></td>
+              <td><input type="text" id="aq-ex-4" oninput="saveAnnual()" placeholder="..."></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <!-- 업무중점 -->
+    <div class="goal-sec">
+      <div class="goal-sec-title">
+        <span>□ 업무중점</span>
+        <button onclick="addAnnualRow('work')" style="background:transparent;border:1px dashed var(--b1);color:var(--t3);border-radius:4px;padding:2px 8px;font-size:11px;cursor:pointer">+ 행</button>
+      </div>
+      <div id="annual-work-list"></div>
+    </div>
+    <div class="save-btn"><button class="btn" id="annual-save-btn" onclick="saveAnnualBtn()">저장</button></div>
+  </div>
+  <!-- 월간 주요일정 (연간) -->
+  <div class="subview" id="asub-schedule">
+    <div style="font-size:11px;color:var(--t3);margin-bottom:8px">연간 월별 주요 일정 / 목표</div>
+    <div style="overflow-x:auto">
+      <table class="plan-table">
+        <thead><tr>
+          <th style="width:40px">월</th>
+          <th>목표 / 주요 일정</th>
+          <th>독서</th><th>자격증</th><th>운동/체중</th>
+        </tr></thead>
+        <tbody id="annual-sched-body"></tbody>
+      </table>
+    </div>
+    <div class="save-btn"><button class="btn" onclick="saveAnnualSchedBtn()">저장</button></div>
+  </div>
 </div>
 
 <!-- ═══════════════════ 원칙 ═══════════════════ -->
@@ -707,6 +1005,48 @@ textarea{resize:none;font-size:13px;border:1px solid var(--b1);border-radius:4px
     <div style="font-size:13px;color:var(--t1);font-style:italic">"나는 머릿속에서 완성한 뒤 시작하지 않는다. 밖으로 꺼내고, 3분 안에 닫고, 25분 동안 만든다."</div>
   </div>
   <div id="routine-content"></div>
+
+  <!-- ── 반복 일정 ── -->
+  <div style="color:var(--t3);font-size:12px;font-weight:700;letter-spacing:.08em;margin:18px 0 8px">🔁 반복 일정 — 일일탭 '오늘 주요 일정'에 자동 표시</div>
+  <!-- 매년 반복 -->
+  <div style="background:var(--s1);border:1px solid var(--b1);border-radius:8px;padding:10px 12px;margin-bottom:8px">
+    <div style="font-size:12px;font-weight:700;color:var(--blue);margin-bottom:8px">📅 매년 반복 (생일·기념일 등)</div>
+    <div id="rec-annual-list"></div>
+    <div style="display:flex;gap:5px;margin-top:6px;flex-wrap:wrap;align-items:center">
+      <select id="rec-ann-month" style="background:var(--s3);border:1px solid var(--b1);color:var(--t1);font-size:12px;padding:4px 5px;border-radius:4px;width:60px">
+        <option value="">월</option>
+        <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option>
+        <option>7</option><option>8</option><option>9</option><option>10</option><option>11</option><option>12</option>
+      </select>
+      <span style="color:var(--t3);font-size:12px">월</span>
+      <select id="rec-ann-day" style="background:var(--s3);border:1px solid var(--b1);color:var(--t1);font-size:12px;padding:4px 5px;border-radius:4px;width:56px">
+        <option value="">일</option>
+        <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
+        <option>6</option><option>7</option><option>8</option><option>9</option><option>10</option>
+        <option>11</option><option>12</option><option>13</option><option>14</option><option>15</option>
+        <option>16</option><option>17</option><option>18</option><option>19</option><option>20</option>
+        <option>21</option><option>22</option><option>23</option><option>24</option><option>25</option>
+        <option>26</option><option>27</option><option>28</option><option>29</option><option>30</option><option>31</option>
+      </select>
+      <span style="color:var(--t3);font-size:12px">일</span>
+      <input type="text" id="rec-ann-title" placeholder="일정명" style="flex:1;min-width:80px;font-size:12px">
+      <button onclick="addRecAnnual()" style="background:var(--bdim);border:1px solid var(--acc);color:var(--blue);border-radius:4px;padding:4px 10px;font-size:12px;cursor:pointer;font-family:inherit">추가</button>
+    </div>
+  </div>
+  <!-- 매주 반복 -->
+  <div style="background:var(--s1);border:1px solid var(--b1);border-radius:8px;padding:10px 12px">
+    <div style="font-size:12px;font-weight:700;color:var(--green);margin-bottom:8px">📆 매주 반복 (입소식·퇴소식 등)</div>
+    <div id="rec-weekly-list"></div>
+    <div style="display:flex;gap:5px;margin-top:6px;flex-wrap:wrap;align-items:center">
+      <select id="rec-wk-day" style="background:var(--s3);border:1px solid var(--b1);color:var(--t1);font-size:12px;padding:4px 5px;border-radius:4px">
+        <option value="0">일</option><option value="1">월</option><option value="2">화</option>
+        <option value="3">수</option><option value="4">목</option><option value="5">금</option><option value="6">토</option>
+      </select>
+      <input type="text" id="rec-wk-time" placeholder="HH:MM" maxlength="5" style="width:52px;font-size:12px">
+      <input type="text" id="rec-wk-title" placeholder="일정명" style="flex:1;min-width:80px;font-size:12px">
+      <button onclick="addRecWeekly()" style="background:var(--bdim);border:1px solid var(--acc);color:var(--blue);border-radius:4px;padding:4px 10px;font-size:12px;cursor:pointer;font-family:inherit">추가</button>
+    </div>
+  </div>
 </div>
 
 <!-- ═══════════════════ 상황처방 ═══════════════════ -->
@@ -1027,33 +1367,85 @@ function sortRowsByTime(rows) {
 }
 
 // ── 일일 계획/실행표
-function addDailyPlanRow(time_v, plan_v, exec_v) {
+function addDailyPlanRow(time_v, plan_v, exec_v, focus_v) {
   const idx = dailyPlanRows.length;
-  dailyPlanRows.push({ time: time_v||'', plan: plan_v||'', exec: exec_v||'' });
+  const focus = focus_v||'';
+  dailyPlanRows.push({ time:time_v||'', plan:plan_v||'', exec:exec_v||'', focus });
   const tbody = document.getElementById('daily-plan-body');
   if (!tbody) return;
-  const tr = document.createElement('tr');
-  tr.id = 'dpr-'+idx;
   const pv = (plan_v||'').replace(/"/g,'&quot;');
-  const ev = (exec_v||'').replace(/"/g,'&quot;');
-  tr.innerHTML = `<td style="padding:3px 2px"><input type="text" id="dpr-time-${idx}" value="${time_v||''}" placeholder="HH:MM" maxlength="5" oninput="updateDailyPlanRow(${idx})" style="width:46px;background:transparent;border:none;border-bottom:1px solid var(--b1);color:var(--t1);font-family:inherit;font-size:12px;outline:none;text-align:center"></td>
-    <td style="padding:3px 2px"><input type="text" id="dpr-plan-${idx}" value="${pv}" placeholder="계획..." oninput="updateDailyPlanRow(${idx})" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--b1);color:var(--t1);font-family:inherit;font-size:12px;outline:none"></td>
-    <td style="padding:3px 2px"><input type="text" id="dpr-exec-${idx}" value="${ev}" placeholder="실행..." oninput="updateDailyPlanRow(${idx})" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--blue);color:var(--blue);font-family:inherit;font-size:12px;outline:none"></td>
-    <td style="padding:3px 2px;text-align:center"><button onclick="removeDailyPlanRow(${idx})" style="background:transparent;border:none;color:var(--red);font-size:14px;cursor:pointer">×</button></td>`;
-  tbody.appendChild(tr);
+  const planCol = focus==='o'?'var(--green)':focus==='x'?'var(--red)':focus==='d'?'var(--yellow)':'var(--t1)';
+  const planDec = focus==='x'?'line-through':'none';
+  // 메인 행
+  const tr1 = document.createElement('tr');
+  tr1.id = 'dpr-'+idx;
+  tr1.innerHTML = `
+    <td style="padding:3px 2px;vertical-align:middle">
+      <input type="text" id="dpr-time-${idx}" value="${time_v||''}" placeholder="HH:MM" maxlength="5"
+        oninput="updateDailyPlanRow(${idx})"
+        style="width:46px;background:transparent;border:none;border-bottom:1px solid var(--b1);color:var(--t1);font-family:inherit;font-size:12px;outline:none;text-align:center">
+    </td>
+    <td style="padding:3px 2px;vertical-align:middle">
+      <input type="text" id="dpr-plan-${idx}" value="${pv}" placeholder="계획..."
+        oninput="updateDailyPlanRow(${idx})"
+        style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--b1);font-family:inherit;font-size:12px;outline:none;color:${planCol};text-decoration:${planDec}">
+    </td>
+    <td style="padding:3px 2px;text-align:center;vertical-align:middle;white-space:nowrap">
+      <button id="dpr-fo-${idx}" class="focus-btn${focus==='o'?' on-o':''}" onclick="setFocus(${idx},'o')">○</button>
+      <button id="dpr-fd-${idx}" class="focus-btn${focus==='d'?' on-d':''}" onclick="setFocus(${idx},'d')">△</button>
+      <button id="dpr-fx-${idx}" class="focus-btn${focus==='x'?' on-x':''}" onclick="setFocus(${idx},'x')">×</button>
+    </td>
+    <td style="padding:3px 2px;vertical-align:middle;text-align:center">
+      <button onclick="removeDailyPlanRow(${idx})" style="background:transparent;border:none;color:var(--red);font-size:14px;cursor:pointer">×</button>
+    </td>`;
+  tbody.appendChild(tr1);
+  // 실행 행 (textarea, 줄바꿈 가능)
+  const tr2 = document.createElement('tr');
+  tr2.id = 'dpr-exec-row-'+idx;
+  const ev = (exec_v||'').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  tr2.innerHTML = `
+    <td colspan="4" style="padding:0 2px 5px 0">
+      <div style="display:flex;align-items:flex-start;gap:4px">
+        <span style="font-size:10px;color:var(--t3);white-space:nowrap;padding:4px 0 0 2px">[실행]</span>
+        <textarea id="dpr-exec-${idx}" rows="1" placeholder="실행 내용 (선택)..."
+          oninput="updateDailyPlanRow(${idx});this.style.height='auto';this.style.height=this.scrollHeight+'px'"
+          style="flex:1;resize:none;overflow:hidden;min-height:26px;background:transparent;border:none;border-bottom:1px solid var(--b2);color:var(--blue);font-family:inherit;font-size:12px;outline:none;padding:3px 2px">${ev}</textarea>
+      </div>
+    </td>`;
+  tbody.appendChild(tr2);
   const e=document.getElementById('daily-plan-empty'); if(e) e.style.display='none';
+  // 기존 데이터 textarea 높이 복원
+  if (exec_v) { const ta=document.getElementById('dpr-exec-'+idx); if(ta){ ta.style.height='auto'; ta.style.height=ta.scrollHeight+'px'; } }
+}
+function setFocus(idx, val) {
+  if (!dailyPlanRows[idx]) return;
+  const prev = dailyPlanRows[idx].focus;
+  const nv = prev===val ? '' : val;
+  dailyPlanRows[idx].focus = nv;
+  ['o','d','x'].forEach(f => {
+    const btn = document.getElementById(`dpr-f${f==='o'?'o':f==='d'?'d':'x'}-${idx}`);
+    if (btn) btn.className = 'focus-btn'+(nv===f?` on-${f}`:'');
+  });
+  const planEl = document.getElementById('dpr-plan-'+idx);
+  if (planEl) {
+    planEl.style.color = nv==='o'?'var(--green)':nv==='x'?'var(--red)':nv==='d'?'var(--yellow)':'var(--t1)';
+    planEl.style.textDecoration = nv==='x'?'line-through':'none';
+  }
+  autoSave();
 }
 function updateDailyPlanRow(idx) {
   if (dailyPlanRows[idx]!==undefined) {
     dailyPlanRows[idx].time=document.getElementById('dpr-time-'+idx)?.value||'';
     dailyPlanRows[idx].plan=document.getElementById('dpr-plan-'+idx)?.value||'';
-    dailyPlanRows[idx].exec=document.getElementById('dpr-exec-'+idx)?.value||'';
+    const ta=document.getElementById('dpr-exec-'+idx);
+    dailyPlanRows[idx].exec=ta?ta.value:'';
     autoSave();
   }
 }
 function removeDailyPlanRow(idx) {
   dailyPlanRows[idx]=null;
   const tr=document.getElementById('dpr-'+idx); if(tr) tr.remove();
+  const tr2=document.getElementById('dpr-exec-row-'+idx); if(tr2) tr2.remove();
   autoSave();
 }
 function renderDailyPlan(rows) {
@@ -1066,11 +1458,11 @@ function renderDailyPlan(rows) {
     if(def.length){
       const dayName=DAYS[new Date(curDate+'T00:00:00').getDay()];
       const filtered=sortRowsByTime(def.filter(r=>!r||!r.days||r.days.length===0||r.days.includes(dayName)));
-      filtered.forEach(r=>{ if(r) addDailyPlanRow(r.time,r.plan,''); });
+      filtered.forEach(r=>{ if(r) addDailyPlanRow(r.time,r.plan,'',''); });
     }
     else{ if(emptyEl) emptyEl.style.display='block'; }
   } else {
-    sortRowsByTime(rows).forEach(r=>{ if(r) addDailyPlanRow(r.time,r.plan,r.exec); });
+    sortRowsByTime(rows).forEach(r=>{ if(r) addDailyPlanRow(r.time,r.plan,r.exec,r.focus); });
   }
 }
 
@@ -1206,6 +1598,7 @@ function readForm() {
     tmr_action: gv('f-tmr-action'), tmr_goal: gv('f-tmr-goal'), tmr_ban: gv('f-tmr-ban'),
     tmr_notdo: gv('f-tmr-notdo'),
     daily_plan_rows: dailyPlanRows.filter(r=>r),
+    tmr_schedule: tmrSchedRows.filter(r=>r),
   };
 }
 function fillForm(e) {
@@ -1222,6 +1615,7 @@ function fillForm(e) {
   sv('f-tmr-action', e.tmr_action); sv('f-tmr-goal', e.tmr_goal); sv('f-tmr-ban', e.tmr_ban);
   sv('f-tmr-notdo', e.tmr_notdo);
   renderDailyPlan(e.daily_plan_rows||[]);
+  renderTmrSched(e.tmr_schedule||[]);
   checks = Object.assign({ gicheon:false, hongik:false, mindful:false, run:false, strength:false, lecture:false,
     'a-contact':false,'a-interview':false,'a-blog':false,'a-brunch':false,
     'a-paper':false,'a-pmp':false,'a-lang':false,'a-ai':false,'a-adsp':false,'a-info':false,
@@ -1325,6 +1719,7 @@ function loadDate() {
     if (planDefault.length) e._planDefault = planDefault;
   }
   fillForm(e); renderAlerts();
+  loadTodaySchedule();
   // 이번 주 목표 표시 (지난 주 weekly 탭의 "다음주 목표" 읽기)
   const curWeekMon = monStr(curDate);
   const prevDt = new Date(curWeekMon+'T00:00:00'); prevDt.setDate(prevDt.getDate()-7);
@@ -1590,6 +1985,14 @@ function saveMonthly() {
   });
   m.next_goals   = monGoalRows.filter(r=>r&&r.text);
   m.next_details = monDetailRows.filter(r=>r&&r.text);
+  // 0월 목표 저장
+  m.month_comp=monCompRows.filter(r=>r&&r.text);
+  m.month_work=monWorkRows.filter(r=>r&&r.text);
+  const _mg={};
+  ['recovery','relation','livelihood','growth','meaning','other'].forEach(k=>{
+    const el=document.getElementById('mg-'+k); if(el) _mg[k]=el.value;
+  });
+  m.month_goals=_mg;
   saveMonthlyStore();
 }
 function saveMonthlyBtn() {
@@ -1660,6 +2063,21 @@ function renderMonthly() {
   const bt = document.getElementById('backtrack-tbl');
   bt.innerHTML = '<tr><th>오늘 행동</th><th>중기 산출물</th><th>최종 목표</th><th>막힌 지점</th><th>지금 당장</th></tr>' +
     BACKTRACK.map((r,i)=>`<tr style="background:${i%2===0?'var(--s1)':'var(--s2)'}"><td style="color:#58a6ff;white-space:nowrap">${r.act}</td><td style="color:var(--t2)">${r.mid}</td><td style="color:var(--t1)">${r.goal}</td><td style="color:var(--red)">${r.block}</td><td style="color:var(--green)">${r.now}</td></tr>`).join('');
+  // ── 0월 목표 복원 ──
+  const [_yr,_mo]=curMon.split('-').map(Number);
+  const gb=document.getElementById('msub-btn-goals'); if(gb) gb.textContent=`${_mo}월 목표`;
+  const sb=document.getElementById('msub-btn-schedule'); if(sb) sb.textContent=`${_mo}월 주요일정/기록`;
+  const _m=allMonthly[curMon]||{};
+  monCompRows=[]; const _cl=document.getElementById('mgoal-comp-list'); if(_cl) _cl.innerHTML='';
+  (_m.month_comp||[]).filter(r=>r).forEach(r=>addMonCompRow(r.text));
+  monWorkRows=[]; const _wl=document.getElementById('mgoal-work-list'); if(_wl) _wl.innerHTML='';
+  (_m.month_work||[]).filter(r=>r).forEach(r=>addMonWorkRow(r.text));
+  ['recovery','relation','livelihood','growth','meaning','other'].forEach(k=>{
+    const el=document.getElementById('mg-'+k); if(el) el.value=(_m.month_goals||{})[k]||'';
+  });
+  selectedMonDay=0;
+  const _sec=document.getElementById('msched-day-section'); if(_sec) _sec.style.display='none';
+  renderMonCalendar(); renderMonTracking();
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1826,21 +2244,566 @@ function renderHistory() {
 function goDate(d) { curDate=d; switchTab('today'); loadDate(); }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// 탭 전환
+// 탭 전환 (2층)
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 function switchTab(v) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('on', t.dataset.v===v));
+  document.querySelectorAll('.tab,.tab2').forEach(t => t.classList.toggle('on', t.dataset.v===v));
   document.querySelectorAll('.view').forEach(vEl => vEl.classList.toggle('on', vEl.id==='v-'+v));
-  if (v==='weekly') { curWk = curWk || monStr(); renderWeekly(); }
-  if (v==='monthly') { curMon = curMon || (()=>{ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'); })(); renderMonthly(); }
+  if (v==='weekly')   { renderWeekly(); }
+  if (v==='monthly')  { renderMonthly(); }
+  if (v==='annual')   { renderAnnual(); }
+  if (v==='tenyear')  { renderTenYear(); }
+  if (v==='lifeplan') { renderLifePlan(); }
   if (v==='principle') renderPrinciple();
-  if (v==='routine') renderRoutine();
-  if (v==='guide') renderGuide();
-  if (v==='history') renderHistory();
+  if (v==='routine')  { renderRoutine(); renderRecurring(); }
+  if (v==='guide')    renderGuide();
+  if (v==='history')  renderHistory();
 }
 document.getElementById('tabs').addEventListener('click', e => {
   if (e.target.classList.contains('tab')) switchTab(e.target.dataset.v);
 });
+document.getElementById('tabs2').addEventListener('click', e => {
+  if (e.target.classList.contains('tab2')) switchTab(e.target.dataset.v);
+});
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 새 전역 변수
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+var allAnnual={}, annualSched={}, lifeGoals={}, tenYearPlan={}, recurringEvt={annual:[],weekly:[]};
+let curYear = new Date().getFullYear();
+let curMonSub = 'goals', curAnnualSub = 'goals';
+let tmrSchedRows = [];
+let monCompRows=[], monWorkRows=[];
+let lifeCompRows=[], lifePhysRows=[], lifeMentRows=[], lifeAbilRows=[];
+let annualCompRows=[], annualWorkRows=[];
+let selectedMonDay = 0;
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 오늘 주요 일정 집계
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function loadTodaySchedule() {
+  const items = [];
+  // 1. 전날 내일 주요 일정
+  const dt = new Date(curDate+'T00:00:00'); dt.setDate(dt.getDate()-1);
+  const prevDay = localDateStr(dt);
+  ((allDaily[prevDay]||{}).tmr_schedule||[]).filter(r=>r&&r.text).forEach(r=>
+    items.push({time:r.time||'', text:r.text, src:'📋'})
+  );
+  // 2. 월간 주요일정
+  const mk = curDate.slice(0,7);
+  const dd = parseInt(curDate.slice(8,10));
+  const mSched = ((allMonthly[mk]||{}).monthly_schedule||{})[dd]||[];
+  mSched.filter(r=>r&&r.text).forEach(r=>items.push({time:r.time||'', text:r.text, src:'📅'}));
+  // 3. 반복 일정 (매년)
+  const mo = parseInt(curDate.slice(5,7));
+  const day = parseInt(curDate.slice(8,10));
+  (recurringEvt.annual||[]).filter(r=>r&&+r.month===mo&&+r.day===day)
+    .forEach(r=>items.push({time:'', text:r.title, src:'🔁'}));
+  // 4. 반복 일정 (매주)
+  const dow = new Date(curDate+'T00:00:00').getDay();
+  (recurringEvt.weekly||[]).filter(r=>r&&+r.dayOfWeek===dow)
+    .forEach(r=>items.push({time:r.time||'', text:r.title, src:'🔁'}));
+  items.sort((a,b)=>(a.time||'99:99').localeCompare(b.time||'99:99'));
+  const box=document.getElementById('today-sched-box');
+  const list=document.getElementById('today-sched-list');
+  if (!box||!list) return;
+  if (!items.length) { box.style.display='none'; return; }
+  box.style.display='block';
+  list.innerHTML = items.map(it=>`<div style="display:flex;gap:8px;padding:3px 0;border-bottom:1px solid var(--b2);align-items:center">
+    <span style="font-size:11px;color:var(--t3);min-width:34px">${it.time||''}</span>
+    <span style="font-size:13px;flex:1">${it.text}</span>
+    <span style="font-size:10px;color:var(--t3)">${it.src}</span>
+  </div>`).join('');
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 내일 주요 일정 행 관리
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function addTmrSchedRow(text, time) {
+  const idx = tmrSchedRows.length;
+  tmrSchedRows.push({text:text||'', time:time||''});
+  const el=document.getElementById('tmr-sched-list'); if(!el) return;
+  const div=document.createElement('div');
+  div.id='tsr-'+idx;
+  div.style.cssText='display:flex;align-items:center;gap:6px;margin-bottom:4px';
+  div.innerHTML=`<input type="text" id="tsr-time-${idx}" value="${time||''}" placeholder="HH:MM" maxlength="5"
+    oninput="updateTmrSchedRow(${idx})"
+    style="width:46px;background:transparent;border:none;border-bottom:1px solid var(--b1);color:var(--t2);font-family:inherit;font-size:12px;outline:none;text-align:center">
+  <input type="text" id="tsr-text-${idx}" value="${(text||'').replace(/"/g,'&quot;')}" placeholder="일정..."
+    oninput="updateTmrSchedRow(${idx})"
+    style="flex:1;background:transparent;border:none;border-bottom:1px solid var(--b1);color:var(--t1);font-family:inherit;font-size:12px;outline:none">
+  <button onclick="removeTmrSchedRow(${idx})" style="background:transparent;border:none;color:var(--red);font-size:14px;cursor:pointer">×</button>`;
+  el.appendChild(div);
+  const e=document.getElementById('tmr-sched-empty'); if(e) e.style.display='none';
+}
+function updateTmrSchedRow(idx) {
+  if (tmrSchedRows[idx]!==undefined) {
+    tmrSchedRows[idx].time=document.getElementById('tsr-time-'+idx)?.value||'';
+    tmrSchedRows[idx].text=document.getElementById('tsr-text-'+idx)?.value||'';
+    autoSave();
+  }
+}
+function removeTmrSchedRow(idx) {
+  tmrSchedRows[idx]=null;
+  const el=document.getElementById('tsr-'+idx); if(el) el.remove();
+  const remaining=tmrSchedRows.filter(r=>r);
+  const e=document.getElementById('tmr-sched-empty'); if(e) e.style.display=remaining.length?'none':'block';
+  autoSave();
+}
+function renderTmrSched(rows) {
+  tmrSchedRows=[];
+  const el=document.getElementById('tmr-sched-list'); if(el) el.innerHTML='';
+  const e=document.getElementById('tmr-sched-empty'); if(e) e.style.display=rows.length?'none':'block';
+  (rows||[]).forEach(r=>{ if(r) addTmrSchedRow(r.text, r.time); });
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 월간 서브탭 전환
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function switchMonSub(sub) {
+  curMonSub = sub;
+  ['goals','schedule','review'].forEach(s => {
+    const btn=document.getElementById('msub-btn-'+s);
+    const view=document.getElementById('msub-'+s);
+    if(btn) btn.classList.toggle('on', s===sub);
+    if(view) view.classList.toggle('on', s===sub);
+  });
+}
+
+// ── 0월 목표 행 관리 (종합목표, 업무중점)
+function _makeGoalRow(prefix, idx, text, saveFn) {
+  const div=document.createElement('div');
+  div.id=prefix+'-'+idx;
+  div.style.cssText='display:flex;align-items:center;gap:6px;margin-bottom:4px';
+  div.innerHTML=`<span style="color:var(--blue);font-size:12px;flex-shrink:0">•</span>
+    <input type="text" id="${prefix}-text-${idx}" value="${(text||'').replace(/"/g,'&quot;')}"
+      placeholder="항목..." oninput="${saveFn}()"
+      style="flex:1;background:transparent;border:none;border-bottom:1px solid var(--b1);color:var(--t1);font-family:inherit;font-size:12px;outline:none">
+    <button onclick="${prefix.replace('-','').replace('-','')}Remove(${idx})" style="background:transparent;border:none;color:var(--red);font-size:14px;cursor:pointer">×</button>`;
+  return div;
+}
+function addMonCompRow(text) {
+  const idx=monCompRows.length; monCompRows.push({text:text||''});
+  const el=document.getElementById('mgoal-comp-list'); if(!el) return;
+  const div=document.createElement('div'); div.id='mcomp-'+idx;
+  div.style.cssText='display:flex;align-items:center;gap:6px;margin-bottom:4px';
+  div.innerHTML=`<span style="color:var(--blue);font-size:12px">•</span>
+    <input type="text" id="mcomp-text-${idx}" value="${(text||'').replace(/"/g,'&quot;')}" placeholder="항목..."
+      oninput="monCompRows[${idx}].text=this.value;saveMonthly()"
+      style="flex:1;background:transparent;border:none;border-bottom:1px solid var(--b1);color:var(--t1);font-family:inherit;font-size:12px;outline:none">
+    <button onclick="mcompRemove(${idx})" style="background:transparent;border:none;color:var(--red);font-size:14px;cursor:pointer">×</button>`;
+  el.appendChild(div);
+}
+function mcompRemove(idx) { monCompRows[idx]=null; const e=document.getElementById('mcomp-'+idx); if(e) e.remove(); saveMonthly(); }
+function addMonWorkRow(text) {
+  const idx=monWorkRows.length; monWorkRows.push({text:text||''});
+  const el=document.getElementById('mgoal-work-list'); if(!el) return;
+  const div=document.createElement('div'); div.id='mwork-'+idx;
+  div.style.cssText='display:flex;align-items:center;gap:6px;margin-bottom:4px';
+  div.innerHTML=`<span style="color:var(--t2);font-size:12px">•</span>
+    <input type="text" id="mwork-text-${idx}" value="${(text||'').replace(/"/g,'&quot;')}" placeholder="업무중점..."
+      oninput="monWorkRows[${idx}].text=this.value;saveMonthly()"
+      style="flex:1;background:transparent;border:none;border-bottom:1px solid var(--b1);color:var(--t1);font-family:inherit;font-size:12px;outline:none">
+    <button onclick="mworkRemove(${idx})" style="background:transparent;border:none;color:var(--red);font-size:14px;cursor:pointer">×</button>`;
+  el.appendChild(div);
+}
+function mworkRemove(idx) { monWorkRows[idx]=null; const e=document.getElementById('mwork-'+idx); if(e) e.remove(); saveMonthly(); }
+
+// ── 0월 주요일정 달력
+function renderMonCalendar() {
+  const [yr,mo] = curMon.split('-').map(Number);
+  const firstDay = new Date(yr,mo-1,1).getDay();
+  const daysInMonth = new Date(yr,mo,0).getDate();
+  const startOffset = firstDay===0?6:firstDay-1;
+  const mData = allMonthly[curMon]||{};
+  const msched = mData.monthly_schedule||{};
+  let html='<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:4px">';
+  ['월','화','수','목','금','토','일'].forEach(d=>{ html+=`<div style="text-align:center;font-size:10px;color:var(--t3);padding:2px 0">${d}</div>`; });
+  for(let i=0;i<startOffset;i++) html+='<div></div>';
+  const today=new Date(), tyyyy=today.getFullYear(),tmm=today.getMonth()+1,tdd=today.getDate();
+  for(let d=1;d<=daysInMonth;d++){
+    const cnt=(msched[d]||[]).filter(r=>r&&r.text).length;
+    const isToday=yr===tyyyy&&mo===tmm&&d===tdd;
+    const isSel=d===selectedMonDay;
+    const bg=isSel?'var(--acc)':isToday?'var(--s3)':'transparent';
+    const col=isSel?'#fff':isToday?'var(--blue)':'var(--t2)';
+    html+=`<div onclick="selectMonDay(${d})" style="cursor:pointer;text-align:center;padding:3px 1px;border-radius:4px;background:${bg}">
+      <div style="font-size:12px;color:${col};font-weight:${isToday?700:400}">${d}</div>
+      ${cnt?`<div style="width:4px;height:4px;border-radius:50%;background:var(--green);margin:1px auto 0"></div>`:'<div style="height:5px"></div>'}
+    </div>`;
+  }
+  html+='</div>';
+  const cal=document.getElementById('msched-calendar'); if(cal) cal.innerHTML=html;
+  renderMonDayItems();
+}
+function selectMonDay(d) {
+  selectedMonDay=d; renderMonCalendar();
+  const sec=document.getElementById('msched-day-section'); if(sec) sec.style.display='block';
+  const lbl=document.getElementById('msched-day-label');
+  const [yr,mo]=curMon.split('-').map(Number);
+  if(lbl) lbl.textContent=`${mo}월 ${d}일`;
+  renderMonDayItems();
+}
+function renderMonDayItems() {
+  if(!selectedMonDay) return;
+  const el=document.getElementById('msched-day-items'); if(!el) return;
+  const msched=((allMonthly[curMon]||{}).monthly_schedule||{})[selectedMonDay]||[];
+  el.innerHTML=msched.filter(r=>r&&r.text).map((r,i)=>`
+    <div style="display:flex;align-items:center;gap:6px;padding:3px 0;border-bottom:1px solid var(--b2)">
+      <span style="font-size:11px;color:var(--t3);min-width:36px">${r.time||''}</span>
+      <span style="font-size:13px;flex:1">${r.text}</span>
+      <button onclick="removeMonSchedItem(${i})" style="background:transparent;border:none;color:var(--red);font-size:14px;cursor:pointer">×</button>
+    </div>`).join('');
+}
+function addMonSchedItem() {
+  const text=(document.getElementById('msched-text-input')?.value||'').trim();
+  if(!text) return;
+  const time=document.getElementById('msched-time-input')?.value||'';
+  const mk=curMon;
+  if(!allMonthly[mk]) allMonthly[mk]={};
+  if(!allMonthly[mk].monthly_schedule) allMonthly[mk].monthly_schedule={};
+  if(!allMonthly[mk].monthly_schedule[selectedMonDay]) allMonthly[mk].monthly_schedule[selectedMonDay]=[];
+  allMonthly[mk].monthly_schedule[selectedMonDay].push({text,time});
+  document.getElementById('msched-text-input').value='';
+  document.getElementById('msched-time-input').value='';
+  saveMonthlyStore(); renderMonCalendar();
+}
+function removeMonSchedItem(i) {
+  const mk=curMon;
+  if(!allMonthly[mk]?.monthly_schedule?.[selectedMonDay]) return;
+  allMonthly[mk].monthly_schedule[selectedMonDay].splice(i,1);
+  saveMonthlyStore(); renderMonDayItems(); renderMonCalendar();
+}
+function renderMonTracking() {
+  const [yr,mo]=curMon.split('-').map(Number);
+  const daysInMonth=new Date(yr,mo,0).getDate();
+  const tbody=document.getElementById('msched-tracking-body'); if(!tbody) return;
+  const mData=allMonthly[curMon]||{};
+  const tracking=mData.tracking||{};
+  let rows='';
+  const weeks=Math.ceil((new Date(yr,mo-1,1).getDay()===0?6:new Date(yr,mo-1,1).getDay()-1+daysInMonth)/7);
+  for(let w=1;w<=weeks;w++){
+    const key=`w${w}`;
+    const t=tracking[key]||{};
+    rows+=`<tr>
+      <td style="color:var(--t3);font-weight:600;white-space:nowrap">${w}주차</td>
+      <td><input type="text" value="${(t.book||'').replace(/"/g,'&quot;')}" placeholder="..." oninput="saveMonTracking('${key}','book',this.value)" style="width:100%;font-size:12px"></td>
+      <td><input type="text" value="${(t.cert||'').replace(/"/g,'&quot;')}" placeholder="..." oninput="saveMonTracking('${key}','cert',this.value)" style="width:100%;font-size:12px"></td>
+      <td><input type="text" value="${(t.breath||'').replace(/"/g,'&quot;')}" placeholder="..." oninput="saveMonTracking('${key}','breath',this.value)" style="width:100%;font-size:12px"></td>
+      <td><input type="text" value="${(t.exercise||'').replace(/"/g,'&quot;')}" placeholder="..." oninput="saveMonTracking('${key}','exercise',this.value)" style="width:100%;font-size:12px"></td>
+      <td><input type="text" value="${(t.notes||'').replace(/"/g,'&quot;')}" placeholder="..." oninput="saveMonTracking('${key}','notes',this.value)" style="width:100%;font-size:12px"></td>
+    </tr>`;
+  }
+  tbody.innerHTML=rows;
+}
+function saveMonTracking(week,field,val) {
+  if(!allMonthly[curMon]) allMonthly[curMon]={};
+  if(!allMonthly[curMon].tracking) allMonthly[curMon].tracking={};
+  if(!allMonthly[curMon].tracking[week]) allMonthly[curMon].tracking[week]={};
+  allMonthly[curMon].tracking[week][field]=val;
+  saveMonthlyStore();
+}
+
+// (renderMonthly·saveMonthly 확장은 원본 함수에 직접 추가됨)
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 인생계획 탭
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function _addLifeRow(listId, rows, text, removeFunc) {
+  const idx=rows.length; rows.push({text:text||''});
+  const el=document.getElementById(listId); if(!el) return;
+  const div=document.createElement('div'); div.id=listId+'-row-'+idx;
+  div.style.cssText='display:flex;align-items:center;gap:6px;margin-bottom:4px';
+  div.innerHTML=`<span style="color:var(--blue);font-size:12px">•</span>
+    <input type="text" id="${listId}-inp-${idx}" value="${(text||'').replace(/"/g,'&quot;')}" placeholder="항목..."
+      oninput="rows[${idx}].text=this.value;saveLifeGoals()"
+      style="flex:1;background:transparent;border:none;border-bottom:1px solid var(--b1);color:var(--t1);font-family:inherit;font-size:12px;outline:none">
+    <button onclick="${removeFunc}(${idx})" style="background:transparent;border:none;color:var(--red);font-size:14px;cursor:pointer">×</button>`;
+  el.appendChild(div);
+}
+function addLifeRow(type) {
+  if(type==='comp') { _addLifeRow('life-comp-list',lifeCompRows,'','lifeCompRm'); }
+  else if(type==='phys') { _addLifeRow('life-phys-list',lifePhysRows,'','lifePhysRm'); }
+  else if(type==='ment') { _addLifeRow('life-ment-list',lifeMentRows,'','lifeMentRm'); }
+  else if(type==='abil') { _addLifeRow('life-abil-list',lifeAbilRows,'','lifeAbilRm'); }
+}
+function lifeCompRm(i){lifeCompRows[i]=null;const e=document.getElementById('life-comp-list-row-'+i);if(e)e.remove();saveLifeGoals();}
+function lifePhysRm(i){lifePhysRows[i]=null;const e=document.getElementById('life-phys-list-row-'+i);if(e)e.remove();saveLifeGoals();}
+function lifeMentRm(i){lifeMentRows[i]=null;const e=document.getElementById('life-ment-list-row-'+i);if(e)e.remove();saveLifeGoals();}
+function lifeAbilRm(i){lifeAbilRows[i]=null;const e=document.getElementById('life-abil-list-row-'+i);if(e)e.remove();saveLifeGoals();}
+function saveLifeGoals() {
+  lifeGoals.comp=lifeCompRows.filter(r=>r&&r.text);
+  lifeGoals.phys=lifePhysRows.filter(r=>r&&r.text);
+  lifeGoals.ment=lifeMentRows.filter(r=>r&&r.text);
+  lifeGoals.abil=lifeAbilRows.filter(r=>r&&r.text);
+  ['40','50','60','70','80'].forEach(d=>{
+    const el=document.getElementById('life-dec-'+d); if(el) lifeGoals['dec'+d]=el.value;
+    const en=document.getElementById('life-dec-'+d+'n'); if(en) lifeGoals['dec'+d+'n']=en.value;
+  });
+  if(window._fbSet) window._fbSet('diary/life_goals', lifeGoals);
+}
+function saveLifeGoalsBtn() {
+  saveLifeGoals();
+  const btn=document.getElementById('life-save-btn');
+  btn.textContent='✓ 저장됨'; btn.classList.add('ok');
+  setTimeout(()=>{btn.textContent='저장';btn.classList.remove('ok');},2000);
+}
+function renderLifePlan() {
+  const g=lifeGoals||{};
+  lifeCompRows=[]; const cl=document.getElementById('life-comp-list'); if(cl) cl.innerHTML='';
+  (g.comp||[{text:'성통공완 : 나를 깨달아서 남을 이롭게 하자'}]).filter(r=>r).forEach(r=>addLifeRow2('comp',r.text));
+  lifePhysRows=[]; const pl=document.getElementById('life-phys-list'); if(pl) pl.innerHTML='';
+  (g.phys||[{text:'태식을 통한 몸의 활성화'}]).filter(r=>r).forEach(r=>addLifeRow2('phys',r.text));
+  lifeMentRows=[]; const ml=document.getElementById('life-ment-list'); if(ml) ml.innerHTML='';
+  (g.ment||[{text:'항상 깨어서 양심을 실천'}]).filter(r=>r).forEach(r=>addLifeRow2('ment',r.text));
+  lifeAbilRows=[]; const al=document.getElementById('life-abil-list'); if(al) al.innerHTML='';
+  (g.abil||[{text:'멀리 내다보고 실수 없도록 일처리'}]).filter(r=>r).forEach(r=>addLifeRow2('abil',r.text));
+  ['40','50','60','70','80'].forEach(d=>{
+    const el=document.getElementById('life-dec-'+d); if(el) el.value=g['dec'+d]||'';
+    const en=document.getElementById('life-dec-'+d+'n'); if(en) en.value=g['dec'+d+'n']||'';
+  });
+}
+function addLifeRow2(type, text) {
+  if(type==='comp') _addLifeRow('life-comp-list',lifeCompRows,text,'lifeCompRm');
+  else if(type==='phys') _addLifeRow('life-phys-list',lifePhysRows,text,'lifePhysRm');
+  else if(type==='ment') _addLifeRow('life-ment-list',lifeMentRows,text,'lifeMentRm');
+  else if(type==='abil') _addLifeRow('life-abil-list',lifeAbilRows,text,'lifeAbilRm');
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 10년 계획 탭
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const TEN_YEAR_ROWS = [
+  {yr:"'26(43세)",label:'기록과 숫자 확정의 해'},{yr:"'27(44세)",label:'탐색+실럼'},{yr:"'28(45세)",label:'탐색+실럼'},
+  {yr:"'29(46세)",label:'탐색+실럼'},{yr:"'30(47세)",label:'집중+성장'},{yr:"'31(48세)",label:'확장+안정'},
+  {yr:"'32(49세)",label:'확장+안정'},{yr:"'33(50세)",label:'심화+브랜딩'},{yr:"'34(51세)",label:'심화+브랜딩'},
+  {yr:"'35(52세)",label:'통합+전승'},{yr:"'36(53세)",label:'통합+전승'},
+];
+function renderTenYear() {
+  const tbody=document.getElementById('tenyear-body'); if(!tbody) return;
+  const data=tenYearPlan.rows||{};
+  tbody.innerHTML=TEN_YEAR_ROWS.map((r,i)=>`<tr style="background:${i%2===0?'var(--s1)':'var(--s2)'}">
+    <td style="color:var(--blue);font-weight:700;white-space:nowrap">${r.yr}<div style="font-size:10px;color:var(--t3)">${r.label}</div></td>
+    <td><textarea id="ty-gen-${i}" rows="2" oninput="saveTenYear()" placeholder="일반 계획/목표..."
+      style="width:100%;resize:none;background:transparent;border:none;border-bottom:1px solid var(--b2);color:var(--t1);font-family:inherit;font-size:12px;outline:none;padding:2px 0">${((data[i]||{}).gen||'').replace(/</g,'&lt;')}</textarea></td>
+    <td><textarea id="ty-det-${i}" rows="2" oninput="saveTenYear()" placeholder="세부계획..."
+      style="width:100%;resize:none;background:transparent;border:none;border-bottom:1px solid var(--b2);color:var(--t2);font-family:inherit;font-size:12px;outline:none;padding:2px 0">${((data[i]||{}).det||'').replace(/</g,'&lt;')}</textarea></td>
+  </tr>`).join('');
+}
+function saveTenYear() {
+  if(!tenYearPlan.rows) tenYearPlan.rows={};
+  TEN_YEAR_ROWS.forEach((_,i)=>{
+    const g=document.getElementById('ty-gen-'+i); const d=document.getElementById('ty-det-'+i);
+    tenYearPlan.rows[i]={gen:g?g.value:'', det:d?d.value:''};
+  });
+  if(window._fbSet) window._fbSet('diary/ten_year_plan', tenYearPlan);
+}
+function saveTenYearBtn() {
+  saveTenYear();
+  const btn=document.getElementById('tenyear-save-btn');
+  btn.textContent='✓ 저장됨'; btn.classList.add('ok');
+  setTimeout(()=>{btn.textContent='저장';btn.classList.remove('ok');},2000);
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 연간 탭
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function shiftYear(d) { curYear+=d; renderAnnual(); }
+function switchAnnualSub(sub) {
+  curAnnualSub=sub;
+  ['goals','schedule'].forEach(s=>{
+    const btn=document.getElementById('asub-btn-'+s); if(btn) btn.classList.toggle('on',s===sub);
+    const v=document.getElementById('asub-'+s); if(v) v.classList.toggle('on',s===sub);
+  });
+}
+function saveAnnual() {
+  const key=String(curYear);
+  if(!allAnnual[key]) allAnnual[key]={};
+  const a=allAnnual[key];
+  a.comp=annualCompRows.filter(r=>r&&r.text);
+  a.review=document.getElementById('annual-review')?.value||'';
+  const dg={};
+  [['rec','recovery'],['rel','relation'],['liv','livelihood'],['gro','growth'],['mea','meaning']].forEach(([k,v])=>{
+    dg[v]={first:document.getElementById(`ag-${k}-f`)?.value||'', second:document.getElementById(`ag-${k}-s`)?.value||''};
+  });
+  a.detail_goals=dg;
+  const qt={};
+  [['br','breath'],['st','study'],['ex','exercise']].forEach(([k,v])=>{
+    qt[v]={};
+    [1,2,3,4].forEach(q=>{ qt[v]['q'+q]=document.getElementById(`aq-${k}-${q}`)?.value||''; });
+  });
+  a.quarterly=qt;
+  a.work=annualWorkRows.filter(r=>r&&r.text);
+  if(window._fbSet) window._fbSet('diary/annual_v2', allAnnual);
+}
+function saveAnnualBtn() {
+  saveAnnual();
+  const btn=document.getElementById('annual-save-btn');
+  btn.textContent='✓ 저장됨'; btn.classList.add('ok');
+  setTimeout(()=>{btn.textContent='저장';btn.classList.remove('ok');},2000);
+}
+function saveAnnualSchedBtn() {
+  const key=String(curYear);
+  if(!annualSched[key]) annualSched[key]={};
+  for(let mo=1;mo<=12;mo++){
+    if(!annualSched[key][mo]) annualSched[key][mo]={};
+    ['goal','book','cert','exercise'].forEach(f=>{
+      const el=document.getElementById(`asched-${mo}-${f}`);
+      if(el) annualSched[key][mo][f]=el.value;
+    });
+  }
+  if(window._fbSet) window._fbSet('diary/annual_sched', annualSched);
+  const btn=document.querySelector('#asub-schedule .btn');
+  if(btn){btn.textContent='✓ 저장됨';btn.classList.add('ok');setTimeout(()=>{btn.textContent='저장';btn.classList.remove('ok');},2000);}
+}
+function addAnnualRow(type) {
+  if(type==='comp') {
+    const idx=annualCompRows.length; annualCompRows.push({text:''});
+    const el=document.getElementById('annual-comp-list'); if(!el) return;
+    const div=document.createElement('div'); div.id='acomp-'+idx;
+    div.style.cssText='display:flex;align-items:center;gap:6px;margin-bottom:4px';
+    div.innerHTML=`<span style="color:var(--blue);font-size:12px">•</span>
+      <input type="text" id="acomp-text-${idx}" placeholder="종합목표..."
+        oninput="annualCompRows[${idx}].text=this.value;saveAnnual()"
+        style="flex:1;background:transparent;border:none;border-bottom:1px solid var(--b1);color:var(--t1);font-family:inherit;font-size:12px;outline:none">
+      <button onclick="acompRm(${idx})" style="background:transparent;border:none;color:var(--red);font-size:14px;cursor:pointer">×</button>`;
+    el.appendChild(div);
+  } else if(type==='work') {
+    const idx=annualWorkRows.length; annualWorkRows.push({text:''});
+    const el=document.getElementById('annual-work-list'); if(!el) return;
+    const div=document.createElement('div'); div.id='awork-'+idx;
+    div.style.cssText='display:flex;align-items:center;gap:6px;margin-bottom:4px';
+    div.innerHTML=`<span style="color:var(--t2);font-size:12px">•</span>
+      <input type="text" id="awork-text-${idx}" placeholder="업무중점..."
+        oninput="annualWorkRows[${idx}].text=this.value;saveAnnual()"
+        style="flex:1;background:transparent;border:none;border-bottom:1px solid var(--b1);color:var(--t1);font-family:inherit;font-size:12px;outline:none">
+      <button onclick="aworkRm(${idx})" style="background:transparent;border:none;color:var(--red);font-size:14px;cursor:pointer">×</button>`;
+    el.appendChild(div);
+  }
+}
+function acompRm(i){annualCompRows[i]=null;const e=document.getElementById('acomp-'+i);if(e)e.remove();saveAnnual();}
+function aworkRm(i){annualWorkRows[i]=null;const e=document.getElementById('awork-'+i);if(e)e.remove();saveAnnual();}
+function renderAnnual() {
+  const lbl=document.getElementById('yr-label'); if(lbl) lbl.textContent=curYear+'년';
+  const lbl2=document.getElementById('annual-review-label'); if(lbl2) lbl2.textContent=`□ ${curYear-1}년 돌아보기`;
+  const key=String(curYear);
+  const a=allAnnual[key]||{};
+  annualCompRows=[]; const cl=document.getElementById('annual-comp-list'); if(cl) cl.innerHTML='';
+  (a.comp||[]).filter(r=>r).forEach(r=>{
+    const idx=annualCompRows.length; annualCompRows.push({text:r.text});
+    const el=document.getElementById('annual-comp-list');
+    const div=document.createElement('div'); div.id='acomp-'+idx;
+    div.style.cssText='display:flex;align-items:center;gap:6px;margin-bottom:4px';
+    div.innerHTML=`<span style="color:var(--blue);font-size:12px">•</span>
+      <input type="text" id="acomp-text-${idx}" value="${(r.text||'').replace(/"/g,'&quot;')}" placeholder="종합목표..."
+        oninput="annualCompRows[${idx}].text=this.value;saveAnnual()"
+        style="flex:1;background:transparent;border:none;border-bottom:1px solid var(--b1);color:var(--t1);font-family:inherit;font-size:12px;outline:none">
+      <button onclick="acompRm(${idx})" style="background:transparent;border:none;color:var(--red);font-size:14px;cursor:pointer">×</button>`;
+    if(el) el.appendChild(div);
+  });
+  const rv=document.getElementById('annual-review'); if(rv) rv.value=a.review||'';
+  const dg=a.detail_goals||{};
+  [['rec','recovery'],['rel','relation'],['liv','livelihood'],['gro','growth'],['mea','meaning']].forEach(([k,v])=>{
+    const f=document.getElementById(`ag-${k}-f`); if(f) f.value=(dg[v]||{}).first||'';
+    const s=document.getElementById(`ag-${k}-s`); if(s) s.value=(dg[v]||{}).second||'';
+  });
+  const qt=a.quarterly||{};
+  [['br','breath'],['st','study'],['ex','exercise']].forEach(([k,v])=>{
+    [1,2,3,4].forEach(q=>{ const el=document.getElementById(`aq-${k}-${q}`); if(el) el.value=(qt[v]||{})['q'+q]||''; });
+  });
+  annualWorkRows=[]; const wl=document.getElementById('annual-work-list'); if(wl) wl.innerHTML='';
+  (a.work||[]).filter(r=>r).forEach(r=>{
+    const idx=annualWorkRows.length; annualWorkRows.push({text:r.text});
+    const el=document.getElementById('annual-work-list');
+    const div=document.createElement('div'); div.id='awork-'+idx;
+    div.style.cssText='display:flex;align-items:center;gap:6px;margin-bottom:4px';
+    div.innerHTML=`<span style="color:var(--t2);font-size:12px">•</span>
+      <input type="text" id="awork-text-${idx}" value="${(r.text||'').replace(/"/g,'&quot;')}" placeholder="업무중점..."
+        oninput="annualWorkRows[${idx}].text=this.value;saveAnnual()"
+        style="flex:1;background:transparent;border:none;border-bottom:1px solid var(--b1);color:var(--t1);font-family:inherit;font-size:12px;outline:none">
+      <button onclick="aworkRm(${idx})" style="background:transparent;border:none;color:var(--red);font-size:14px;cursor:pointer">×</button>`;
+    if(el) el.appendChild(div);
+  });
+  // 월간 주요일정 표
+  const asched=annualSched[key]||{};
+  const tbody=document.getElementById('annual-sched-body'); if(tbody) {
+    const MNAMES=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+    tbody.innerHTML=MNAMES.map((mn,i)=>{
+      const m=i+1, d=asched[m]||{};
+      return `<tr style="background:${i%2===0?'var(--s1)':'var(--s2)'}">
+        <td style="color:var(--blue);font-weight:700;white-space:nowrap">${mn}</td>
+        <td><textarea id="asched-${m}-goal" rows="2" oninput="saveAnnualSchedLive(${m},'goal',this.value)"
+          style="width:100%;resize:none;background:transparent;border:none;border-bottom:1px solid var(--b2);color:var(--t1);font-family:inherit;font-size:12px;outline:none;padding:2px 0">${(d.goal||'').replace(/</g,'&lt;')}</textarea></td>
+        <td><input type="text" id="asched-${m}-book" value="${(d.book||'').replace(/"/g,'&quot;')}" oninput="saveAnnualSchedLive(${m},'book',this.value)" style="width:100%;font-size:12px"></td>
+        <td><input type="text" id="asched-${m}-cert" value="${(d.cert||'').replace(/"/g,'&quot;')}" oninput="saveAnnualSchedLive(${m},'cert',this.value)" style="width:100%;font-size:12px"></td>
+        <td><input type="text" id="asched-${m}-exercise" value="${(d.exercise||'').replace(/"/g,'&quot;')}" oninput="saveAnnualSchedLive(${m},'exercise',this.value)" style="width:100%;font-size:12px"></td>
+      </tr>`;
+    }).join('');
+  }
+}
+function saveAnnualSchedLive(mo,field,val) {
+  const key=String(curYear);
+  if(!annualSched[key]) annualSched[key]={};
+  if(!annualSched[key][mo]) annualSched[key][mo]={};
+  annualSched[key][mo][field]=val;
+  if(window._fbSet) window._fbSet('diary/annual_sched', annualSched);
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 반복 일정 탭
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function saveRecurring() {
+  if(window._fbSet) window._fbSet('diary/recurring', recurringEvt);
+}
+function renderRecurring() {
+  // 매년
+  const al=document.getElementById('rec-annual-list'); if(!al) return;
+  const ann=recurringEvt.annual||[];
+  al.innerHTML=ann.length?ann.map((r,i)=>r?`
+    <div class="rec-event-item">
+      <span style="font-size:12px;color:var(--blue);min-width:36px">${r.month}/${r.day}</span>
+      <span style="font-size:13px;flex:1">${r.title}</span>
+      <button onclick="removeRecAnnual(${i})" style="background:transparent;border:none;color:var(--red);font-size:14px;cursor:pointer">×</button>
+    </div>`:'').join(''):'<div style="font-size:12px;color:var(--t3);padding:4px 0">없음</div>';
+  // 매주
+  const wl=document.getElementById('rec-weekly-list'); if(!wl) return;
+  const wk=recurringEvt.weekly||[];
+  const DAYNAMES=['일','월','화','수','목','금','토'];
+  wl.innerHTML=wk.length?wk.map((r,i)=>r?`
+    <div class="rec-event-item">
+      <span style="font-size:12px;color:var(--green);min-width:30px">${DAYNAMES[r.dayOfWeek]}</span>
+      ${r.time?`<span style="font-size:11px;color:var(--t3)">${r.time}</span>`:''}
+      <span style="font-size:13px;flex:1">${r.title}</span>
+      <button onclick="removeRecWeekly(${i})" style="background:transparent;border:none;color:var(--red);font-size:14px;cursor:pointer">×</button>
+    </div>`:'').join(''):'<div style="font-size:12px;color:var(--t3);padding:4px 0">없음</div>';
+}
+function addRecAnnual() {
+  const mo=parseInt(document.getElementById('rec-ann-month')?.value)||0;
+  const day=parseInt(document.getElementById('rec-ann-day')?.value)||0;
+  const title=(document.getElementById('rec-ann-title')?.value||'').trim();
+  if(!mo||!day||!title) { alert('월, 일, 일정명을 모두 입력하세요'); return; }
+  if(!recurringEvt.annual) recurringEvt.annual=[];
+  recurringEvt.annual.push({month:mo,day,title});
+  document.getElementById('rec-ann-title').value='';
+  saveRecurring(); renderRecurring();
+}
+function addRecWeekly() {
+  const dow=parseInt(document.getElementById('rec-wk-day')?.value)||0;
+  const time=(document.getElementById('rec-wk-time')?.value||'').trim();
+  const title=(document.getElementById('rec-wk-title')?.value||'').trim();
+  if(!title) { alert('일정명을 입력하세요'); return; }
+  if(!recurringEvt.weekly) recurringEvt.weekly=[];
+  recurringEvt.weekly.push({dayOfWeek:dow,time,title});
+  document.getElementById('rec-wk-title').value='';
+  document.getElementById('rec-wk-time').value='';
+  saveRecurring(); renderRecurring();
+}
+function removeRecAnnual(i) {
+  recurringEvt.annual.splice(i,1); saveRecurring(); renderRecurring();
+}
+function removeRecWeekly(i) {
+  recurringEvt.weekly.splice(i,1); saveRecurring(); renderRecurring();
+}
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // 초기화
