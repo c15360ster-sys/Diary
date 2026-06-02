@@ -638,25 +638,26 @@ textarea{resize:none;font-size:13px;border:1px solid var(--b1);border-radius:4px
       </div>
       <div id="mgoal-comp-list"></div>
     </div>
-    <!-- 세부목표 표 -->
+    <!-- 실천방안 -->
+    <div class="goal-sec">
+      <div class="goal-sec-title">
+        <span>□ 실천방안</span>
+        <button onclick="addMonActionRow()" style="background:transparent;border:1px dashed var(--b1);color:var(--t3);border-radius:4px;padding:2px 8px;font-size:11px;cursor:pointer">+ 행</button>
+      </div>
+      <div id="mgoal-action-list"></div>
+    </div>
+    <!-- 세부목표 (동적 행) -->
     <div class="goal-sec">
       <div class="goal-sec-title"><span>□ 세부목표</span></div>
-      <div style="overflow-x:auto">
-        <table class="plan-table">
-          <thead><tr>
-            <th style="width:64px">구분</th>
-            <th>내 용</th>
-          </tr></thead>
-          <tbody>
-            <tr><td style="color:var(--blue);font-weight:600">회복</td><td><textarea id="mg-recovery" rows="2" oninput="saveMonthly()" placeholder="..."></textarea></td></tr>
-            <tr><td style="color:var(--yellow);font-weight:600">관계</td><td><textarea id="mg-relation" rows="2" oninput="saveMonthly()" placeholder="..."></textarea></td></tr>
-            <tr><td style="color:var(--green);font-weight:600">생계</td><td><textarea id="mg-livelihood" rows="2" oninput="saveMonthly()" placeholder="..."></textarea></td></tr>
-            <tr><td style="color:var(--blue);font-weight:600">성장</td><td><textarea id="mg-growth" rows="2" oninput="saveMonthly()" placeholder="..."></textarea></td></tr>
-            <tr><td style="color:var(--purple);font-weight:600">의미</td><td><textarea id="mg-meaning" rows="2" oninput="saveMonthly()" placeholder="..."></textarea></td></tr>
-            <tr><td style="color:var(--t2)">기타</td><td><textarea id="mg-other" rows="2" oninput="saveMonthly()" placeholder="..."></textarea></td></tr>
-          </tbody>
-        </table>
+      <div id="mgoal-detail-container"></div>
+    </div>
+    <!-- 운동/수련 -->
+    <div class="goal-sec">
+      <div class="goal-sec-title">
+        <span>□ 운동/수련</span>
+        <button onclick="addMonExerciseWeek()" style="background:transparent;border:1px dashed var(--b1);color:var(--t3);border-radius:4px;padding:2px 8px;font-size:11px;cursor:pointer">+ 주차 추가</button>
       </div>
+      <div id="mgoal-exercise-list"></div>
     </div>
     <!-- 업무중점 -->
     <div class="goal-sec">
@@ -899,34 +900,15 @@ textarea{resize:none;font-size:13px;border:1px solid var(--b1);border-radius:4px
       </div>
       <div id="annual-comp-list"></div>
     </div>
-    <!-- 세부 실천사항 -->
-    <div class="goal-sec">
-      <div class="goal-sec-title">
-        <span>□ 세부 실천사항</span>
-        <button onclick="addAnnualRow('detail')" style="background:transparent;border:1px dashed var(--b1);color:var(--t3);border-radius:4px;padding:2px 8px;font-size:11px;cursor:pointer">+ 행</button>
-      </div>
-      <div id="annual-detail-list"></div>
-    </div>
     <!-- 돌아보기 -->
     <div class="goal-sec">
       <div class="goal-sec-title"><span id="annual-review-label">□ 전년도 돌아보기</span><span style="font-size:10px;color:var(--t3);font-weight:400">3칸까지 입력</span></div>
       <textarea id="annual-review" rows="3" oninput="saveAnnual()" placeholder="전년도를 돌아보며..."></textarea>
     </div>
-    <!-- 세부목표 표 -->
+    <!-- 세부목표 (동적 행, 전반기/후반기) -->
     <div class="goal-sec">
       <div class="goal-sec-title"><span>□ 세부목표</span></div>
-      <div style="overflow-x:auto">
-        <table class="plan-table">
-          <thead><tr><th style="width:54px">구분</th><th>전 반 기</th><th>후 반 기</th></tr></thead>
-          <tbody>
-            <tr><td style="color:var(--blue);font-weight:600">회복</td><td><textarea id="ag-rec-f" rows="2" oninput="saveAnnual()" placeholder="..."></textarea></td><td><textarea id="ag-rec-s" rows="2" oninput="saveAnnual()" placeholder="..."></textarea></td></tr>
-            <tr><td style="color:var(--yellow);font-weight:600">관계</td><td><textarea id="ag-rel-f" rows="2" oninput="saveAnnual()" placeholder="..."></textarea></td><td><textarea id="ag-rel-s" rows="2" oninput="saveAnnual()" placeholder="..."></textarea></td></tr>
-            <tr><td style="color:var(--green);font-weight:600">생계</td><td><textarea id="ag-liv-f" rows="2" oninput="saveAnnual()" placeholder="..."></textarea></td><td><textarea id="ag-liv-s" rows="2" oninput="saveAnnual()" placeholder="..."></textarea></td></tr>
-            <tr><td style="color:var(--blue);font-weight:600">성장</td><td><textarea id="ag-gro-f" rows="2" oninput="saveAnnual()" placeholder="..."></textarea></td><td><textarea id="ag-gro-s" rows="2" oninput="saveAnnual()" placeholder="..."></textarea></td></tr>
-            <tr><td style="color:var(--purple);font-weight:600">의미</td><td><textarea id="ag-mea-f" rows="2" oninput="saveAnnual()" placeholder="..."></textarea></td><td><textarea id="ag-mea-s" rows="2" oninput="saveAnnual()" placeholder="..."></textarea></td></tr>
-          </tbody>
-        </table>
-      </div>
+      <div id="annual-detail-goals-container"></div>
     </div>
     <!-- 분기별 자기계발 계획 -->
     <div class="goal-sec">
@@ -2060,12 +2042,16 @@ function saveMonthly() {
   m.next_details = monDetailRows.filter(r=>r&&r.text);
   // 0월 목표 저장
   m.month_comp=monCompRows.filter(r=>r&&r.text);
+  m.month_action=monActionRows.filter(r=>r&&r.text);
   m.month_work=monWorkRows.filter(r=>r&&r.text);
-  const _mg={};
+  // 세부목표 (동적 행)
+  const _mgv2={};
   ['recovery','relation','livelihood','growth','meaning','other'].forEach(k=>{
-    const el=document.getElementById('mg-'+k); if(el) _mg[k]=el.value;
+    _mgv2[k]=(monDetailGoals[k]||[]).filter(r=>r&&r.text);
   });
-  m.month_goals=_mg;
+  m.month_goals_v2=_mgv2;
+  // 운동/수련
+  m.exercise_plan=monExerciseRows.filter(r=>r).map(w=>({items:(w.items||[]).filter(r=>r)}));
   saveMonthlyStore();
 }
 function saveMonthlyBtn() {
@@ -2145,11 +2131,26 @@ function renderMonthly() {
   const _m=allMonthly[curMon]||{};
   monCompRows=[]; const _cl=document.getElementById('mgoal-comp-list'); if(_cl) _cl.innerHTML='';
   (_m.month_comp||[]).filter(r=>r).forEach(r=>addMonCompRow(r.text));
+  monActionRows=[]; const _al=document.getElementById('mgoal-action-list'); if(_al) _al.innerHTML='';
+  (_m.month_action||[]).filter(r=>r).forEach(r=>addMonActionRow(r.text));
   monWorkRows=[]; const _wl=document.getElementById('mgoal-work-list'); if(_wl) _wl.innerHTML='';
   (_m.month_work||[]).filter(r=>r).forEach(r=>addMonWorkRow(r.text));
+  // 세부목표 (동적 행) — 구버전 마이그레이션 포함
+  monDetailGoals={recovery:[],relation:[],livelihood:[],growth:[],meaning:[],other:[]};
+  const _oldMg=_m.month_goals||{};
+  const _newMgv2=_m.month_goals_v2||{};
   ['recovery','relation','livelihood','growth','meaning','other'].forEach(k=>{
-    const el=document.getElementById('mg-'+k); if(el) el.value=(_m.month_goals||{})[k]||'';
+    if(_newMgv2[k]&&_newMgv2[k].length) {
+      monDetailGoals[k]=_newMgv2[k].filter(r=>r);
+    } else if(_oldMg[k]) {
+      monDetailGoals[k]=[{text:_oldMg[k]}];
+    }
   });
+  renderMonDetailGoals();
+  // 운동/수련
+  monExerciseRows=[];
+  const _el=document.getElementById('mgoal-exercise-list'); if(_el) _el.innerHTML='';
+  (_m.exercise_plan||[]).forEach(w=>{ if(w) addMonExerciseWeek(w); });
   selectedMonDay=0;
   const _sec=document.getElementById('msched-day-section'); if(_sec) _sec.style.display='none';
   renderMonCalendar(); renderMonTracking();
@@ -2393,9 +2394,12 @@ var allAnnual={}, annualSched={}, lifeGoals={}, tenYearPlan={}, recurringEvt={an
 let curYear = new Date().getFullYear();
 let curMonSub = 'goals', curAnnualSub = 'goals';
 let tmrSchedRows = [];
-let monCompRows=[], monWorkRows=[];
+let monCompRows=[], monActionRows=[], monWorkRows=[];
+let monDetailGoals={recovery:[],relation:[],livelihood:[],growth:[],meaning:[],other:[]};
+var monExerciseRows=[];
 let lifeCompRows=[], lifePhysRows=[], lifeMentRows=[], lifeAbilRows=[];
-let annualCompRows=[], annualDetailRows=[], annualWorkRows=[];
+let annualCompRows=[], annualWorkRows=[];
+let annualDetailGoals={recovery:{first:[],second:[]},relation:{first:[],second:[]},livelihood:{first:[],second:[]},growth:{first:[],second:[]},meaning:{first:[],second:[]},other:{first:[],second:[]}};
 let selectedMonDay = 0;
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -2523,6 +2527,125 @@ function addMonCompRow(text) {
   el.appendChild(div);
 }
 function mcompRemove(idx) { monCompRows[idx]=null; const e=document.getElementById('mcomp-'+idx); if(e) e.remove(); saveMonthly(); }
+
+// ── 실천방안
+function addMonActionRow(text) {
+  const idx=monActionRows.length; monActionRows.push({text:text||''});
+  const el=document.getElementById('mgoal-action-list'); if(!el) return;
+  const div=document.createElement('div'); div.id='maction-'+idx;
+  div.style.cssText='display:flex;align-items:center;gap:6px;margin-bottom:4px';
+  div.innerHTML=`<span style="color:var(--green);font-size:12px">◦</span>
+    <input type="text" id="maction-text-${idx}" value="${(text||'').replace(/"/g,'&quot;')}" placeholder="실천방안..."
+      oninput="monActionRows[${idx}].text=this.value;saveMonthly()"
+      style="flex:1;background:transparent;border:none;border-bottom:1px solid var(--b1);color:var(--t1);font-family:inherit;font-size:12px;outline:none">
+    <button onclick="mactionRemove(${idx})" style="background:transparent;border:none;color:var(--red);font-size:14px;cursor:pointer">×</button>`;
+  el.appendChild(div);
+}
+function mactionRemove(idx) { monActionRows[idx]=null; const e=document.getElementById('maction-'+idx); if(e) e.remove(); saveMonthly(); }
+
+// ── 세부목표 (동적 행)
+const MON_DETAIL_CATS=[
+  {k:'recovery',label:'회복',c:'var(--blue)'},
+  {k:'relation',label:'관계',c:'var(--yellow)'},
+  {k:'livelihood',label:'생계',c:'var(--green)'},
+  {k:'growth',label:'성장',c:'var(--blue)'},
+  {k:'meaning',label:'의미',c:'var(--purple)'},
+  {k:'other',label:'기타',c:'var(--t2)'}
+];
+function renderMonDetailGoals() {
+  const cont=document.getElementById('mgoal-detail-container'); if(!cont) return;
+  cont.innerHTML='';
+  MON_DETAIL_CATS.forEach(cat=>{
+    const sec=document.createElement('div');
+    sec.style.cssText='border-bottom:1px solid var(--b2);padding:7px 0';
+    sec.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+      <span style="font-size:12px;font-weight:700;color:${cat.c};min-width:36px">${cat.label}</span>
+      <button onclick="addMonDetailGoalRow('${cat.k}')" style="background:transparent;border:1px dashed var(--b1);color:var(--t3);border-radius:3px;padding:1px 6px;font-size:10px;cursor:pointer">+ 항목</button>
+    </div>
+    <div id="mdetail-list-${cat.k}"></div>`;
+    cont.appendChild(sec);
+    (monDetailGoals[cat.k]||[]).filter(r=>r&&r.text!==undefined).forEach(r=>_addMonDetailGoalItem(cat.k, r.text));
+  });
+}
+function _addMonDetailGoalItem(catKey, text) {
+  const arr=monDetailGoals[catKey]; if(!arr) return;
+  const idx=arr.length; arr.push({text:text||''});
+  const el=document.getElementById('mdetail-list-'+catKey); if(!el) return;
+  const div=document.createElement('div'); div.id=`mdetail-${catKey}-${idx}`;
+  div.style.cssText='display:flex;align-items:center;gap:4px;margin-bottom:3px';
+  div.innerHTML=`<span style="font-size:10px;color:var(--t3)">•</span>
+    <input type="text" value="${(text||'').replace(/"/g,'&quot;')}" placeholder="..."
+      oninput="monDetailGoals['${catKey}'][${idx}].text=this.value;saveMonthly()"
+      style="flex:1;font-size:12px;background:transparent;border:none;border-bottom:1px solid var(--b2);color:var(--t1);font-family:inherit;outline:none;padding:2px 0">
+    <button onclick="removeMonDetailGoalRow('${catKey}',${idx})" style="background:transparent;border:none;color:var(--red);font-size:13px;cursor:pointer">×</button>`;
+  el.appendChild(div);
+}
+function addMonDetailGoalRow(catKey) {
+  _addMonDetailGoalItem(catKey,''); saveMonthly();
+}
+function removeMonDetailGoalRow(catKey, idx) {
+  monDetailGoals[catKey][idx]=null;
+  const e=document.getElementById(`mdetail-${catKey}-${idx}`); if(e) e.remove();
+  saveMonthly();
+}
+
+// ── 운동/수련
+const MON_EX_DEFAULT=['호흡','체중','버피','팔굽','V업','플랭크','턱걸이','달리기'];
+function addMonExerciseWeek(data) {
+  const idx=monExerciseRows.length;
+  const items=data&&data.items ? data.items.filter(r=>r) : MON_EX_DEFAULT.map(n=>({name:n,value:''}));
+  monExerciseRows.push({items});
+  const el=document.getElementById('mgoal-exercise-list'); if(!el) return;
+  const div=document.createElement('div'); div.id='mexwk-'+idx;
+  div.style.cssText='background:var(--s1);border:1px solid var(--b1);border-radius:8px;padding:10px 12px;margin-bottom:7px';
+  el.appendChild(div);
+  _renderMonExerciseWeek(idx);
+}
+function _renderMonExerciseWeek(wIdx) {
+  const div=document.getElementById('mexwk-'+wIdx); if(!div) return;
+  const w=monExerciseRows[wIdx]; if(!w) return;
+  const items=w.items||[];
+  div.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+    <span style="font-size:12px;font-weight:700;color:var(--blue)">■ ${wIdx+1}주차</span>
+    <div style="display:flex;gap:5px">
+      <button onclick="addMonExerciseItem(${wIdx})" style="background:transparent;border:1px dashed var(--b1);color:var(--t3);border-radius:3px;padding:1px 6px;font-size:10px;cursor:pointer">+ 항목</button>
+      <button onclick="removeMonExerciseWeek(${wIdx})" style="background:transparent;border:1px solid var(--red);color:var(--red);border-radius:3px;padding:1px 6px;font-size:10px;cursor:pointer">× 주차삭제</button>
+    </div>
+  </div>
+  <div id="mexwk-items-${wIdx}">${items.map((it,i)=>it?_mexItemHTML(wIdx,i,it.name,it.value):'').join('')}</div>`;
+}
+function _mexItemHTML(wIdx,iIdx,name,value) {
+  const n=(name||'').replace(/"/g,'&quot;'), v=(value||'').replace(/"/g,'&quot;');
+  return `<div id="mexitem-${wIdx}-${iIdx}" style="display:flex;align-items:center;gap:5px;margin-bottom:4px">
+    <span style="font-size:10px;color:var(--t3)">◦</span>
+    <input type="text" value="${n}" placeholder="항목명"
+      oninput="monExerciseRows[${wIdx}].items[${iIdx}].name=this.value;saveMonthly()"
+      style="width:56px;font-size:11px;background:transparent;border:none;border-bottom:1px solid var(--b2);color:var(--t2);font-family:inherit;outline:none;padding:2px 0">
+    <span style="font-size:10px;color:var(--t3)">:</span>
+    <input type="text" value="${v}" placeholder="..."
+      oninput="monExerciseRows[${wIdx}].items[${iIdx}].value=this.value;saveMonthly()"
+      style="flex:1;font-size:11px;background:transparent;border:none;border-bottom:1px solid var(--b2);color:var(--t1);font-family:inherit;outline:none;padding:2px 0">
+    <button onclick="removeMonExerciseItem(${wIdx},${iIdx})" style="background:transparent;border:none;color:var(--red);font-size:12px;cursor:pointer">×</button>
+  </div>`;
+}
+function addMonExerciseItem(wIdx) {
+  monExerciseRows[wIdx].items.push({name:'',value:''});
+  const el=document.getElementById('mexwk-items-'+wIdx); if(!el) return;
+  const i=monExerciseRows[wIdx].items.length-1;
+  el.insertAdjacentHTML('beforeend',_mexItemHTML(wIdx,i,'',''));
+  saveMonthly();
+}
+function removeMonExerciseItem(wIdx,iIdx) {
+  monExerciseRows[wIdx].items[iIdx]=null;
+  const e=document.getElementById(`mexitem-${wIdx}-${iIdx}`); if(e) e.remove();
+  saveMonthly();
+}
+function removeMonExerciseWeek(idx) {
+  monExerciseRows[idx]=null;
+  const e=document.getElementById('mexwk-'+idx); if(e) e.remove();
+  saveMonthly();
+}
+
 function addMonWorkRow(text) {
   const idx=monWorkRows.length; monWorkRows.push({text:text||''});
   const el=document.getElementById('mgoal-work-list'); if(!el) return;
@@ -2796,13 +2919,16 @@ function saveAnnual() {
   if(!allAnnual[key]) allAnnual[key]={};
   const a=allAnnual[key];
   a.comp=annualCompRows.filter(r=>r&&r.text);
-  a.detail=annualDetailRows.filter(r=>r&&r.text);
   a.review=document.getElementById('annual-review')?.value||'';
-  const dg={};
-  [['rec','recovery'],['rel','relation'],['liv','livelihood'],['gro','growth'],['mea','meaning']].forEach(([k,v])=>{
-    dg[v]={first:document.getElementById(`ag-${k}-f`)?.value||'', second:document.getElementById(`ag-${k}-s`)?.value||''};
+  // 세부목표 (동적 행, 전반기/후반기)
+  const dgv2={};
+  ['recovery','relation','livelihood','growth','meaning','other'].forEach(v=>{
+    dgv2[v]={
+      first:(annualDetailGoals[v]?.first||[]).filter(r=>r&&r.text),
+      second:(annualDetailGoals[v]?.second||[]).filter(r=>r&&r.text)
+    };
   });
-  a.detail_goals=dg;
+  a.detail_goals_v2=dgv2;
   const qt={};
   [['br','breath'],['st','study'],['ex','exercise']].forEach(([k,v])=>{
     qt[v]={};
@@ -2835,17 +2961,6 @@ function addAnnualRow(type, text) {
         style="flex:1;background:transparent;border:none;border-bottom:1px solid var(--b1);color:var(--t1);font-family:inherit;font-size:12px;outline:none">
       <button onclick="acompRm(${idx})" style="background:transparent;border:none;color:var(--red);font-size:14px;cursor:pointer">×</button>`;
     el.appendChild(div);
-  } else if(type==='detail') {
-    const idx=annualDetailRows.length; annualDetailRows.push({text:text||''});
-    const el=document.getElementById('annual-detail-list'); if(!el) return;
-    const div=document.createElement('div'); div.id='adetail-'+idx;
-    div.style.cssText='display:flex;align-items:center;gap:6px;margin-bottom:4px';
-    div.innerHTML=`<span style="color:var(--green);font-size:12px">◦</span>
-      <input type="text" id="adetail-text-${idx}" value="${(text||'').replace(/"/g,'&quot;')}" placeholder="세부 실천사항..."
-        oninput="annualDetailRows[${idx}].text=this.value;saveAnnual()"
-        style="flex:1;background:transparent;border:none;border-bottom:1px solid var(--b1);color:var(--t1);font-family:inherit;font-size:12px;outline:none">
-      <button onclick="adetailRm(${idx})" style="background:transparent;border:none;color:var(--red);font-size:14px;cursor:pointer">×</button>`;
-    el.appendChild(div);
   } else if(type==='work') {
     const idx=annualWorkRows.length; annualWorkRows.push({text:text||''});
     const el=document.getElementById('annual-work-list'); if(!el) return;
@@ -2860,8 +2975,61 @@ function addAnnualRow(type, text) {
   }
 }
 function acompRm(i){annualCompRows[i]=null;const e=document.getElementById('acomp-'+i);if(e)e.remove();saveAnnual();}
-function adetailRm(i){annualDetailRows[i]=null;const e=document.getElementById('adetail-'+i);if(e)e.remove();saveAnnual();}
 function aworkRm(i){annualWorkRows[i]=null;const e=document.getElementById('awork-'+i);if(e)e.remove();saveAnnual();}
+
+// ── 연간 세부목표 (전반기/후반기 동적 행)
+const ANNUAL_DETAIL_CATS=[
+  {k:'recovery',label:'회복',c:'var(--blue)'},
+  {k:'relation',label:'관계',c:'var(--yellow)'},
+  {k:'livelihood',label:'생계',c:'var(--green)'},
+  {k:'growth',label:'성장',c:'var(--blue)'},
+  {k:'meaning',label:'의미',c:'var(--purple)'},
+  {k:'other',label:'기타',c:'var(--t2)'}
+];
+function renderAnnualDetailGoals() {
+  const cont=document.getElementById('annual-detail-goals-container'); if(!cont) return;
+  const th='<th style="font-size:11px;padding:5px 8px;background:var(--s3);border:1px solid var(--b1);color:var(--t2)">';
+  let html=`<div style="overflow-x:auto"><table class="plan-table"><thead><tr>
+    ${th}구분</th>${th}전 반 기 <button onclick="event.stopPropagation()" style="display:none"></button></th>${th}후 반 기</th></tr></thead><tbody>`;
+  ANNUAL_DETAIL_CATS.forEach(cat=>{
+    html+=`<tr>
+      <td style="color:${cat.c};font-weight:700;font-size:12px;vertical-align:top;padding:6px 8px;white-space:nowrap;border:1px solid var(--b1)">${cat.label}</td>
+      <td style="border:1px solid var(--b1);padding:4px 6px;vertical-align:top">
+        <div id="adg-${cat.k}-first-list">${(annualDetailGoals[cat.k]?.first||[]).filter(r=>r).map((r,i)=>_adgItemHTML(cat.k,'first',i,r.text)).join('')}</div>
+        <button onclick="addAnnualDetailGoalRow('${cat.k}','first')" style="background:transparent;border:1px dashed var(--b1);color:var(--t3);border-radius:3px;padding:1px 6px;font-size:10px;cursor:pointer;margin-top:3px">+ 항목</button>
+      </td>
+      <td style="border:1px solid var(--b1);padding:4px 6px;vertical-align:top">
+        <div id="adg-${cat.k}-second-list">${(annualDetailGoals[cat.k]?.second||[]).filter(r=>r).map((r,i)=>_adgItemHTML(cat.k,'second',i,r.text)).join('')}</div>
+        <button onclick="addAnnualDetailGoalRow('${cat.k}','second')" style="background:transparent;border:1px dashed var(--b1);color:var(--t3);border-radius:3px;padding:1px 6px;font-size:10px;cursor:pointer;margin-top:3px">+ 항목</button>
+      </td>
+    </tr>`;
+  });
+  html+='</tbody></table></div>';
+  cont.innerHTML=html;
+}
+function _adgItemHTML(cat,half,idx,text) {
+  return `<div id="adg-${cat}-${half}-${idx}" style="display:flex;align-items:center;gap:3px;margin-bottom:3px">
+    <span style="font-size:10px;color:var(--t3)">•</span>
+    <input type="text" value="${(text||'').replace(/"/g,'&quot;')}" placeholder="..."
+      oninput="annualDetailGoals['${cat}']['${half}'][${idx}].text=this.value;saveAnnual()"
+      style="flex:1;font-size:11px;background:transparent;border:none;border-bottom:1px solid var(--b2);color:var(--t1);font-family:inherit;outline:none;padding:1px 0">
+    <button onclick="removeAnnualDetailGoalRow('${cat}','${half}',${idx})" style="background:transparent;border:none;color:var(--red);font-size:12px;cursor:pointer">×</button>
+  </div>`;
+}
+function addAnnualDetailGoalRow(cat,half) {
+  if(!annualDetailGoals[cat]) annualDetailGoals[cat]={first:[],second:[]};
+  const idx=annualDetailGoals[cat][half].length;
+  annualDetailGoals[cat][half].push({text:''});
+  const el=document.getElementById(`adg-${cat}-${half}-list`); if(!el) return;
+  el.insertAdjacentHTML('beforeend',_adgItemHTML(cat,half,idx,''));
+  saveAnnual();
+}
+function removeAnnualDetailGoalRow(cat,half,idx) {
+  annualDetailGoals[cat][half][idx]=null;
+  const e=document.getElementById(`adg-${cat}-${half}-${idx}`); if(e) e.remove();
+  saveAnnual();
+}
+
 function renderAnnual() {
   const lbl=document.getElementById('yr-label'); if(lbl) lbl.textContent=curYear+'년';
   const lbl2=document.getElementById('annual-review-label'); if(lbl2) lbl2.textContent=`□ ${curYear-1}년 돌아보기`;
@@ -2869,14 +3037,23 @@ function renderAnnual() {
   const a=allAnnual[key]||{};
   annualCompRows=[]; const cl=document.getElementById('annual-comp-list'); if(cl) cl.innerHTML='';
   (a.comp||[]).filter(r=>r).forEach(r=>addAnnualRow('comp', r.text));
-  annualDetailRows=[]; const dl=document.getElementById('annual-detail-list'); if(dl) dl.innerHTML='';
-  (a.detail||[]).filter(r=>r).forEach(r=>addAnnualRow('detail', r.text));
   const rv=document.getElementById('annual-review'); if(rv) rv.value=a.review||'';
-  const dg=a.detail_goals||{};
-  [['rec','recovery'],['rel','relation'],['liv','livelihood'],['gro','growth'],['mea','meaning']].forEach(([k,v])=>{
-    const f=document.getElementById(`ag-${k}-f`); if(f) f.value=(dg[v]||{}).first||'';
-    const s=document.getElementById(`ag-${k}-s`); if(s) s.value=(dg[v]||{}).second||'';
+  // 세부목표 (동적 행) — 구버전 마이그레이션 포함
+  const _dgv2=a.detail_goals_v2||{};
+  const _dgOld=a.detail_goals||{};
+  annualDetailGoals={recovery:{first:[],second:[]},relation:{first:[],second:[]},livelihood:{first:[],second:[]},growth:{first:[],second:[]},meaning:{first:[],second:[]},other:{first:[],second:[]}};
+  ['recovery','relation','livelihood','growth','meaning','other'].forEach(v=>{
+    ['first','second'].forEach(half=>{
+      const newData=(_dgv2[v]||{})[half];
+      if(newData&&newData.length){
+        annualDetailGoals[v][half]=newData.filter(r=>r);
+      } else {
+        const oldStr=(_dgOld[v]||{})[half];
+        if(oldStr) annualDetailGoals[v][half]=[{text:oldStr}];
+      }
+    });
   });
+  renderAnnualDetailGoals();
   const qt=a.quarterly||{};
   [['br','breath'],['st','study'],['ex','exercise']].forEach(([k,v])=>{
     [1,2,3,4].forEach(q=>{ const el=document.getElementById(`aq-${k}-${q}`); if(el) el.value=(qt[v]||{})['q'+q]||''; });
