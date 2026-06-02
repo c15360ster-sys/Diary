@@ -2348,21 +2348,33 @@ function renderHistoryDaily() {
 }
 function renderHistoryAnnual() {
   const el=document.getElementById('hist-annual-list'); if(!el) return;
-  const years=Object.keys(allAnnual).sort().reverse();
-  if(!years.length){ el.innerHTML='<div style="color:var(--t3);text-align:center;padding:40px 0">연간 기록이 없습니다</div>'; return; }
-  el.innerHTML=years.map(yr=>{
-    const a=allAnnual[yr]||{};
-    const review=(a.review||'').trim();
+  const curYr = new Date().getFullYear();
+  // 표시할 연도 수집: allAnnual의 키에서 -1 (돌아보기를 작성한 해 → 해당 연도)
+  // + 반드시 전년도(curYr-1) 포함
+  const fromData = Object.keys(allAnnual).map(y=>parseInt(y)-1).filter(y=>y>0&&y<curYr);
+  const displaySet = new Set([curYr-1, ...fromData]);
+  const sortedYrs = [...displaySet].sort().reverse();
+  if(!sortedYrs.length){ el.innerHTML='<div style="color:var(--t3);text-align:center;padding:40px 0">연간 기록이 없습니다</div>'; return; }
+  el.innerHTML=sortedYrs.map(yr=>{
+    // 해당 연도의 돌아보기는 다음 해(yr+1)의 annual-review에 기록됨
+    const nextData=allAnnual[String(yr+1)]||{};
+    const review=(nextData.review||'').trim();
     return `<div class="hist-item" onclick="goAnnual(${yr})" style="padding:10px 14px">
       <div style="display:flex;align-items:baseline;gap:10px">
-        <span style="font-size:15px;font-weight:700;color:var(--blue);flex-shrink:0">${yr}</span>
-        <span style="font-size:12px;color:var(--t2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">${review||'<span style="color:var(--t3)">기록 없음</span>'}</span>
+        <span style="font-size:15px;font-weight:700;color:var(--blue);flex-shrink:0">${yr}년</span>
+        <span style="font-size:12px;color:var(--t2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">${review||'<span style="color:var(--t3)">—</span>'}</span>
       </div>
     </div>`;
   }).join('');
 }
 function goDate(d) { curDate=d; switchTab('today'); loadDate(); }
-function goAnnual(yr) { curYear=yr; switchTab('annual'); renderAnnual(); }
+function goAnnual(yr) {
+  curYear=yr;
+  switchTab('annual');
+  // 연간목표 서브탭으로 고정 이동
+  if(typeof switchAnnualSub==='function') switchAnnualSub('goals');
+  renderAnnual();
+}
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // 탭 전환 (2층)
