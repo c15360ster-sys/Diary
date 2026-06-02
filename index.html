@@ -509,12 +509,10 @@ textarea{resize:none;font-size:13px;border:1px solid var(--b1);border-radius:4px
   <div class="card">
     <div class="sec-label">📝 주간 결산</div>
 
-    <!-- 이번달 목표 (월간 탭에서 설정) -->
+    <!-- 이번달 종합목표 (월간 탭 종합목표에서 자동 표시) -->
     <div id="wk-month-goal" style="display:none;background:#1a0a2a;border:1px solid #4a1f7f;border-radius:7px;padding:9px 12px;margin-bottom:10px">
-      <div style="font-size:11px;color:var(--purple);font-weight:700;margin-bottom:4px">🎯 이번달 목표</div>
-      <div id="wk-month-goals-list" style="margin-bottom:6px"></div>
-      <div style="font-size:11px;color:var(--t3);font-weight:700;margin-bottom:3px">세부 실천사항</div>
-      <div id="wk-month-details-list"></div>
+      <div style="font-size:11px;color:var(--purple);font-weight:700;margin-bottom:4px">🎯 이번달 종합목표</div>
+      <div id="wk-month-goals-list"></div>
     </div>
 
     <!-- 관계 -->
@@ -668,17 +666,12 @@ textarea{resize:none;font-size:13px;border:1px solid var(--b1);border-radius:4px
       </div>
       <div id="mgoal-work-list"></div>
     </div>
-    <!-- 다음달 목표 (주간탭 연동) -->
-    <div class="monthly-sec" style="border-left:3px solid var(--blue)">
-      <div class="monthly-sec-title" style="color:var(--blue)">📌 다음달 목표 — 다음달 주간 결산에 자동 표시</div>
-      <div class="m-label" style="margin-bottom:6px">◽ 다음달 목표</div>
+    <!-- 다음달 목표 (숨김 — 데이터 유지, UI만 제거) -->
+    <div style="display:none" aria-hidden="true">
       <div id="m-goals-list"></div>
-      <button onclick="addMonGoalRow()" style="margin-top:4px;background:transparent;border:1px dashed var(--b1);color:var(--t3);border-radius:4px;padding:3px 10px;font-size:11px;cursor:pointer">+ 항목</button>
-      <div class="m-label" style="margin-top:10px;margin-bottom:6px">◽ 세부 실천사항</div>
       <div id="m-details-list"></div>
-      <button onclick="addMonDetailRow()" style="margin-top:4px;background:transparent;border:1px dashed var(--b1);color:var(--t3);border-radius:4px;padding:3px 10px;font-size:11px;cursor:pointer">+ 항목</button>
     </div>
-    <div class="save-btn"><button class="btn" onclick="saveMonthlyBtn()">저장</button></div>
+    <div class="save-btn"><button class="btn" id="m-save-btn-goals" onclick="saveMonthlyBtn()">저장</button></div>
   </div>
 
   <!-- ── 0월 주요일정/기록 ── -->
@@ -702,7 +695,7 @@ textarea{resize:none;font-size:13px;border:1px solid var(--b1);border-radius:4px
       </div>
       <div id="mon-tracking-list"></div>
     </div>
-    <div class="save-btn"><button class="btn" onclick="saveMonthlyBtn()">저장</button></div>
+    <div class="save-btn"><button class="btn" id="m-save-btn-sched" onclick="saveMonthlyBtn()">저장</button></div>
   </div>
 
   <!-- ── 60분 운영회의 ── -->
@@ -1109,8 +1102,27 @@ textarea{resize:none;font-size:13px;border:1px solid var(--b1);border-radius:4px
 
 <!-- ═══════════════════ 기록 ═══════════════════ -->
 <div class="view" id="v-history">
-  <div style="color:var(--t3);font-size:12px;font-weight:700;letter-spacing:.08em;margin-bottom:10px">최근 30일 기록</div>
-  <div id="history-list"></div>
+  <div class="subtabs">
+    <button class="subtab on" id="hist-btn-daily" onclick="switchHistSub('daily')">일일기록</button>
+    <button class="subtab" id="hist-btn-annual" onclick="switchHistSub('annual')">연간기록</button>
+  </div>
+
+  <!-- 일일기록 -->
+  <div class="subview on" id="hsub-daily">
+    <div class="date-nav" style="padding:6px 0 10px">
+      <button class="date-arrow" onclick="shiftHistMonth(-1)">‹</button>
+      <div style="text-align:center;flex:1">
+        <div id="hist-mon-label" style="font-weight:700;font-size:15px;color:var(--t1)"></div>
+      </div>
+      <button class="date-arrow" onclick="shiftHistMonth(1)">›</button>
+    </div>
+    <div id="hist-daily-list"></div>
+  </div>
+
+  <!-- 연간기록 -->
+  <div class="subview" id="hsub-annual">
+    <div id="hist-annual-list"></div>
+  </div>
 </div>
 
 <script>
@@ -1961,21 +1973,15 @@ function renderWeekly() {
   const savedDetails = w.next_details || (w.next_detail ? [{text:w.next_detail}] : []);
   savedGoals.filter(r=>r).forEach(r=>addWkGoalRow(r.text));
   savedDetails.filter(r=>r).forEach(r=>addWkDetailRow(r.text));
-  // 이번달 목표 표시 (월간 탭의 전달 next_goals)
+  // 이번달 종합목표 표시 (현재 월 월간탭 종합목표)
   const wkYM = curWk.slice(0,7);
-  const [wy,wm] = wkYM.split('-').map(Number);
-  let pmy=wy, pmm=wm-1; if(pmm<1){pmm=12;pmy--;}
-  const prevMonKey = pmy+'-'+String(pmm).padStart(2,'0');
-  const prevMonData = allMonthly[prevMonKey]||{};
-  const monGoals   = prevMonData.next_goals   || [];
-  const monDetails = prevMonData.next_details || [];
+  const curMonForWk = allMonthly[wkYM]||{};
+  const monComp = curMonForWk.month_comp || [];
   const mbox=document.getElementById('wk-month-goal');
   if(mbox){
-    mbox.style.display=(monGoals.length||monDetails.length)?'block':'none';
+    mbox.style.display=monComp.length?'block':'none';
     const mgl=document.getElementById('wk-month-goals-list');
-    if(mgl) mgl.innerHTML=monGoals.filter(r=>r&&r.text).map(r=>`<div style="font-size:13px;color:var(--t1);padding:2px 0">• ${r.text}</div>`).join('');
-    const mdl=document.getElementById('wk-month-details-list');
-    if(mdl) mdl.innerHTML=monDetails.filter(r=>r&&r.text).map(r=>`<div style="font-size:12px;color:var(--t2);padding:2px 0">• ${r.text}</div>`).join('');
+    if(mgl) mgl.innerHTML=monComp.filter(r=>r&&r.text).map(r=>`<div style="font-size:13px;color:var(--t1);padding:2px 0">• ${r.text}</div>`).join('');
   }
   // 일일 텍스트 자동 집계
   const wk2 = curWk;
@@ -2064,9 +2070,11 @@ function saveMonthly() {
 }
 function saveMonthlyBtn() {
   saveMonthly();
-  const btn=document.getElementById('m-save-btn');
-  btn.textContent='✓ 저장됨'; btn.classList.add('ok');
-  setTimeout(()=>{ btn.textContent='저장'; btn.classList.remove('ok'); },2000);
+  ['m-save-btn','m-save-btn-goals','m-save-btn-sched'].forEach(id=>{
+    const btn=document.getElementById(id); if(!btn) return;
+    btn.textContent='✓ 저장됨'; btn.classList.add('ok');
+    setTimeout(()=>{ btn.textContent='저장'; btn.classList.remove('ok'); },2000);
+  });
 }
 function renderMonthly() {
   const mk = curMon;
@@ -2287,28 +2295,73 @@ function showRisk(i) {
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // 기록 탭
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+let curHistSub = 'daily';
+let histMon = (()=>{ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'); })();
+
+function switchHistSub(sub) {
+  curHistSub = sub;
+  ['daily','annual'].forEach(s=>{
+    const btn=document.getElementById('hist-btn-'+s); if(btn) btn.classList.toggle('on',s===sub);
+    const v=document.getElementById('hsub-'+s); if(v) v.classList.toggle('on',s===sub);
+  });
+  if(sub==='daily') renderHistoryDaily();
+  else renderHistoryAnnual();
+}
+function shiftHistMonth(d) {
+  let [y,m]=histMon.split('-').map(Number); m+=d;
+  if(m<1){m=12;y--;} if(m>12){m=1;y++;}
+  histMon=y+'-'+String(m).padStart(2,'0');
+  renderHistoryDaily();
+}
 function renderHistory() {
-  const dates = Object.keys(allDaily).sort().reverse().slice(0,30);
-  const el = document.getElementById('history-list');
-  if (!dates.length) { el.innerHTML = '<div style="color:var(--t3);text-align:center;padding:40px 0">기록이 없습니다</div>'; return; }
-  el.innerHTML = dates.map(d=>{
-    const e = allDaily[d], a = calcAlerts(e);
-    const dt = new Date(d+'T00:00:00');
-    const dep = parseInt(e.depression);
-    const dc = !isNaN(dep) ? dep>=7?'var(--red)':dep<=4?'var(--green)':'var(--yellow)' : 'var(--t3)';
-    return `<div class="hist-item" onclick="goDate('${d}')">
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <b style="font-size:14px">${dt.getMonth()+1}/${dt.getDate()} (${DAYS[dt.getDay()]})</b>
-        <div style="display:flex;gap:6px;align-items:center">
-          ${!isNaN(dep)?`<span style="font-size:12px;color:${dc}">우울 ${dep}</span>`:''}
-          ${a.length?`<span class="badge">⚠ ${a.length}</span>`:''}
-        </div>
+  if(curHistSub==='daily') renderHistoryDaily();
+  else renderHistoryAnnual();
+}
+function renderHistoryDaily() {
+  const lbl=document.getElementById('hist-mon-label');
+  const [y,m]=histMon.split('-').map(Number);
+  if(lbl) lbl.textContent=`${y}년 ${m}월`;
+  const el=document.getElementById('hist-daily-list'); if(!el) return;
+  const daysInMonth=new Date(y,m,0).getDate();
+  let hasAny=false;
+  let html='';
+  for(let d=1;d<=daysInMonth;d++){
+    const ds=y+'-'+String(m).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    const e=allDaily[ds];
+    if(!e) continue;
+    hasAny=true;
+    const dt=new Date(ds+'T00:00:00');
+    const dayKr=DAYS[dt.getDay()];
+    const hema=(e.hema||'').trim();
+    const dep=parseInt(e.depression);
+    const dc=!isNaN(dep)?dep>=7?'var(--red)':dep<=4?'var(--green)':'var(--yellow)':'var(--t3)';
+    html+=`<div class="hist-item" onclick="goDate('${ds}')" style="padding:8px 12px">
+      <div style="display:flex;align-items:baseline;gap:8px">
+        <span style="font-size:13px;font-weight:700;color:var(--blue);min-width:54px;flex-shrink:0">${d}(${dayKr})</span>
+        ${!isNaN(dep)?`<span style="font-size:11px;color:${dc};flex-shrink:0">우울${dep}</span>`:''}
+        <span style="font-size:12px;color:var(--t2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">${hema||'<span style="color:var(--t3)">—</span>'}</span>
       </div>
-      ${e.action?`<div style="font-size:12px;color:var(--t2);margin-top:3px">행동: ${e.action}</div>`:''}
+    </div>`;
+  }
+  el.innerHTML=hasAny?html:'<div style="color:var(--t3);text-align:center;padding:40px 0">이 달 기록이 없습니다</div>';
+}
+function renderHistoryAnnual() {
+  const el=document.getElementById('hist-annual-list'); if(!el) return;
+  const years=Object.keys(allAnnual).sort().reverse();
+  if(!years.length){ el.innerHTML='<div style="color:var(--t3);text-align:center;padding:40px 0">연간 기록이 없습니다</div>'; return; }
+  el.innerHTML=years.map(yr=>{
+    const a=allAnnual[yr]||{};
+    const review=(a.review||'').trim();
+    return `<div class="hist-item" onclick="goAnnual(${yr})" style="padding:10px 14px">
+      <div style="display:flex;align-items:baseline;gap:10px">
+        <span style="font-size:15px;font-weight:700;color:var(--blue);flex-shrink:0">${yr}</span>
+        <span style="font-size:12px;color:var(--t2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">${review||'<span style="color:var(--t3)">기록 없음</span>'}</span>
+      </div>
     </div>`;
   }).join('');
 }
 function goDate(d) { curDate=d; switchTab('today'); loadDate(); }
+function goAnnual(yr) { curYear=yr; switchTab('annual'); renderAnnual(); }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // 탭 전환 (2층)
@@ -2867,7 +2920,9 @@ function renderAnnualSched() {
     sec.style.cssText='background:var(--s1);border:1px solid var(--b1);border-radius:8px;margin-bottom:5px;overflow:hidden';
     const hdr=document.createElement('div');
     hdr.style.cssText=`display:flex;align-items:center;justify-content:space-between;padding:8px 12px;cursor:pointer;${open?'background:var(--bdim)':''}`;
-    hdr.innerHTML=`<span style="font-size:13px;font-weight:700;color:${open?'var(--blue)':'var(--t2)'}">□ ${mn}</span><span id="asched-tog-${mo}" style="font-size:11px;color:var(--t3)">${open?'▾':'▸'}</span>`;
+    const firstGoal=(annualSched[key][mo].goals||[])[0]?.text||'';
+    const preview=firstGoal?`<span style="font-size:11px;color:var(--t3);margin-left:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">${firstGoal}</span>`:'';
+    hdr.innerHTML=`<div style="display:flex;align-items:center;flex:1;min-width:0"><span style="font-size:13px;font-weight:700;color:${open?'var(--blue)':'var(--t2)'};flex-shrink:0">□ ${mn}</span>${preview}</div><span id="asched-tog-${mo}" style="font-size:11px;color:var(--t3);flex-shrink:0;margin-left:6px">${open?'▾':'▸'}</span>`;
     hdr.onclick=()=>toggleAnnualSchedSec(mo);
     const body=document.createElement('div');
     body.id='asched-body-'+mo;
@@ -2922,14 +2977,34 @@ function addAnnualSchedItem(mo,field) {
   if(!annualSched[key][mo][field]) annualSched[key][mo][field]=[];
   annualSched[key][mo][field].push({text:''});
   _renderAnnualSchedBody(mo); saveAnnualSchedLiveV2();
+  if(field==='goals') _refreshAnnualSchedHeaderPreview(mo);
 }
 function removeAnnualSchedItem(mo,field,idx) {
   const arr=(annualSched[String(curYear)]||{})[mo]?.[field];
   if(arr){arr.splice(idx,1);_renderAnnualSchedBody(mo);saveAnnualSchedLiveV2();}
+  if(field==='goals') _refreshAnnualSchedHeaderPreview(mo);
 }
 function updateAnnualSchedItem(mo,field,idx,val) {
   const arr=(annualSched[String(curYear)]||{})[mo]?.[field];
-  if(arr&&arr[idx]!==undefined){arr[idx].text=val;saveAnnualSchedLiveV2();}
+  if(arr&&arr[idx]!==undefined){
+    arr[idx].text=val;
+    saveAnnualSchedLiveV2();
+    if(field==='goals') _refreshAnnualSchedHeaderPreview(mo);
+  }
+}
+function _refreshAnnualSchedHeaderPreview(mo) {
+  const key=String(curYear);
+  const firstGoal=((annualSched[key]||{})[mo]?.goals||[])[0]?.text||'';
+  // 헤더 내부의 미리보기 span 찾아서 갱신
+  const hdr=document.querySelector(`#asched-sec-${mo}>div:first-child`); if(!hdr) return;
+  let preview=hdr.querySelector('.asched-preview');
+  if(!preview){
+    preview=document.createElement('span');
+    preview.className='asched-preview';
+    preview.style.cssText='font-size:11px;color:var(--t3);margin-left:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1';
+    const titleDiv=hdr.querySelector('div'); if(titleDiv) titleDiv.appendChild(preview);
+  }
+  preview.textContent=firstGoal;
 }
 function updateAnnualSchedWeight(mo,val) {
   annualSched[String(curYear)][mo].weight=val; saveAnnualSchedLiveV2();
