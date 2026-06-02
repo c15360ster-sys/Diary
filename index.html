@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>일일기록표</title>
+<title>인생기록표</title>
 <style>
 :root {
   --bg:#0d1117; --s1:#161b22; --s2:#0d1117; --s3:#21262d;
@@ -244,7 +244,7 @@ textarea{resize:none;font-size:13px;border:1px solid var(--b1);border-radius:4px
 
 <div class="topbar">
   <div class="title-row">
-    <div><div class="title-main">일일기록표</div><div class="title-sub">9장 운영표 연동</div></div>
+    <div><div class="title-main">인생기록표</div><div class="title-sub">9장 운영표 연동</div></div>
     <span id="sync-badge" style="display:none;background:#2d1010;color:var(--red);font-size:10px;padding:2px 7px;border-radius:4px;font-weight:700">오프라인</span>
   </div>
   <div class="tabs" id="tabs">
@@ -332,7 +332,7 @@ textarea{resize:none;font-size:13px;border:1px solid var(--b1);border-radius:4px
         </div>
         <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
           <label style="font-size:12px;color:var(--t2)">중간각성 <input type="number" id="f-wakeups" min="0" max="20" placeholder="회" style="width:44px" oninput="autoSave()"></label>
-          <label style="font-size:12px;color:var(--t2)">낮잠 <input type="text" id="f-nap" placeholder="0" style="width:36px;text-align:center" oninput="autoSave()"> 시간</label>
+          <label style="font-size:12px;color:var(--t2)">낮잠 <input type="text" id="f-nap" placeholder="0" style="width:36px;text-align:center" oninput="autoSave();calcSleep()"> 시간</label>
           <span id="sleep-hrs" class="sleep-hrs"></span>
         </div>
       </div>
@@ -434,8 +434,9 @@ textarea{resize:none;font-size:13px;border:1px solid var(--b1);border-radius:4px
           <span class="chk" id="chk-run" onclick="toggleChk('run')"><span class="chk-box"><span class="chk-mark">✓</span></span><span class="chk-label">달리기</span></span>
           <span class="chk" id="chk-strength" onclick="toggleChk('strength')"><span class="chk-box"><span class="chk-mark">✓</span></span><span class="chk-label">근력운동</span></span>
           <span class="chk" id="chk-lecture" onclick="toggleChk('lecture')"><span class="chk-box"><span class="chk-mark">✓</span></span><span class="chk-label">강의시청</span></span>
+          <span class="chk" id="chk-ex-other" onclick="toggleChk('ex-other')"><span class="chk-box"><span class="chk-mark">✓</span></span><span class="chk-label">기타</span></span>
         </div>
-        <input type="text" id="f-exercise-etc" placeholder="기록(시간/거리/내용)..." oninput="autoSave()" style="width:100%">
+        <input type="text" id="f-exercise-etc" placeholder="기록(시간/거리/내용/기타 항목명)..." oninput="autoSave()" style="width:100%">
       </div>
     </div>
     <div class="row" style="border-bottom:none">
@@ -693,18 +694,13 @@ textarea{resize:none;font-size:13px;border:1px solid var(--b1);border-radius:4px
         <button onclick="addMonSchedItem()" style="background:var(--bdim);border:1px solid var(--acc);color:var(--blue);border-radius:4px;padding:4px 10px;font-size:12px;cursor:pointer;font-family:inherit;flex-shrink:0">추가</button>
       </div>
     </div>
-    <!-- 월간 트래킹 표 -->
+    <!-- 월간 트래킹 -->
     <div style="margin-top:12px">
-      <div style="font-size:11px;font-weight:700;color:var(--t3);margin-bottom:6px">□ 월간 기록</div>
-      <div style="overflow-x:auto">
-        <table class="plan-table" id="msched-tracking-table">
-          <thead><tr>
-            <th style="width:56px">주차</th>
-            <th>독서</th><th>자격증</th><th>호흡/영상</th><th>운동/체중</th><th>실시사항</th>
-          </tr></thead>
-          <tbody id="msched-tracking-body"></tbody>
-        </table>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <div style="font-size:11px;font-weight:700;color:var(--t3)">□ 월간 기록</div>
+        <button onclick="addMonTrackingWeek()" style="background:transparent;border:1px dashed var(--b1);color:var(--t3);border-radius:4px;padding:2px 8px;font-size:11px;cursor:pointer">+ 행 추가</button>
       </div>
+      <div id="mon-tracking-list"></div>
     </div>
     <div class="save-btn"><button class="btn" onclick="saveMonthlyBtn()">저장</button></div>
   </div>
@@ -910,6 +906,14 @@ textarea{resize:none;font-size:13px;border:1px solid var(--b1);border-radius:4px
       </div>
       <div id="annual-comp-list"></div>
     </div>
+    <!-- 세부 실천사항 -->
+    <div class="goal-sec">
+      <div class="goal-sec-title">
+        <span>□ 세부 실천사항</span>
+        <button onclick="addAnnualRow('detail')" style="background:transparent;border:1px dashed var(--b1);color:var(--t3);border-radius:4px;padding:2px 8px;font-size:11px;cursor:pointer">+ 행</button>
+      </div>
+      <div id="annual-detail-list"></div>
+    </div>
     <!-- 돌아보기 -->
     <div class="goal-sec">
       <div class="goal-sec-title"><span id="annual-review-label">□ 전년도 돌아보기</span><span style="font-size:10px;color:var(--t3);font-weight:400">3칸까지 입력</span></div>
@@ -934,27 +938,71 @@ textarea{resize:none;font-size:13px;border:1px solid var(--b1);border-radius:4px
     <!-- 분기별 자기계발 계획 -->
     <div class="goal-sec">
       <div class="goal-sec-title"><span>□ 분기별 자기계발 계획</span></div>
-      <div style="overflow-x:auto">
-        <table class="plan-table">
-          <thead><tr><th style="width:54px">구분</th><th>1/4분기</th><th>2/4분기</th><th>3/4분기</th><th>4/4분기</th></tr></thead>
-          <tbody>
-            <tr><td style="color:var(--blue);font-weight:600">호흡</td>
-              <td><input type="text" id="aq-br-1" oninput="saveAnnual()" placeholder="..."></td>
-              <td><input type="text" id="aq-br-2" oninput="saveAnnual()" placeholder="..."></td>
-              <td><input type="text" id="aq-br-3" oninput="saveAnnual()" placeholder="..."></td>
-              <td><input type="text" id="aq-br-4" oninput="saveAnnual()" placeholder="..."></td></tr>
-            <tr><td style="color:var(--yellow);font-weight:600">공부</td>
-              <td><input type="text" id="aq-st-1" oninput="saveAnnual()" placeholder="..."></td>
-              <td><input type="text" id="aq-st-2" oninput="saveAnnual()" placeholder="..."></td>
-              <td><input type="text" id="aq-st-3" oninput="saveAnnual()" placeholder="..."></td>
-              <td><input type="text" id="aq-st-4" oninput="saveAnnual()" placeholder="..."></td></tr>
-            <tr><td style="color:var(--green);font-weight:600">운동</td>
-              <td><input type="text" id="aq-ex-1" oninput="saveAnnual()" placeholder="..."></td>
-              <td><input type="text" id="aq-ex-2" oninput="saveAnnual()" placeholder="..."></td>
-              <td><input type="text" id="aq-ex-3" oninput="saveAnnual()" placeholder="..."></td>
-              <td><input type="text" id="aq-ex-4" oninput="saveAnnual()" placeholder="..."></td></tr>
-          </tbody>
-        </table>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <!-- 1/4분기 -->
+        <div style="background:var(--s3);border-radius:6px;padding:8px 10px">
+          <div style="font-size:12px;font-weight:700;color:var(--t2);margin-bottom:6px">■ 1/4분기</div>
+          <div style="display:flex;align-items:center;gap:4px;margin-bottom:5px">
+            <span style="font-size:11px;color:var(--blue);min-width:30px;flex-shrink:0">◦ 호흡:</span>
+            <input type="text" id="aq-br-1" oninput="saveAnnual()" placeholder="..." style="flex:1;font-size:11px">
+          </div>
+          <div style="display:flex;align-items:center;gap:4px;margin-bottom:5px">
+            <span style="font-size:11px;color:var(--yellow);min-width:30px;flex-shrink:0">◦ 공부:</span>
+            <input type="text" id="aq-st-1" oninput="saveAnnual()" placeholder="..." style="flex:1;font-size:11px">
+          </div>
+          <div style="display:flex;align-items:center;gap:4px">
+            <span style="font-size:11px;color:var(--green);min-width:30px;flex-shrink:0">◦ 운동:</span>
+            <input type="text" id="aq-ex-1" oninput="saveAnnual()" placeholder="..." style="flex:1;font-size:11px">
+          </div>
+        </div>
+        <!-- 2/4분기 -->
+        <div style="background:var(--s3);border-radius:6px;padding:8px 10px">
+          <div style="font-size:12px;font-weight:700;color:var(--t2);margin-bottom:6px">■ 2/4분기</div>
+          <div style="display:flex;align-items:center;gap:4px;margin-bottom:5px">
+            <span style="font-size:11px;color:var(--blue);min-width:30px;flex-shrink:0">◦ 호흡:</span>
+            <input type="text" id="aq-br-2" oninput="saveAnnual()" placeholder="..." style="flex:1;font-size:11px">
+          </div>
+          <div style="display:flex;align-items:center;gap:4px;margin-bottom:5px">
+            <span style="font-size:11px;color:var(--yellow);min-width:30px;flex-shrink:0">◦ 공부:</span>
+            <input type="text" id="aq-st-2" oninput="saveAnnual()" placeholder="..." style="flex:1;font-size:11px">
+          </div>
+          <div style="display:flex;align-items:center;gap:4px">
+            <span style="font-size:11px;color:var(--green);min-width:30px;flex-shrink:0">◦ 운동:</span>
+            <input type="text" id="aq-ex-2" oninput="saveAnnual()" placeholder="..." style="flex:1;font-size:11px">
+          </div>
+        </div>
+        <!-- 3/4분기 -->
+        <div style="background:var(--s3);border-radius:6px;padding:8px 10px">
+          <div style="font-size:12px;font-weight:700;color:var(--t2);margin-bottom:6px">■ 3/4분기</div>
+          <div style="display:flex;align-items:center;gap:4px;margin-bottom:5px">
+            <span style="font-size:11px;color:var(--blue);min-width:30px;flex-shrink:0">◦ 호흡:</span>
+            <input type="text" id="aq-br-3" oninput="saveAnnual()" placeholder="..." style="flex:1;font-size:11px">
+          </div>
+          <div style="display:flex;align-items:center;gap:4px;margin-bottom:5px">
+            <span style="font-size:11px;color:var(--yellow);min-width:30px;flex-shrink:0">◦ 공부:</span>
+            <input type="text" id="aq-st-3" oninput="saveAnnual()" placeholder="..." style="flex:1;font-size:11px">
+          </div>
+          <div style="display:flex;align-items:center;gap:4px">
+            <span style="font-size:11px;color:var(--green);min-width:30px;flex-shrink:0">◦ 운동:</span>
+            <input type="text" id="aq-ex-3" oninput="saveAnnual()" placeholder="..." style="flex:1;font-size:11px">
+          </div>
+        </div>
+        <!-- 4/4분기 -->
+        <div style="background:var(--s3);border-radius:6px;padding:8px 10px">
+          <div style="font-size:12px;font-weight:700;color:var(--t2);margin-bottom:6px">■ 4/4분기</div>
+          <div style="display:flex;align-items:center;gap:4px;margin-bottom:5px">
+            <span style="font-size:11px;color:var(--blue);min-width:30px;flex-shrink:0">◦ 호흡:</span>
+            <input type="text" id="aq-br-4" oninput="saveAnnual()" placeholder="..." style="flex:1;font-size:11px">
+          </div>
+          <div style="display:flex;align-items:center;gap:4px;margin-bottom:5px">
+            <span style="font-size:11px;color:var(--yellow);min-width:30px;flex-shrink:0">◦ 공부:</span>
+            <input type="text" id="aq-st-4" oninput="saveAnnual()" placeholder="..." style="flex:1;font-size:11px">
+          </div>
+          <div style="display:flex;align-items:center;gap:4px">
+            <span style="font-size:11px;color:var(--green);min-width:30px;flex-shrink:0">◦ 운동:</span>
+            <input type="text" id="aq-ex-4" oninput="saveAnnual()" placeholder="..." style="flex:1;font-size:11px">
+          </div>
+        </div>
       </div>
     </div>
     <!-- 업무중점 -->
@@ -969,17 +1017,8 @@ textarea{resize:none;font-size:13px;border:1px solid var(--b1);border-radius:4px
   </div>
   <!-- 월간 주요일정 (연간) -->
   <div class="subview" id="asub-schedule">
-    <div style="font-size:11px;color:var(--t3);margin-bottom:8px">연간 월별 주요 일정 / 목표</div>
-    <div style="overflow-x:auto">
-      <table class="plan-table">
-        <thead><tr>
-          <th style="width:40px">월</th>
-          <th>목표 / 주요 일정</th>
-          <th>독서</th><th>자격증</th><th>운동/체중</th>
-        </tr></thead>
-        <tbody id="annual-sched-body"></tbody>
-      </table>
-    </div>
+    <div style="font-size:11px;color:var(--t3);margin-bottom:8px">연간 월별 주요 일정 / 목표 — 월 헤더를 탭하면 펼쳐집니다</div>
+    <div id="annual-sched-accordion"></div>
     <div class="save-btn"><button class="btn" onclick="saveAnnualSchedBtn()">저장</button></div>
   </div>
 </div>
@@ -1013,6 +1052,10 @@ textarea{resize:none;font-size:13px;border:1px solid var(--b1);border-radius:4px
     <div style="font-size:12px;font-weight:700;color:var(--blue);margin-bottom:8px">📅 매년 반복 (생일·기념일 등)</div>
     <div id="rec-annual-list"></div>
     <div style="display:flex;gap:5px;margin-top:6px;flex-wrap:wrap;align-items:center">
+      <select id="rec-ann-cal" style="background:var(--s3);border:1px solid var(--b1);color:var(--t1);font-size:12px;padding:4px 5px;border-radius:4px;width:56px">
+        <option value="solar">양력</option>
+        <option value="lunar">음력</option>
+      </select>
       <select id="rec-ann-month" style="background:var(--s3);border:1px solid var(--b1);color:var(--t1);font-size:12px;padding:4px 5px;border-radius:4px;width:60px">
         <option value="">월</option>
         <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option>
@@ -1309,7 +1352,7 @@ let curDate = today();
 let curWk = monStr();       // 현재 보고 있는 주의 월요일 날짜 (주간 탭)
 let curMon = (() => { const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'); })(); // 현재 보고 있는 월 (월간 탭)
 let dailyPlanRows = [];
-let checks = { gicheon:false, hongik:false, mindful:false, run:false, strength:false, lecture:false,
+let checks = { gicheon:false, hongik:false, mindful:false, run:false, strength:false, lecture:false, 'ex-other':false,
   'a-contact':false,'a-interview':false,'a-blog':false,'a-brunch':false,
   'a-paper':false,'a-pmp':false,'a-lang':false,'a-ai':false,'a-adsp':false,'a-info':false,
   'a-jobscan':false,'a-apply':false };
@@ -1375,7 +1418,7 @@ function addDailyPlanRow(time_v, plan_v, exec_v, focus_v) {
   if (!tbody) return;
   const pv = (plan_v||'').replace(/"/g,'&quot;');
   const planCol = focus==='o'?'var(--green)':focus==='x'?'var(--red)':focus==='d'?'var(--yellow)':'var(--t1)';
-  const planDec = focus==='x'?'line-through':'none';
+  const planDec = focus==='o'?'line-through':'none';
   // 메인 행
   const tr1 = document.createElement('tr');
   tr1.id = 'dpr-'+idx;
@@ -1429,7 +1472,7 @@ function setFocus(idx, val) {
   const planEl = document.getElementById('dpr-plan-'+idx);
   if (planEl) {
     planEl.style.color = nv==='o'?'var(--green)':nv==='x'?'var(--red)':nv==='d'?'var(--yellow)':'var(--t1)';
-    planEl.style.textDecoration = nv==='x'?'line-through':'none';
+    planEl.style.textDecoration = nv==='o'?'line-through':'none';
   }
   autoSave();
 }
@@ -1454,7 +1497,12 @@ function renderDailyPlan(rows) {
   const emptyEl=document.getElementById('daily-plan-empty');
   if (!rows||rows.length===0) {
     const mon=monStr(curDate);
-    const def=(wkPlanDefaults&&wkPlanDefaults[mon])||[];
+    let def=(wkPlanDefaults&&wkPlanDefaults[mon])||[];
+    if(!def.length && wkPlanDefaults){
+      // 해당 주 기본값 없으면 가장 최근 이전 주 기본값 자동 상속
+      const keys=Object.keys(wkPlanDefaults).filter(k=>k<=mon).sort().reverse();
+      if(keys.length) def=wkPlanDefaults[keys[0]]||[];
+    }
     if(def.length){
       const dayName=DAYS[new Date(curDate+'T00:00:00').getDay()];
       const filtered=sortRowsByTime(def.filter(r=>!r||!r.days||r.days.length===0||r.days.includes(dayName)));
@@ -1616,7 +1664,7 @@ function fillForm(e) {
   sv('f-tmr-notdo', e.tmr_notdo);
   renderDailyPlan(e.daily_plan_rows||[]);
   renderTmrSched(e.tmr_schedule||[]);
-  checks = Object.assign({ gicheon:false, hongik:false, mindful:false, run:false, strength:false, lecture:false,
+  checks = Object.assign({ gicheon:false, hongik:false, mindful:false, run:false, strength:false, lecture:false, 'ex-other':false,
     'a-contact':false,'a-interview':false,'a-blog':false,'a-brunch':false,
     'a-paper':false,'a-pmp':false,'a-lang':false,'a-ai':false,'a-adsp':false,'a-info':false,
     'a-jobscan':false,'a-apply':false }, e.exercise || e.action_checks || {});
@@ -1661,10 +1709,14 @@ function calcSleep() {
   const [bh,bm] = bed.split(':').map(Number), [wh,wm] = wake.split(':').map(Number);
   let diff = (wh*60+wm)-(bh*60+bm);
   if (diff < 0) diff += 1440;
-  const hrs = (diff/60).toFixed(1);
-  hEl.textContent = hrs + '시간';
-  hEl.style.color = diff < 360 ? 'var(--red)' : 'var(--green)';
-  bEl.innerHTML = diff < 360 ? '<span class="badge">6시간↓</span>' : '';
+  const napRaw = gv('f-nap');
+  const napMin = napRaw ? Math.round(parseFloat(napRaw) * 60) : 0;
+  const total = diff + (isNaN(napMin) ? 0 : napMin);
+  const hrs = (total/60).toFixed(1);
+  const napLabel = napMin > 0 ? ` (+낮잠 ${(napMin/60).toFixed(1)}h)` : '';
+  hEl.textContent = hrs + '시간' + napLabel;
+  hEl.style.color = total < 360 ? 'var(--red)' : 'var(--green)';
+  bEl.innerHTML = total < 360 ? '<span class="badge">6시간↓</span>' : '';
 }
 function calcAlerts(e) {
   const a = [];
@@ -2275,7 +2327,7 @@ let curMonSub = 'goals', curAnnualSub = 'goals';
 let tmrSchedRows = [];
 let monCompRows=[], monWorkRows=[];
 let lifeCompRows=[], lifePhysRows=[], lifeMentRows=[], lifeAbilRows=[];
-let annualCompRows=[], annualWorkRows=[];
+let annualCompRows=[], annualDetailRows=[], annualWorkRows=[];
 let selectedMonDay = 0;
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -2294,11 +2346,19 @@ function loadTodaySchedule() {
   const dd = parseInt(curDate.slice(8,10));
   const mSched = ((allMonthly[mk]||{}).monthly_schedule||{})[dd]||[];
   mSched.filter(r=>r&&r.text).forEach(r=>items.push({time:r.time||'', text:r.text, src:'📅'}));
-  // 3. 반복 일정 (매년)
+  // 3. 반복 일정 (매년) — 양력/음력 분기
   const mo = parseInt(curDate.slice(5,7));
   const day = parseInt(curDate.slice(8,10));
-  (recurringEvt.annual||[]).filter(r=>r&&+r.month===mo&&+r.day===day)
-    .forEach(r=>items.push({time:'', text:r.title, src:'🔁'}));
+  const lunarToday = getLunarDate(curDate);
+  (recurringEvt.annual||[]).filter(r=>r).forEach(r=>{
+    if(r.isLunar) {
+      if(lunarToday && +r.month===lunarToday.month && +r.day===lunarToday.day)
+        items.push({time:'', text:'🌙 '+r.title, src:'🔁'});
+    } else {
+      if(+r.month===mo && +r.day===day)
+        items.push({time:'', text:r.title, src:'🔁'});
+    }
+  });
   // 4. 반복 일정 (매주)
   const dow = new Date(curDate+'T00:00:00').getDay();
   (recurringEvt.weekly||[]).filter(r=>r&&+r.dayOfWeek===dow)
@@ -2474,35 +2534,82 @@ function removeMonSchedItem(i) {
   allMonthly[mk].monthly_schedule[selectedMonDay].splice(i,1);
   saveMonthlyStore(); renderMonDayItems(); renderMonCalendar();
 }
-function renderMonTracking() {
-  const [yr,mo]=curMon.split('-').map(Number);
-  const daysInMonth=new Date(yr,mo,0).getDate();
-  const tbody=document.getElementById('msched-tracking-body'); if(!tbody) return;
-  const mData=allMonthly[curMon]||{};
-  const tracking=mData.tracking||{};
-  let rows='';
-  const weeks=Math.ceil((new Date(yr,mo-1,1).getDay()===0?6:new Date(yr,mo-1,1).getDay()-1+daysInMonth)/7);
-  for(let w=1;w<=weeks;w++){
-    const key=`w${w}`;
-    const t=tracking[key]||{};
-    rows+=`<tr>
-      <td style="color:var(--t3);font-weight:600;white-space:nowrap">${w}주차</td>
-      <td><input type="text" value="${(t.book||'').replace(/"/g,'&quot;')}" placeholder="..." oninput="saveMonTracking('${key}','book',this.value)" style="width:100%;font-size:12px"></td>
-      <td><input type="text" value="${(t.cert||'').replace(/"/g,'&quot;')}" placeholder="..." oninput="saveMonTracking('${key}','cert',this.value)" style="width:100%;font-size:12px"></td>
-      <td><input type="text" value="${(t.breath||'').replace(/"/g,'&quot;')}" placeholder="..." oninput="saveMonTracking('${key}','breath',this.value)" style="width:100%;font-size:12px"></td>
-      <td><input type="text" value="${(t.exercise||'').replace(/"/g,'&quot;')}" placeholder="..." oninput="saveMonTracking('${key}','exercise',this.value)" style="width:100%;font-size:12px"></td>
-      <td><input type="text" value="${(t.notes||'').replace(/"/g,'&quot;')}" placeholder="..." oninput="saveMonTracking('${key}','notes',this.value)" style="width:100%;font-size:12px"></td>
-    </tr>`;
-  }
-  tbody.innerHTML=rows;
+var monTrackingRows = [];
+function addMonTrackingWeek(data) {
+  const idx = monTrackingRows.length;
+  const d = data || {};
+  monTrackingRows.push({book:d.book||'', cert:d.cert||'', breath:d.breath||'', exercise:d.exercise||'', weight:d.weight||'', other:d.other||''});
+  const el = document.getElementById('mon-tracking-list'); if(!el) return;
+  const div = document.createElement('div');
+  div.id = 'mon-track-'+idx;
+  div.style.cssText = 'background:var(--s1);border:1px solid var(--b1);border-radius:8px;padding:10px 12px;margin-bottom:8px';
+  const esc = v => (v||'').replace(/"/g,'&quot;');
+  div.innerHTML = `
+    <div style="font-size:12px;font-weight:700;color:var(--blue);margin-bottom:8px">■ ${monTrackingRows.filter(r=>r).length}주차</div>
+    <div style="padding-left:4px">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:5px">
+        <span style="font-size:12px;color:var(--t3);min-width:62px;flex-shrink:0">◦ 독서:</span>
+        <input type="text" id="mt-book-${idx}" value="${esc(d.book)}" placeholder="..." oninput="saveMonTrackRow(${idx},'book',this.value)" style="flex:1;font-size:12px">
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:5px">
+        <span style="font-size:12px;color:var(--t3);min-width:62px;flex-shrink:0">◦ 자격증:</span>
+        <input type="text" id="mt-cert-${idx}" value="${esc(d.cert)}" placeholder="..." oninput="saveMonTrackRow(${idx},'cert',this.value)" style="flex:1;font-size:12px">
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:5px">
+        <span style="font-size:12px;color:var(--t3);min-width:62px;flex-shrink:0">◦ 호흡/명상:</span>
+        <input type="text" id="mt-breath-${idx}" value="${esc(d.breath)}" placeholder="..." oninput="saveMonTrackRow(${idx},'breath',this.value)" style="flex:1;font-size:12px">
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:5px">
+        <span style="font-size:12px;color:var(--t3);min-width:62px;flex-shrink:0">◦ 운동/기천:</span>
+        <input type="text" id="mt-exercise-${idx}" value="${esc(d.exercise)}" placeholder="..." oninput="saveMonTrackRow(${idx},'exercise',this.value)" style="flex:1;font-size:12px">
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:5px">
+        <span style="font-size:12px;color:var(--t3);min-width:62px;flex-shrink:0">◦ 체중:</span>
+        <input type="text" id="mt-weight-${idx}" value="${esc(d.weight)}" placeholder="kg" oninput="saveMonTrackRow(${idx},'weight',this.value)" style="width:70px;font-size:12px">
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
+        <span style="font-size:12px;color:var(--t3);min-width:62px;flex-shrink:0">◦ 기타:</span>
+        <input type="text" id="mt-other-${idx}" value="${esc(d.other)}" placeholder="..." oninput="saveMonTrackRow(${idx},'other',this.value)" style="flex:1;font-size:12px">
+      </div>
+    </div>
+    <div style="text-align:right">
+      <button onclick="removeMonTrackingWeek(${idx})" style="background:transparent;border:1px solid var(--red);color:var(--red);border-radius:4px;padding:2px 8px;font-size:11px;cursor:pointer">× 행 삭제</button>
+    </div>`;
+  el.appendChild(div);
 }
-function saveMonTracking(week,field,val) {
+function saveMonTrackRow(idx, field, val) {
+  if(monTrackingRows[idx]) { monTrackingRows[idx][field]=val; saveMonTrackingV2(); }
+}
+function removeMonTrackingWeek(idx) {
+  monTrackingRows[idx]=null;
+  const el=document.getElementById('mon-track-'+idx); if(el) el.remove();
+  saveMonTrackingV2();
+}
+function saveMonTrackingV2() {
   if(!allMonthly[curMon]) allMonthly[curMon]={};
-  if(!allMonthly[curMon].tracking) allMonthly[curMon].tracking={};
-  if(!allMonthly[curMon].tracking[week]) allMonthly[curMon].tracking[week]={};
-  allMonthly[curMon].tracking[week][field]=val;
+  allMonthly[curMon].tracking_v2=monTrackingRows.filter(r=>r);
   saveMonthlyStore();
 }
+function renderMonTracking() {
+  monTrackingRows=[];
+  const el=document.getElementById('mon-tracking-list'); if(!el) return;
+  el.innerHTML='';
+  const mData=allMonthly[curMon]||{};
+  let trackData=mData.tracking_v2;
+  if(!trackData && mData.tracking) {
+    // 구버전 표 형식 마이그레이션
+    const [yr,mo]=curMon.split('-').map(Number);
+    const dim=new Date(yr,mo,0).getDate();
+    const wks=Math.ceil((new Date(yr,mo-1,1).getDay()===0?6:new Date(yr,mo-1,1).getDay()-1+dim)/7);
+    trackData=[];
+    for(let w=1;w<=wks;w++){
+      const old=mData.tracking['w'+w]||{};
+      trackData.push({book:old.book||'',cert:old.cert||'',breath:old.breath||'',exercise:old.exercise||'',weight:'',other:old.notes||''});
+    }
+  }
+  (trackData||[]).forEach(r=>{if(r) addMonTrackingWeek(r);});
+}
+function saveMonTracking(week,field,val){} // 하위호환 빈 함수
 
 // (renderMonthly·saveMonthly 확장은 원본 함수에 직접 추가됨)
 
@@ -2621,6 +2728,7 @@ function saveAnnual() {
   if(!allAnnual[key]) allAnnual[key]={};
   const a=allAnnual[key];
   a.comp=annualCompRows.filter(r=>r&&r.text);
+  a.detail=annualDetailRows.filter(r=>r&&r.text);
   a.review=document.getElementById('annual-review')?.value||'';
   const dg={};
   [['rec','recovery'],['rel','relation'],['liv','livelihood'],['gro','growth'],['mea','meaning']].forEach(([k,v])=>{
@@ -2643,38 +2751,40 @@ function saveAnnualBtn() {
   setTimeout(()=>{btn.textContent='저장';btn.classList.remove('ok');},2000);
 }
 function saveAnnualSchedBtn() {
-  const key=String(curYear);
-  if(!annualSched[key]) annualSched[key]={};
-  for(let mo=1;mo<=12;mo++){
-    if(!annualSched[key][mo]) annualSched[key][mo]={};
-    ['goal','book','cert','exercise'].forEach(f=>{
-      const el=document.getElementById(`asched-${mo}-${f}`);
-      if(el) annualSched[key][mo][f]=el.value;
-    });
-  }
   if(window._fbSet) window._fbSet('diary/annual_sched', annualSched);
   const btn=document.querySelector('#asub-schedule .btn');
   if(btn){btn.textContent='✓ 저장됨';btn.classList.add('ok');setTimeout(()=>{btn.textContent='저장';btn.classList.remove('ok');},2000);}
 }
-function addAnnualRow(type) {
+function addAnnualRow(type, text) {
   if(type==='comp') {
-    const idx=annualCompRows.length; annualCompRows.push({text:''});
+    const idx=annualCompRows.length; annualCompRows.push({text:text||''});
     const el=document.getElementById('annual-comp-list'); if(!el) return;
     const div=document.createElement('div'); div.id='acomp-'+idx;
     div.style.cssText='display:flex;align-items:center;gap:6px;margin-bottom:4px';
     div.innerHTML=`<span style="color:var(--blue);font-size:12px">•</span>
-      <input type="text" id="acomp-text-${idx}" placeholder="종합목표..."
+      <input type="text" id="acomp-text-${idx}" value="${(text||'').replace(/"/g,'&quot;')}" placeholder="종합목표..."
         oninput="annualCompRows[${idx}].text=this.value;saveAnnual()"
         style="flex:1;background:transparent;border:none;border-bottom:1px solid var(--b1);color:var(--t1);font-family:inherit;font-size:12px;outline:none">
       <button onclick="acompRm(${idx})" style="background:transparent;border:none;color:var(--red);font-size:14px;cursor:pointer">×</button>`;
     el.appendChild(div);
+  } else if(type==='detail') {
+    const idx=annualDetailRows.length; annualDetailRows.push({text:text||''});
+    const el=document.getElementById('annual-detail-list'); if(!el) return;
+    const div=document.createElement('div'); div.id='adetail-'+idx;
+    div.style.cssText='display:flex;align-items:center;gap:6px;margin-bottom:4px';
+    div.innerHTML=`<span style="color:var(--green);font-size:12px">◦</span>
+      <input type="text" id="adetail-text-${idx}" value="${(text||'').replace(/"/g,'&quot;')}" placeholder="세부 실천사항..."
+        oninput="annualDetailRows[${idx}].text=this.value;saveAnnual()"
+        style="flex:1;background:transparent;border:none;border-bottom:1px solid var(--b1);color:var(--t1);font-family:inherit;font-size:12px;outline:none">
+      <button onclick="adetailRm(${idx})" style="background:transparent;border:none;color:var(--red);font-size:14px;cursor:pointer">×</button>`;
+    el.appendChild(div);
   } else if(type==='work') {
-    const idx=annualWorkRows.length; annualWorkRows.push({text:''});
+    const idx=annualWorkRows.length; annualWorkRows.push({text:text||''});
     const el=document.getElementById('annual-work-list'); if(!el) return;
     const div=document.createElement('div'); div.id='awork-'+idx;
     div.style.cssText='display:flex;align-items:center;gap:6px;margin-bottom:4px';
     div.innerHTML=`<span style="color:var(--t2);font-size:12px">•</span>
-      <input type="text" id="awork-text-${idx}" placeholder="업무중점..."
+      <input type="text" id="awork-text-${idx}" value="${(text||'').replace(/"/g,'&quot;')}" placeholder="업무중점..."
         oninput="annualWorkRows[${idx}].text=this.value;saveAnnual()"
         style="flex:1;background:transparent;border:none;border-bottom:1px solid var(--b1);color:var(--t1);font-family:inherit;font-size:12px;outline:none">
       <button onclick="aworkRm(${idx})" style="background:transparent;border:none;color:var(--red);font-size:14px;cursor:pointer">×</button>`;
@@ -2682,6 +2792,7 @@ function addAnnualRow(type) {
   }
 }
 function acompRm(i){annualCompRows[i]=null;const e=document.getElementById('acomp-'+i);if(e)e.remove();saveAnnual();}
+function adetailRm(i){annualDetailRows[i]=null;const e=document.getElementById('adetail-'+i);if(e)e.remove();saveAnnual();}
 function aworkRm(i){annualWorkRows[i]=null;const e=document.getElementById('awork-'+i);if(e)e.remove();saveAnnual();}
 function renderAnnual() {
   const lbl=document.getElementById('yr-label'); if(lbl) lbl.textContent=curYear+'년';
@@ -2689,18 +2800,9 @@ function renderAnnual() {
   const key=String(curYear);
   const a=allAnnual[key]||{};
   annualCompRows=[]; const cl=document.getElementById('annual-comp-list'); if(cl) cl.innerHTML='';
-  (a.comp||[]).filter(r=>r).forEach(r=>{
-    const idx=annualCompRows.length; annualCompRows.push({text:r.text});
-    const el=document.getElementById('annual-comp-list');
-    const div=document.createElement('div'); div.id='acomp-'+idx;
-    div.style.cssText='display:flex;align-items:center;gap:6px;margin-bottom:4px';
-    div.innerHTML=`<span style="color:var(--blue);font-size:12px">•</span>
-      <input type="text" id="acomp-text-${idx}" value="${(r.text||'').replace(/"/g,'&quot;')}" placeholder="종합목표..."
-        oninput="annualCompRows[${idx}].text=this.value;saveAnnual()"
-        style="flex:1;background:transparent;border:none;border-bottom:1px solid var(--b1);color:var(--t1);font-family:inherit;font-size:12px;outline:none">
-      <button onclick="acompRm(${idx})" style="background:transparent;border:none;color:var(--red);font-size:14px;cursor:pointer">×</button>`;
-    if(el) el.appendChild(div);
-  });
+  (a.comp||[]).filter(r=>r).forEach(r=>addAnnualRow('comp', r.text));
+  annualDetailRows=[]; const dl=document.getElementById('annual-detail-list'); if(dl) dl.innerHTML='';
+  (a.detail||[]).filter(r=>r).forEach(r=>addAnnualRow('detail', r.text));
   const rv=document.getElementById('annual-review'); if(rv) rv.value=a.review||'';
   const dg=a.detail_goals||{};
   [['rec','recovery'],['rel','relation'],['liv','livelihood'],['gro','growth'],['mea','meaning']].forEach(([k,v])=>{
@@ -2712,34 +2814,113 @@ function renderAnnual() {
     [1,2,3,4].forEach(q=>{ const el=document.getElementById(`aq-${k}-${q}`); if(el) el.value=(qt[v]||{})['q'+q]||''; });
   });
   annualWorkRows=[]; const wl=document.getElementById('annual-work-list'); if(wl) wl.innerHTML='';
-  (a.work||[]).filter(r=>r).forEach(r=>{
-    const idx=annualWorkRows.length; annualWorkRows.push({text:r.text});
-    const el=document.getElementById('annual-work-list');
-    const div=document.createElement('div'); div.id='awork-'+idx;
-    div.style.cssText='display:flex;align-items:center;gap:6px;margin-bottom:4px';
-    div.innerHTML=`<span style="color:var(--t2);font-size:12px">•</span>
-      <input type="text" id="awork-text-${idx}" value="${(r.text||'').replace(/"/g,'&quot;')}" placeholder="업무중점..."
-        oninput="annualWorkRows[${idx}].text=this.value;saveAnnual()"
-        style="flex:1;background:transparent;border:none;border-bottom:1px solid var(--b1);color:var(--t1);font-family:inherit;font-size:12px;outline:none">
-      <button onclick="aworkRm(${idx})" style="background:transparent;border:none;color:var(--red);font-size:14px;cursor:pointer">×</button>`;
-    if(el) el.appendChild(div);
-  });
-  // 월간 주요일정 표
-  const asched=annualSched[key]||{};
-  const tbody=document.getElementById('annual-sched-body'); if(tbody) {
-    const MNAMES=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
-    tbody.innerHTML=MNAMES.map((mn,i)=>{
-      const m=i+1, d=asched[m]||{};
-      return `<tr style="background:${i%2===0?'var(--s1)':'var(--s2)'}">
-        <td style="color:var(--blue);font-weight:700;white-space:nowrap">${mn}</td>
-        <td><textarea id="asched-${m}-goal" rows="2" oninput="saveAnnualSchedLive(${m},'goal',this.value)"
-          style="width:100%;resize:none;background:transparent;border:none;border-bottom:1px solid var(--b2);color:var(--t1);font-family:inherit;font-size:12px;outline:none;padding:2px 0">${(d.goal||'').replace(/</g,'&lt;')}</textarea></td>
-        <td><input type="text" id="asched-${m}-book" value="${(d.book||'').replace(/"/g,'&quot;')}" oninput="saveAnnualSchedLive(${m},'book',this.value)" style="width:100%;font-size:12px"></td>
-        <td><input type="text" id="asched-${m}-cert" value="${(d.cert||'').replace(/"/g,'&quot;')}" oninput="saveAnnualSchedLive(${m},'cert',this.value)" style="width:100%;font-size:12px"></td>
-        <td><input type="text" id="asched-${m}-exercise" value="${(d.exercise||'').replace(/"/g,'&quot;')}" oninput="saveAnnualSchedLive(${m},'exercise',this.value)" style="width:100%;font-size:12px"></td>
-      </tr>`;
-    }).join('');
+  (a.work||[]).filter(r=>r).forEach(r=>addAnnualRow('work', r.text));
+  renderAnnualSched();
+}
+function _migrateAnnualSchedMonth(d) {
+  if(!d) return;
+  if((d.goal!==undefined||d.book!==undefined)&&!d.goals){
+    d.goals=d.goal?[{text:d.goal}]:[];
+    d.books=d.book?[{text:d.book}]:[];
+    d.certs=d.cert?[{text:d.cert}]:[];
+    d.breath=[];
+    d.exercise_list=d.exercise?[{text:d.exercise}]:[];
+    d.weight='';
+    delete d.goal; delete d.book; delete d.cert; delete d.exercise;
   }
+  if(!d.goals) d.goals=[];
+  if(!d.books) d.books=[];
+  if(!d.certs) d.certs=[];
+  if(!d.breath) d.breath=[];
+  if(!d.exercise_list) d.exercise_list=[];
+  if(d.weight===undefined) d.weight='';
+}
+function renderAnnualSched() {
+  const cont=document.getElementById('annual-sched-accordion'); if(!cont) return;
+  const key=String(curYear);
+  if(!annualSched[key]) annualSched[key]={};
+  const MNAMES=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+  const nowMo=new Date().getFullYear()===curYear?new Date().getMonth()+1:-1;
+  cont.innerHTML='';
+  MNAMES.forEach((mn,i)=>{
+    const mo=i+1;
+    if(!annualSched[key][mo]) annualSched[key][mo]={};
+    _migrateAnnualSchedMonth(annualSched[key][mo]);
+    const open=(mo===nowMo);
+    const sec=document.createElement('div');
+    sec.id='asched-sec-'+mo;
+    sec.style.cssText='background:var(--s1);border:1px solid var(--b1);border-radius:8px;margin-bottom:5px;overflow:hidden';
+    const hdr=document.createElement('div');
+    hdr.style.cssText=`display:flex;align-items:center;justify-content:space-between;padding:8px 12px;cursor:pointer;${open?'background:var(--bdim)':''}`;
+    hdr.innerHTML=`<span style="font-size:13px;font-weight:700;color:${open?'var(--blue)':'var(--t2)'}">□ ${mn}</span><span id="asched-tog-${mo}" style="font-size:11px;color:var(--t3)">${open?'▾':'▸'}</span>`;
+    hdr.onclick=()=>toggleAnnualSchedSec(mo);
+    const body=document.createElement('div');
+    body.id='asched-body-'+mo;
+    body.style.cssText=`padding:0 12px 10px;display:${open?'block':'none'}`;
+    sec.appendChild(hdr); sec.appendChild(body); cont.appendChild(sec);
+    if(open) _renderAnnualSchedBody(mo);
+  });
+}
+function toggleAnnualSchedSec(mo) {
+  const body=document.getElementById('asched-body-'+mo);
+  const tog=document.getElementById('asched-tog-'+mo);
+  if(!body) return;
+  const isOpen=body.style.display!=='none';
+  body.style.display=isOpen?'none':'block';
+  if(tog) tog.textContent=isOpen?'▸':'▾';
+  if(!isOpen) _renderAnnualSchedBody(mo);
+}
+function _renderAnnualSchedBody(mo) {
+  const body=document.getElementById('asched-body-'+mo); if(!body) return;
+  const key=String(curYear);
+  const d=annualSched[key][mo]||{};
+  const mkSec=(label,field,color)=>{
+    const items=d[field]||[];
+    return `<div style="margin-bottom:8px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px">
+        <span style="font-size:11px;font-weight:700;color:${color}">■ ${label}</span>
+        <button onclick="addAnnualSchedItem(${mo},'${field}')" style="background:transparent;border:1px dashed var(--b1);color:var(--t3);border-radius:3px;padding:1px 6px;font-size:10px;cursor:pointer">+ 행 추가</button>
+      </div>
+      <div id="asched-list-${mo}-${field}">${items.map((it,i)=>`<div style="display:flex;align-items:center;gap:4px;margin-bottom:3px">
+        <span style="font-size:10px;color:var(--t3)">◦</span>
+        <input type="text" value="${(it.text||'').replace(/"/g,'&quot;')}" placeholder="..."
+          oninput="updateAnnualSchedItem(${mo},'${field}',${i},this.value)"
+          style="flex:1;font-size:11px;background:transparent;border:none;border-bottom:1px solid var(--b2);color:var(--t1);font-family:inherit;outline:none;padding:2px 0">
+        <button onclick="removeAnnualSchedItem(${mo},'${field}',${i})" style="background:transparent;border:none;color:var(--red);font-size:12px;cursor:pointer">×</button>
+      </div>`).join('')}</div></div>`;
+  };
+  body.innerHTML=
+    mkSec('주요목표/일정','goals','var(--blue)')+
+    mkSec('독서','books','var(--t2)')+
+    mkSec('자격증','certs','var(--t2)')+
+    mkSec('호흡/명상','breath','var(--blue)')+
+    mkSec('운동','exercise_list','var(--green)')+
+    `<div style="display:flex;align-items:center;gap:6px;margin-top:4px">
+      <span style="font-size:11px;font-weight:700;color:var(--t2)">■ 체중:</span>
+      <input type="text" value="${(d.weight||'').replace(/"/g,'&quot;')}" placeholder="kg"
+        oninput="updateAnnualSchedWeight(${mo},this.value)"
+        style="width:70px;font-size:11px;background:transparent;border:none;border-bottom:1px solid var(--b2);color:var(--t1);font-family:inherit;outline:none;padding:2px 0">
+    </div>`;
+}
+function addAnnualSchedItem(mo,field) {
+  const key=String(curYear);
+  if(!annualSched[key][mo][field]) annualSched[key][mo][field]=[];
+  annualSched[key][mo][field].push({text:''});
+  _renderAnnualSchedBody(mo); saveAnnualSchedLiveV2();
+}
+function removeAnnualSchedItem(mo,field,idx) {
+  const arr=(annualSched[String(curYear)]||{})[mo]?.[field];
+  if(arr){arr.splice(idx,1);_renderAnnualSchedBody(mo);saveAnnualSchedLiveV2();}
+}
+function updateAnnualSchedItem(mo,field,idx,val) {
+  const arr=(annualSched[String(curYear)]||{})[mo]?.[field];
+  if(arr&&arr[idx]!==undefined){arr[idx].text=val;saveAnnualSchedLiveV2();}
+}
+function updateAnnualSchedWeight(mo,val) {
+  annualSched[String(curYear)][mo].weight=val; saveAnnualSchedLiveV2();
+}
+function saveAnnualSchedLiveV2() {
+  if(window._fbSet) window._fbSet('diary/annual_sched', annualSched);
 }
 function saveAnnualSchedLive(mo,field,val) {
   const key=String(curYear);
@@ -2761,6 +2942,7 @@ function renderRecurring() {
   const ann=recurringEvt.annual||[];
   al.innerHTML=ann.length?ann.map((r,i)=>r?`
     <div class="rec-event-item">
+      <span style="font-size:10px;padding:1px 5px;border-radius:3px;font-weight:700;flex-shrink:0;${r.isLunar?'background:#2d1f00;color:#d29922':'background:#0a1a2a;color:#58a6ff'}">${r.isLunar?'음력':'양력'}</span>
       <span style="font-size:12px;color:var(--blue);min-width:36px">${r.month}/${r.day}</span>
       <span style="font-size:13px;flex:1">${r.title}</span>
       <button onclick="removeRecAnnual(${i})" style="background:transparent;border:none;color:var(--red);font-size:14px;cursor:pointer">×</button>
@@ -2777,14 +2959,26 @@ function renderRecurring() {
       <button onclick="removeRecWeekly(${i})" style="background:transparent;border:none;color:var(--red);font-size:14px;cursor:pointer">×</button>
     </div>`:'').join(''):'<div style="font-size:12px;color:var(--t3);padding:4px 0">없음</div>';
 }
+function getLunarDate(solarDateStr) {
+  try {
+    const d = new Date(solarDateStr+'T00:00:00');
+    const fmt = new Intl.DateTimeFormat('ko-KR-u-ca-chinese',{month:'numeric',day:'numeric'});
+    const parts = fmt.formatToParts(d);
+    const m = parseInt(parts.find(p=>p.type==='month')?.value||'0');
+    const dy = parseInt(parts.find(p=>p.type==='day')?.value||'0');
+    return (m&&dy)?{month:m,day:dy}:null;
+  } catch(e){return null;}
+}
 function addRecAnnual() {
   const mo=parseInt(document.getElementById('rec-ann-month')?.value)||0;
   const day=parseInt(document.getElementById('rec-ann-day')?.value)||0;
   const title=(document.getElementById('rec-ann-title')?.value||'').trim();
+  const isLunar=(document.getElementById('rec-ann-cal')?.value==='lunar');
   if(!mo||!day||!title) { alert('월, 일, 일정명을 모두 입력하세요'); return; }
   if(!recurringEvt.annual) recurringEvt.annual=[];
-  recurringEvt.annual.push({month:mo,day,title});
+  recurringEvt.annual.push({month:mo,day,title,isLunar});
   document.getElementById('rec-ann-title').value='';
+  document.getElementById('rec-ann-cal').value='solar';
   saveRecurring(); renderRecurring();
 }
 function addRecWeekly() {
