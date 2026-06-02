@@ -1582,14 +1582,19 @@ function removeWkPlanRow(idx) {
   saveWeekly();
 }
 function applyWkPlanToDaily() {
-  // 현재 보고 있는 주의 다음 주 월요일을 기본값 키로 사용
   const dt = new Date(curWk+'T00:00:00'); dt.setDate(dt.getDate()+7);
   const nextMon = localDateStr(dt);
   const validRows = wkPlanRows.filter(r=>r&&(r.time||r.plan));
   if (!wkPlanDefaults) wkPlanDefaults = {};
   wkPlanDefaults[nextMon] = validRows;
   if (window._fbSet) window._fbSet('diary/wk_plan_defaults', wkPlanDefaults);
-  alert('다음 주('+nextMon+'~) 일일 기본값으로 저장됐습니다.');
+  // 다음주 weekly 데이터에도 plan_rows 미리 기록 (주간 탭 이동 시 자동 표시)
+  if (!allWeekly[nextMon]) allWeekly[nextMon] = {};
+  if (!(allWeekly[nextMon].plan_rows||[]).length) {
+    allWeekly[nextMon].plan_rows = validRows;
+    if (window._fbSet) window._fbSet('diary/weekly_v2', allWeekly);
+  }
+  alert('다음 주('+nextMon+'~) 기본값으로 저장됐습니다. 다음주 탭에서 바로 확인하세요.');
 }
 
 // ── 날짜 헬퍼
@@ -1989,11 +1994,21 @@ function renderWeekly() {
   const navigItems = days2.filter(({e})=>e.navig&&e.navig.trim()).map(({d,e})=>`<div style="font-size:11px;padding:2px 0;border-bottom:1px solid var(--b2)"><span style="color:var(--t3);min-width:50px;display:inline-block">${dayLabel(d)}</span><span style="color:var(--blue)">${e.navig}</span></div>`).join('');
   const navigSec = document.getElementById('wk-daily-navig');
   if (navigSec) navigSec.innerHTML = navigItems ? '<div style="font-size:11px;color:var(--blue);font-weight:700;margin-bottom:3px">🧭 항법 기록</div>'+navigItems : '';
-  // 주간 계획 복원
+  // 주간 계획 복원 — 현재 주 데이터 없으면 가장 최근 이전 주 plan_rows 자동 상속
   wkPlanRows = [];
   const tbody = document.getElementById('wk-plan-body');
   if (tbody) tbody.innerHTML = '';
-  (w.plan_rows||[]).forEach(r => { if(r) addWkPlanRow(r.time, r.plan, r.days); });
+  let planRowsToLoad = w.plan_rows || [];
+  if (!planRowsToLoad.length) {
+    // 1순위: 이전 주가 "다음주 일일 적용" 클릭해서 저장한 defaults
+    planRowsToLoad = wkPlanDefaults[curWk] || [];
+  }
+  if (!planRowsToLoad.length) {
+    // 2순위: 가장 최근 이전 주의 plan_rows
+    const prevDt = new Date(curWk+'T00:00:00'); prevDt.setDate(prevDt.getDate()-7);
+    planRowsToLoad = (allWeekly[localDateStr(prevDt)]||{}).plan_rows || [];
+  }
+  planRowsToLoad.forEach(r => { if(r) addWkPlanRow(r.time, r.plan, r.days); });
   wkChecks.finance = !!w.finance; wkChecks.emotion = !!w.emotion;
   ['finance','emotion'].forEach(k => {
     const el = document.getElementById('wk-'+k);
