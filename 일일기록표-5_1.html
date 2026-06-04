@@ -1441,9 +1441,9 @@ function addDailyPlanRow(time_v, plan_v, exec_v, focus_v) {
   tr2.id = 'dpr-exec-row-'+idx;
   const ev = (exec_v||'').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   tr2.innerHTML = `
-    <td colspan="4" style="padding:0 2px 5px 0">
+    <td colspan="4" style="padding:0 2px 5px 50px">
       <div style="display:flex;align-items:flex-start;gap:4px">
-        <span style="font-size:10px;color:var(--t3);white-space:nowrap;padding:4px 0 0 2px">[실행]</span>
+        <span style="font-size:10px;color:var(--t3);white-space:nowrap;padding:4px 0 0 2px">└ [실행]</span>
         <textarea id="dpr-exec-${idx}" rows="1" placeholder="실행 내용 (선택)..."
           oninput="updateDailyPlanRow(${idx});this.style.height='auto';this.style.height=this.scrollHeight+'px'"
           style="flex:1;resize:none;overflow:hidden;min-height:26px;background:transparent;border:none;border-bottom:1px solid var(--b2);color:var(--blue);font-family:inherit;font-size:12px;outline:none;padding:3px 2px">${ev}</textarea>
@@ -2685,14 +2685,20 @@ function renderMonCalendar() {
   for(let i=0;i<startOffset;i++) html+='<div></div>';
   const today=new Date(), tyyyy=today.getFullYear(),tmm=today.getMonth()+1,tdd=today.getDate();
   for(let d=1;d<=daysInMonth;d++){
-    const cnt=(msched[d]||[]).filter(r=>r&&r.text).length;
+    const items=(msched[d]||[]).filter(r=>r&&r.text);
+    const cnt=items.length;
     const isToday=yr===tyyyy&&mo===tmm&&d===tdd;
     const isSel=d===selectedMonDay;
     const bg=isSel?'var(--acc)':isToday?'var(--s3)':'transparent';
     const col=isSel?'#fff':isToday?'var(--blue)':'var(--t2)';
+    const evtCol=isSel?'rgba(255,255,255,0.85)':'var(--t3)';
+    const shown=items.slice(0,4);
+    const extra=cnt-shown.length;
+    const evtHtml=shown.map(r=>`<div style="font-size:9px;color:${evtCol};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;line-height:1.3">${r.text.slice(0,7)}</div>`).join('')
+      +(extra>0?`<div style="font-size:9px;color:${evtCol};opacity:.7">·${extra}</div>`:'');
     html+=`<div onclick="selectMonDay(${d})" style="cursor:pointer;text-align:center;padding:3px 1px;border-radius:4px;background:${bg}">
       <div style="font-size:12px;color:${col};font-weight:${isToday?700:400}">${d}</div>
-      ${cnt?`<div style="width:4px;height:4px;border-radius:50%;background:var(--green);margin:1px auto 0"></div>`:'<div style="height:5px"></div>'}
+      ${cnt?evtHtml:'<div style="height:5px"></div>'}
     </div>`;
   }
   html+='</div>';
