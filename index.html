@@ -137,6 +137,20 @@ textarea{resize:none;font-size:13px;border:1px solid var(--b1);border-radius:4px
 .date-label{font-weight:700;font-size:17px;text-align:center}
 .date-input{font-size:11px;color:var(--t3);background:none;border:none;cursor:pointer;margin-top:2px;width:100%;text-align:center}
 .sleep-hrs{font-size:12px;margin-left:6px}
+/* ── 6남매 약했던 것 버튼 ── */
+.weak-btn{background:transparent;border:1px solid var(--b1);border-radius:14px;padding:3px 10px;font-size:12px;cursor:pointer;font-family:inherit;color:var(--t3);transition:all .15s}
+.weak-btn.on{background:#2d1010;border-color:var(--red);color:var(--red);font-weight:700}
+/* ── 트리거 대응방식 버튼 ── */
+.resp-btn{background:transparent;border:1px solid var(--b1);border-radius:14px;padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit;color:var(--t3);transition:all .15s}
+.resp-btn.on{background:var(--bdim);border-color:var(--blue);color:var(--blue);font-weight:700}
+/* ── 양심노트 OAX 버튼 ── */
+.oax-btn{background:transparent;border:1px solid var(--b1);border-radius:3px;padding:1px 5px;font-size:12px;cursor:pointer;font-family:inherit;color:var(--t3);transition:all .15s}
+.oax-btn.on-o{background:#0f2d1a;border-color:var(--green);color:var(--green);font-weight:700}
+.oax-btn.on-a{background:#2d2800;border-color:var(--yellow);color:var(--yellow);font-weight:700}
+.oax-btn.on-x{background:var(--rdim);border-color:var(--red);color:var(--red);font-weight:700}
+/* ── 양심노트 판단 버튼 ── */
+.judge-btn{background:transparent;border:1px solid var(--b1);border-radius:3px;padding:2px 4px;font-size:10px;cursor:pointer;font-family:inherit;color:var(--t3);transition:all .15s;white-space:nowrap}
+.judge-btn.on{background:var(--bdim);border-color:var(--purple);color:var(--purple);font-weight:700}
 </style>
 <!-- Firebase SDK -->
 <script type="module">
@@ -275,6 +289,12 @@ textarea{resize:none;font-size:13px;border:1px solid var(--b1);border-radius:4px
   </div>
   <div id="alert-box"></div>
 
+  <!-- 이번달 목표 (월간 탭 종합목표 → 읽기 전용) -->
+  <div id="daily-month-goal" style="display:none;background:#1a0a2a;border:1px solid #4a1f7f;border-radius:8px;padding:10px 14px;margin-bottom:10px">
+    <div style="font-size:11px;color:var(--purple);font-weight:700;letter-spacing:.06em;margin-bottom:5px">🎯 이번달 목표</div>
+    <div id="daily-month-goals-list"></div>
+  </div>
+
   <!-- 이번 주 목표 (주간 탭 다음주 목표 → 읽기 전용 리스트) -->
   <div id="daily-week-goal" style="display:none;background:#0a1a2a;border:1px solid #1e4a7f;border-radius:8px;padding:10px 14px;margin-bottom:10px">
     <div style="font-size:11px;color:var(--blue);font-weight:700;letter-spacing:.06em;margin-bottom:5px">📌 이번 주 목표</div>
@@ -287,6 +307,12 @@ textarea{resize:none;font-size:13px;border:1px solid var(--b1);border-radius:4px
   <div id="today-sched-box" class="today-sched-box" style="display:none">
     <div style="font-size:11px;color:var(--green);font-weight:700;letter-spacing:.06em;margin-bottom:5px">📌 오늘 주요 일정</div>
     <div id="today-sched-list"></div>
+  </div>
+
+  <!-- 오늘의 화두 (전날 '내일의 화두' 자동 표시) -->
+  <div id="daily-agenda-box" style="display:none;background:#0a1a10;border:1px solid #1e4a2f;border-radius:8px;padding:8px 14px;margin-bottom:10px">
+    <div style="font-size:11px;color:var(--green);font-weight:700;letter-spacing:.06em;margin-bottom:4px">💡 오늘의 화두</div>
+    <div id="daily-agenda-text" style="font-size:13px;color:var(--t1);line-height:1.5"></div>
   </div>
 
   <!-- 계획/실행표 -->
@@ -389,7 +415,7 @@ textarea{resize:none;font-size:13px;border:1px solid var(--b1);border-radius:4px
     </div>
     <div class="row">
       <div class="rl"><div class="rl-m">해마 노트</div><div class="rl-s">장소+대상+순간+감정 2개↑</div></div>
-      <div class="rc"><textarea id="f-hema" rows="2" placeholder="오늘 가장 선명했던 장면 — 뿌듯함·깨달음·인상깊은 기억 등" oninput="autoSave()"></textarea></div>
+      <div class="rc"><textarea id="f-hema" rows="5" placeholder="오늘 가장 선명했던 장면 — 뿌듯함·깨달음·인상깊은 기억 등" oninput="autoSave();this.style.height='auto';this.style.height=this.scrollHeight+'px'" style="overflow:hidden;min-height:110px"></textarea></div>
     </div>
     <div class="row">
       <div class="rl"><div class="rl-m">버텨낸 것</div><div class="rl-s">성과 아닌 버팀</div></div>
@@ -399,9 +425,121 @@ textarea{resize:none;font-size:13px;border:1px solid var(--b1);border-radius:4px
       <div class="rl"><div class="rl-m">살아난 순간</div><div class="rl-s">에너지 올라온 때</div></div>
       <div class="rc"><input type="text" id="f-alive" placeholder="어떤 순간에 에너지가 올라왔는가..." oninput="autoSave()"></div>
     </div>
-    <div class="row" style="border-bottom:none">
+    <div class="row">
       <div class="rl"><div class="rl-m">기운 빠진 순간</div><div class="rl-s">에너지 빠진 때</div></div>
       <div class="rc"><input type="text" id="f-drained" placeholder="어떤 순간에 에너지가 빠졌는가..." oninput="autoSave()"></div>
+    </div>
+    <!-- ── 6남매 점검 (삼일양심 Layer 3) ── -->
+    <div class="row">
+      <div class="rl"><div class="rl-m">6남매 점검</div><div class="rl-s">켜진 것에 ✓</div></div>
+      <div class="rc">
+        <div style="display:flex;flex-wrap:wrap;gap:4px 0">
+          <span class="chk" id="chk-6s-초연" onclick="toggleChk('6s-초연')"><span class="chk-box"><span class="chk-mark">✓</span></span><span class="chk-label">초연</span></span>
+          <span class="chk" id="chk-6s-충만" onclick="toggleChk('6s-충만')"><span class="chk-box"><span class="chk-mark">✓</span></span><span class="chk-label">충만</span></span>
+          <span class="chk" id="chk-6s-초긍정" onclick="toggleChk('6s-초긍정')"><span class="chk-box"><span class="chk-mark">✓</span></span><span class="chk-label">초긍정</span></span>
+          <span class="chk" id="chk-6s-유연" onclick="toggleChk('6s-유연')"><span class="chk-box"><span class="chk-mark">✓</span></span><span class="chk-label">유연</span></span>
+          <span class="chk" id="chk-6s-따뜻" onclick="toggleChk('6s-따뜻')"><span class="chk-box"><span class="chk-mark">✓</span></span><span class="chk-label">따뜻</span></span>
+          <span class="chk" id="chk-6s-자명" onclick="toggleChk('6s-자명')"><span class="chk-box"><span class="chk-mark">✓</span></span><span class="chk-label">자명</span></span>
+        </div>
+        <div style="font-size:10px;color:var(--t3);margin-top:3px">초연·충만·초긍정·유연·따뜻·자명 — 오늘 작동한 의식 상태</div>
+        <div style="margin-top:8px">
+          <div style="font-size:11px;color:var(--t3);margin-bottom:4px">가장 약했던 것 (1개)</div>
+          <div style="display:flex;flex-wrap:wrap;gap:4px" id="weak-6s-btns">
+            <button class="weak-btn" id="weak-6s-초연" onclick="toggleWeak6s('초연')">초연</button>
+            <button class="weak-btn" id="weak-6s-충만" onclick="toggleWeak6s('충만')">충만</button>
+            <button class="weak-btn" id="weak-6s-초긍정" onclick="toggleWeak6s('초긍정')">초긍정</button>
+            <button class="weak-btn" id="weak-6s-유연" onclick="toggleWeak6s('유연')">유연</button>
+            <button class="weak-btn" id="weak-6s-따뜻" onclick="toggleWeak6s('따뜻')">따뜻</button>
+            <button class="weak-btn" id="weak-6s-자명" onclick="toggleWeak6s('자명')">자명</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- ── 트리거 뿌리신념 (삼일양심 Layer 3) ── -->
+    <div class="row" style="border-bottom:none">
+      <div class="rl"><div class="rl-m">트리거 신념</div><div class="rl-s">오늘 반응한 믿음</div></div>
+      <div class="rc">
+        <input type="text" id="f-trigger" placeholder="상황 → 뿌리신념 / 없으면 '없음'..." oninput="autoSave()">
+        <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px" id="trigger-response-btns">
+          <button class="resp-btn" id="resp-btn-react" onclick="toggleTriggerResponse('react')">그냥 반응</button>
+          <button class="resp-btn" id="resp-btn-aware" onclick="toggleTriggerResponse('aware')">알아차리고 멈춤</button>
+          <button class="resp-btn" id="resp-btn-molla" onclick="toggleTriggerResponse('molla')">몰라 선언</button>
+          <button class="resp-btn" id="resp-btn-track" onclick="toggleTriggerResponse('track')">6단계 추적까지</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 양심노트 ── -->
+  <div class="card">
+    <div class="sec-label">📓 양심노트 (Layer 3 저녁 성찰)</div>
+
+    <!-- 오늘의 마음관리 -->
+    <div style="margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <div style="font-size:12px;font-weight:700;color:var(--t2)">● 오늘의 마음관리</div>
+        <button onclick="addConscienceRow()" style="background:transparent;border:1px dashed var(--b1);color:var(--t3);border-radius:4px;padding:2px 8px;font-size:11px;cursor:pointer">+ 사안추가</button>
+      </div>
+      <div style="font-size:10px;color:var(--t3);margin-bottom:6px">각 사안별 敬/仁/義/禮/智 ○·△·× 체크 후 판단 선택</div>
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:11px;min-width:360px">
+          <thead>
+            <tr style="background:var(--s3)">
+              <th style="padding:5px 6px;text-align:left;color:var(--t2);min-width:80px">사안</th>
+              <th style="padding:5px 4px;text-align:center;color:var(--blue);width:32px">敬</th>
+              <th style="padding:5px 4px;text-align:center;color:var(--green);width:32px">仁</th>
+              <th style="padding:5px 4px;text-align:center;color:var(--yellow);width:32px">義</th>
+              <th style="padding:5px 4px;text-align:center;color:var(--purple);width:32px">禮</th>
+              <th style="padding:5px 4px;text-align:center;color:var(--acc2);width:32px">智</th>
+              <th style="padding:5px 4px;text-align:center;color:var(--t2);width:60px">판단</th>
+              <th style="width:20px"></th>
+            </tr>
+          </thead>
+          <tbody id="conscience-tbody"></tbody>
+        </table>
+      </div>
+      <div id="conscience-empty" style="font-size:11px;color:var(--t3);padding:6px 0">+ 사안추가로 오늘의 마음관리 항목을 입력하세요</div>
+    </div>
+
+    <!-- 오늘의 심화분석 (선택) -->
+    <div style="border-top:1px solid var(--b2);padding-top:10px;margin-bottom:10px">
+      <div style="font-size:12px;font-weight:700;color:var(--t2);margin-bottom:6px">● 오늘의 심화분석 <span style="font-size:10px;font-weight:400;color:var(--t3)">(선택 — 특히 찜찜했던 사안 1개)</span></div>
+      <div class="m-field">
+        <div class="m-label">검토사안</div>
+        <input type="text" id="f-cs-topic" placeholder="어떤 상황이었는가..." oninput="autoSave()">
+      </div>
+      <div style="display:grid;gap:6px">
+        <div style="background:var(--s3);border-radius:6px;padding:8px 10px">
+          <div style="font-size:11px;color:var(--blue);font-weight:700;margin-bottom:3px">敬 — 그 순간 깨어있었는가?</div>
+          <input type="text" id="f-cs-kyung" placeholder="깨어있음 여부 / 당시 상태..." oninput="autoSave()" style="font-size:12px">
+        </div>
+        <div style="background:var(--s3);border-radius:6px;padding:8px 10px">
+          <div style="font-size:11px;color:var(--green);font-weight:700;margin-bottom:3px">仁 — 상대를 나처럼 배려했는가?</div>
+          <input type="text" id="f-cs-in" placeholder="배려 여부 / 어떻게 했는가..." oninput="autoSave()" style="font-size:12px">
+        </div>
+        <div style="background:var(--s3);border-radius:6px;padding:8px 10px">
+          <div style="font-size:11px;color:var(--yellow);font-weight:700;margin-bottom:3px">義 — 내가 싫은 일을 상대에게 하지 않았는가?</div>
+          <input type="text" id="f-cs-eui" placeholder="의로운 행동 여부..." oninput="autoSave()" style="font-size:12px">
+        </div>
+        <div style="background:var(--s3);border-radius:6px;padding:8px 10px">
+          <div style="font-size:11px;color:var(--purple);font-weight:700;margin-bottom:3px">禮 — 언행이 상황에 조화로웠는가?</div>
+          <input type="text" id="f-cs-ye" placeholder="언행의 적절함 여부..." oninput="autoSave()" style="font-size:12px">
+        </div>
+        <div style="background:var(--s3);border-radius:6px;padding:8px 10px">
+          <div style="font-size:11px;color:var(--acc2);font-weight:700;margin-bottom:3px">智 — 판단이 찜찜함 없이 자명했는가?</div>
+          <input type="text" id="f-cs-ji" placeholder="판단의 자명함 여부..." oninput="autoSave()" style="font-size:12px">
+        </div>
+      </div>
+      <div style="margin-top:8px">
+        <div class="m-label">분석 결과 / 향후 개선사항</div>
+        <textarea id="f-cs-result" rows="2" placeholder="종합 결론 및 더 개선해야 할 사항..." oninput="autoSave()"></textarea>
+      </div>
+    </div>
+
+    <!-- 자아성찰 -->
+    <div style="border-top:1px solid var(--b2);padding-top:10px">
+      <div style="font-size:12px;font-weight:700;color:var(--t2);margin-bottom:6px">● 자아 성찰</div>
+      <textarea id="f-cs-reflection" rows="2" placeholder="깨달음 / 잘한 일 / 반성할 일..." oninput="autoSave()"></textarea>
     </div>
   </div>
 
@@ -458,6 +596,12 @@ textarea{resize:none;font-size:13px;border:1px solid var(--b1);border-radius:4px
     </div>
     <div id="tmr-sched-list"></div>
     <div id="tmr-sched-empty" style="font-size:11px;color:var(--t3);padding:4px 0">+ 행으로 내일 일정을 추가하세요</div>
+  </div>
+
+  <!-- 내일의 화두 -->
+  <div class="card" style="margin-top:0">
+    <div class="sec-label">💡 내일의 화두</div>
+    <input type="text" id="f-tmr-agenda" placeholder="내일 하루 염두에 둘 한 가지..." oninput="autoSave()">
   </div>
 
   <div class="tomorrow-box">
@@ -554,7 +698,22 @@ textarea{resize:none;font-size:13px;border:1px solid var(--b1);border-radius:4px
       <div style="font-size:11px;color:var(--t3);font-weight:700;margin-bottom:6px">◽ 이번주 일일기록 자동 집계</div>
       <div id="wk-daily-alive" style="margin-bottom:6px"></div>
       <div id="wk-daily-drained" style="margin-bottom:6px"></div>
-      <div id="wk-daily-navig"></div>
+      <div id="wk-daily-navig" style="margin-bottom:6px"></div>
+      <div id="wk-daily-trigger" style="margin-bottom:6px"></div>
+      <div id="wk-daily-6s" style="margin-bottom:6px"></div>
+      <div id="wk-daily-conscience"></div>
+    </div>
+
+    <!-- 삼일양심 주간 점검 (Layer 3/4) -->
+    <div style="border-bottom:1px solid var(--b2);padding-bottom:10px;margin-bottom:8px">
+      <div style="font-size:12px;color:var(--purple);font-weight:700;margin-bottom:6px">🧘 삼일양심 주간 점검</div>
+      <div style="display:flex;gap:10px;margin-bottom:8px">
+        <span class="chk" id="wk-practice" onclick="toggleWkChk('practice')"><span class="chk-box"><span class="chk-mark">✓</span></span><span class="chk-label" style="font-size:12px">이번주 심화 느끼기 실습 완료</span></span>
+      </div>
+      <div class="m-field" style="margin-bottom:0">
+        <div class="m-label">◽ 이번주 반복된 뿌리 신념 <span style="color:var(--t3);font-size:11px">— 집계 보고 종합</span></div>
+        <input type="text" id="wk-trigger" placeholder="반복 트리거의 핵심 신념 (예: 나는 인정받아야 한다 / 실패하면 안 된다)..." oninput="saveWeekly()">
+      </div>
     </div>
 
     <!-- 패턴 요약 -->
@@ -1080,6 +1239,11 @@ textarea{resize:none;font-size:13px;border:1px solid var(--b1);border-radius:4px
 
   <div style="color:var(--t3);font-size:12px;font-weight:700;letter-spacing:.08em;margin:16px 0 6px">📋 플랜 B 트리거 (8.3)</div>
   <div id="planb-list"></div>
+
+  <!-- 트리거 6단계 프로세스 -->
+  <div style="color:var(--t3);font-size:12px;font-weight:700;letter-spacing:.08em;margin:16px 0 6px">🔁 트리거 6단계 프로세스 (삼일명상)</div>
+  <div style="font-size:11px;color:var(--t3);margin-bottom:8px">감정이 올라왔을 때 — 단계를 탭하면 실행 지침이 펼쳐집니다</div>
+  <div id="trigger6-list"></div>
 </div>
 
 <!-- ═══════════════════ 기록 ═══════════════════ -->
@@ -1354,6 +1518,9 @@ let wkChecks = { finance:false, emotion:false };
 let bodyState = '';
 let saveTimer = null;
 let wkPlanRows = [];
+let weak6s = '';            // 오늘 6남매 중 가장 약했던 항목
+let triggerResponse = '';   // 트리거 대응방식
+let conscienceRows = [];    // 양심노트 마음관리 행
 
 function showSpinner(on) {
   const el = document.getElementById('loading-overlay');
@@ -1441,7 +1608,7 @@ function addDailyPlanRow(time_v, plan_v, exec_v, focus_v) {
   tr2.id = 'dpr-exec-row-'+idx;
   const ev = (exec_v||'').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   tr2.innerHTML = `
-    <td colspan="4" style="padding:0 2px 5px 50px">
+    <td colspan="4" style="padding:0 2px 5px 18px">
       <div style="display:flex;align-items:flex-start;gap:4px">
         <span style="font-size:10px;color:var(--t3);white-space:nowrap;padding:4px 0 0 2px">└ [실행]</span>
         <textarea id="dpr-exec-${idx}" rows="1" placeholder="실행 내용 (선택)..."
@@ -1635,6 +1802,7 @@ function readForm() {
     survived: gv('f-survived'),
     alive: gv('f-alive'),
     drained: gv('f-drained'),
+    trigger: gv('f-trigger'),
     wife: gv('f-wife'),
     avoidance: gv('f-avoid'),
     tension: gv('f-tension'), unsaid: gv('f-unsaid'),
@@ -1646,6 +1814,18 @@ function readForm() {
     tmr_notdo: gv('f-tmr-notdo'),
     daily_plan_rows: dailyPlanRows.filter(r=>r),
     tmr_schedule: tmrSchedRows.filter(r=>r),
+    tmr_agenda: gv('f-tmr-agenda'),
+    weak_6s: weak6s,
+    trigger_response: triggerResponse,
+    conscience_items: conscienceRows.filter(r=>r),
+    conscience_topic: gv('f-cs-topic'),
+    conscience_kyung: gv('f-cs-kyung'),
+    conscience_in: gv('f-cs-in'),
+    conscience_eui: gv('f-cs-eui'),
+    conscience_ye: gv('f-cs-ye'),
+    conscience_ji: gv('f-cs-ji'),
+    conscience_result: gv('f-cs-result'),
+    conscience_reflection: gv('f-cs-reflection'),
   };
 }
 function fillForm(e) {
@@ -1656,17 +1836,41 @@ function fillForm(e) {
   sv('f-navig', e.navig); sv('f-hema', e.hema);
   sv('f-survived', e.survived); sv('f-alive', e.alive);
   sv('f-drained', e.drained); sv('f-wife', e.wife);
+  sv('f-trigger', e.trigger);
   sv('f-avoid', e.avoidance);
   sv('f-tension', e.tension); sv('f-unsaid', e.unsaid);
   sv('f-exercise-etc', e.exercise_etc); sv('f-body', e.body);
   sv('f-tmr-action', e.tmr_action); sv('f-tmr-goal', e.tmr_goal); sv('f-tmr-ban', e.tmr_ban);
   sv('f-tmr-notdo', e.tmr_notdo);
+  sv('f-tmr-agenda', e.tmr_agenda);
   renderDailyPlan(e.daily_plan_rows||[]);
   renderTmrSched(e.tmr_schedule||[]);
+  // 6남매 약함 복원
+  weak6s = e.weak_6s || '';
+  ['초연','충만','초긍정','유연','따뜻','자명'].forEach(k => {
+    const btn = document.getElementById('weak-6s-'+k);
+    if (btn) btn.className = 'weak-btn' + (weak6s===k?' on':'');
+  });
+  // 트리거 대응방식 복원
+  triggerResponse = e.trigger_response || '';
+  ['react','aware','molla','track'].forEach(k => {
+    const btn = document.getElementById('resp-btn-'+k);
+    if (btn) btn.className = 'resp-btn' + (triggerResponse===k?' on':'');
+  });
+  // 양심노트 복원
+  renderConscienceRows(e.conscience_items||[]);
+  sv('f-cs-topic', e.conscience_topic); sv('f-cs-kyung', e.conscience_kyung);
+  sv('f-cs-in', e.conscience_in); sv('f-cs-eui', e.conscience_eui);
+  sv('f-cs-ye', e.conscience_ye); sv('f-cs-ji', e.conscience_ji);
+  sv('f-cs-result', e.conscience_result); sv('f-cs-reflection', e.conscience_reflection);
+  // 해마노트 높이 복원
+  const hemaEl = document.getElementById('f-hema');
+  if (hemaEl && hemaEl.value) { hemaEl.style.height='auto'; hemaEl.style.height=hemaEl.scrollHeight+'px'; }
   checks = Object.assign({ gicheon:false, hongik:false, mindful:false, run:false, strength:false, lecture:false, 'ex-other':false,
     'a-contact':false,'a-interview':false,'a-blog':false,'a-brunch':false,
     'a-paper':false,'a-pmp':false,'a-lang':false,'a-ai':false,'a-adsp':false,'a-info':false,
-    'a-jobscan':false,'a-apply':false }, e.exercise || e.action_checks || {});
+    'a-jobscan':false,'a-apply':false,
+    '6s-초연':false,'6s-충만':false,'6s-초긍정':false,'6s-유연':false,'6s-따뜻':false,'6s-자명':false }, e.exercise || e.action_checks || {});
   Object.keys(checks).forEach(k => renderChk(k));
   bodyState = e.body_state || '';
   ['ok','tired','pain'].forEach(s => {
@@ -1744,6 +1948,99 @@ function renderChk(k) {
   else { b.classList.remove('on'); box.classList.remove('on'); m.style.display='none'; }
 }
 function toggleChk(k) { checks[k] = !checks[k]; renderChk(k); autoSave(); }
+
+// ── 6남매 약했던 것
+function toggleWeak6s(k) {
+  weak6s = weak6s === k ? '' : k;
+  ['초연','충만','초긍정','유연','따뜻','자명'].forEach(n => {
+    const btn = document.getElementById('weak-6s-'+n);
+    if (btn) btn.className = 'weak-btn' + (weak6s===n?' on':'');
+  });
+  autoSave();
+}
+
+// ── 트리거 대응방식
+function toggleTriggerResponse(k) {
+  triggerResponse = triggerResponse === k ? '' : k;
+  ['react','aware','molla','track'].forEach(n => {
+    const btn = document.getElementById('resp-btn-'+n);
+    if (btn) btn.className = 'resp-btn' + (triggerResponse===n?' on':'');
+  });
+  autoSave();
+}
+
+// ── 양심노트 마음관리 행 관리
+const OAX_COLS = ['kyung','in','eui','ye','ji'];
+const JUDGE_LABELS = ['①자명','②자찜','③찜자','④찜찜'];
+const JUDGE_KEYS   = ['clear','clfy','fycl','fuzzy'];
+
+function addConscienceRow(data) {
+  const idx = conscienceRows.length;
+  conscienceRows.push({ text:data?.text||'', oax:{}, judge:data?.judge||'' });
+  if (data) { conscienceRows[idx].text=data.text||''; conscienceRows[idx].oax=data.oax||{}; conscienceRows[idx].judge=data.judge||''; }
+  const tbody = document.getElementById('conscience-tbody');
+  if (!tbody) return;
+  const emptyEl = document.getElementById('conscience-empty');
+  if (emptyEl) emptyEl.style.display = 'none';
+  const tr = document.createElement('tr');
+  tr.id = 'cs-row-'+idx;
+  tr.style.borderBottom = '1px solid var(--b2)';
+  // OAX 버튼 생성 함수
+  const oaxBtns = col => {
+    const cur = (conscienceRows[idx].oax||{})[col]||'';
+    return ['o','a','x'].map(v=>`<button class="oax-btn${cur===v?' on-'+v:''}" id="cs-oax-${idx}-${col}-${v}" onclick="setOax(${idx},'${col}','${v}')">${v==='o'?'○':v==='a'?'△':'×'}</button>`).join('');
+  };
+  // 판단 버튼
+  const jBtns = JUDGE_KEYS.map((jk,ji)=>`<button class="judge-btn${conscienceRows[idx].judge===jk?' on':''}" id="cs-jdg-${idx}-${jk}" onclick="setJudge(${idx},'${jk}')">${JUDGE_LABELS[ji]}</button>`).join(' ');
+  tr.innerHTML =
+    '<td style="padding:4px 4px"><input type="text" id="cs-text-'+idx+'" value="'+(data?.text||'').replace(/"/g,'&quot;')+'" placeholder="사안..." oninput="updateCsText('+idx+')" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--b1);color:var(--t1);font-family:inherit;font-size:11px;outline:none;min-width:70px"></td>' +
+    OAX_COLS.map(c=>'<td style="padding:4px 2px;text-align:center;white-space:nowrap">'+oaxBtns(c)+'</td>').join('') +
+    '<td style="padding:4px 2px;white-space:nowrap"><div style="display:flex;flex-direction:column;gap:2px">'+jBtns+'</div></td>' +
+    '<td style="padding:4px 2px;text-align:center"><button onclick="removeCsRow('+idx+')" style="background:transparent;border:none;color:var(--red);font-size:13px;cursor:pointer">×</button></td>';
+  tbody.appendChild(tr);
+}
+function renderConscienceRows(rows) {
+  conscienceRows = [];
+  const tbody = document.getElementById('conscience-tbody');
+  if (tbody) tbody.innerHTML = '';
+  const emptyEl = document.getElementById('conscience-empty');
+  if (emptyEl) emptyEl.style.display = rows.length ? 'none' : 'block';
+  rows.forEach(r => { if(r) addConscienceRow(r); });
+}
+function updateCsText(idx) {
+  if (conscienceRows[idx]) { conscienceRows[idx].text = document.getElementById('cs-text-'+idx)?.value||''; autoSave(); }
+}
+function removeCsRow(idx) {
+  conscienceRows[idx] = null;
+  const tr = document.getElementById('cs-row-'+idx); if(tr) tr.remove();
+  const tbody = document.getElementById('conscience-tbody');
+  const emptyEl = document.getElementById('conscience-empty');
+  if (emptyEl && tbody && !tbody.querySelector('tr')) emptyEl.style.display = 'block';
+  autoSave();
+}
+function setOax(idx, col, val) {
+  if (!conscienceRows[idx]) return;
+  if (!conscienceRows[idx].oax) conscienceRows[idx].oax = {};
+  const prev = conscienceRows[idx].oax[col] || '';
+  const nv = prev === val ? '' : val;
+  conscienceRows[idx].oax[col] = nv;
+  ['o','a','x'].forEach(v => {
+    const btn = document.getElementById(`cs-oax-${idx}-${col}-${v}`);
+    if (btn) btn.className = 'oax-btn' + (nv===v?' on-'+v:'');
+  });
+  autoSave();
+}
+function setJudge(idx, jk) {
+  if (!conscienceRows[idx]) return;
+  const prev = conscienceRows[idx].judge || '';
+  const nv = prev === jk ? '' : jk;
+  conscienceRows[idx].judge = nv;
+  JUDGE_KEYS.forEach(k => {
+    const btn = document.getElementById(`cs-jdg-${idx}-${k}`);
+    if (btn) btn.className = 'judge-btn' + (nv===k?' on':'');
+  });
+  autoSave();
+}
 function shiftDate(d) {
   const dt = new Date(curDate+'T00:00:00'); dt.setDate(dt.getDate()+d);
   curDate = localDateStr(dt); loadDate();
@@ -1771,6 +2068,29 @@ function loadDate() {
   }
   fillForm(e); renderAlerts();
   loadTodaySchedule();
+
+  // 이번달 목표 표시 (현재 날짜 기준 월 월간탭 종합목표)
+  const curYM = curDate.slice(0,7);
+  const curMonData = allMonthly[curYM] || {};
+  const monCompGoals = curMonData.month_comp || [];
+  const mbox = document.getElementById('daily-month-goal');
+  if (mbox) {
+    mbox.style.display = monCompGoals.filter(r=>r&&r.text).length ? 'block' : 'none';
+    const mgl = document.getElementById('daily-month-goals-list');
+    if (mgl) mgl.innerHTML = monCompGoals.filter(r=>r&&r.text).map(r=>`<div style="font-size:13px;color:var(--t1);padding:2px 0">• ${r.text}</div>`).join('');
+  }
+
+  // 오늘의 화두 표시 (전날 tmr_agenda 읽기)
+  const ydDt = new Date(curDate+'T00:00:00'); ydDt.setDate(ydDt.getDate()-1);
+  const ydStr = localDateStr(ydDt);
+  const ydAgenda = (allDaily[ydStr]||{}).tmr_agenda || '';
+  const agendaBox = document.getElementById('daily-agenda-box');
+  const agendaText = document.getElementById('daily-agenda-text');
+  if (agendaBox && agendaText) {
+    agendaBox.style.display = ydAgenda.trim() ? 'block' : 'none';
+    agendaText.textContent = ydAgenda;
+  }
+
   // 이번 주 목표 표시 (지난 주 weekly 탭의 "다음주 목표" 읽기)
   const curWeekMon = monStr(curDate);
   const prevDt = new Date(curWeekMon+'T00:00:00'); prevDt.setDate(prevDt.getDate()-7);
@@ -1806,6 +2126,8 @@ function saveWeekly() {
   w.output = gv('wk-output'); w.next = gv('wk-next');
   w.alive = gv('wk-alive'); w.drained = gv('wk-drained');
   w.review = gv('wk-review');
+  w.trigger_pattern = gv('wk-trigger');
+  w.practice = wkChecks.practice;
   w.output_count = gv('wk-output-count');
   w.small_output = gv('wk-small-output');
   w.big_output = gv('wk-big-output');
@@ -1942,6 +2264,7 @@ function renderWeekly() {
   sv('wk-output', w.output);
   sv('wk-alive', w.alive); sv('wk-drained', w.drained);
   sv('wk-review', w.review);
+  sv('wk-trigger', w.trigger_pattern);
   sv('wk-output-count', w.output_count);
   sv('wk-small-output', w.small_output);
   sv('wk-big-output', w.big_output);
@@ -1982,6 +2305,62 @@ function renderWeekly() {
   const navigItems = days2.filter(({e})=>e.navig&&e.navig.trim()).map(({d,e})=>`<div style="font-size:11px;padding:2px 0;border-bottom:1px solid var(--b2)"><span style="color:var(--t3);min-width:50px;display:inline-block">${dayLabel(d)}</span><span style="color:var(--blue)">${e.navig}</span></div>`).join('');
   const navigSec = document.getElementById('wk-daily-navig');
   if (navigSec) navigSec.innerHTML = navigItems ? '<div style="font-size:11px;color:var(--blue);font-weight:700;margin-bottom:3px">🧭 항법 기록</div>'+navigItems : '';
+  // 트리거 신념 집계
+  const RESP_LABEL = {react:'그냥반응',aware:'알아차림',molla:'몰라선언',track:'6단계추적'};
+  const triggerItems = days2.filter(({e})=>e.trigger&&e.trigger.trim()&&e.trigger.trim()!='없음').map(({d,e})=>{
+    const respTag = e.trigger_response ? ' <span style="font-size:10px;color:var(--t3);margin-left:6px">[' + (RESP_LABEL[e.trigger_response]||e.trigger_response) + ']</span>' : '';
+    return '<div style="font-size:11px;padding:2px 0;border-bottom:1px solid var(--b2)"><span style="color:var(--t3);min-width:50px;display:inline-block">' + dayLabel(d) + '</span><span style="color:var(--purple)">' + e.trigger + '</span>' + respTag + '</div>';
+  }).join('');
+  const triggerSec = document.getElementById('wk-daily-trigger');
+  if (triggerSec) triggerSec.innerHTML = triggerItems ? '<div style="font-size:11px;color:var(--purple);font-weight:700;margin-bottom:3px">🧠 트리거 뿌리신념</div>'+triggerItems : '';
+
+  // 6남매 주간 집계
+  const SIX = ['초연','충만','초긍정','유연','따뜻','자명'];
+  const activeCounts = {}, weakCounts = {};
+  SIX.forEach(k=>{ activeCounts[k]=0; weakCounts[k]=0; });
+  days2.forEach(({e})=>{
+    const ac = e.exercise || e.action_checks || {};
+    SIX.forEach(k=>{ if(ac['6s-'+k]) activeCounts[k]++; });
+    if(e.weak_6s && SIX.includes(e.weak_6s)) weakCounts[e.weak_6s]++;
+  });
+  const hasSixData = SIX.some(k=>activeCounts[k]>0||weakCounts[k]>0);
+  const sixSec = document.getElementById('wk-daily-6s');
+  if (sixSec) {
+    if (hasSixData) {
+      const rows = SIX.map(k=>{
+        const act = activeCounts[k], wk = weakCounts[k];
+        const actColor = act>=4?'var(--green)':act>=2?'var(--yellow)':'var(--t3)';
+        const wkColor = wk>=3?'var(--red)':wk>=1?'var(--yellow)':'var(--t3)';
+        return `<div style="display:flex;align-items:center;gap:6px;padding:3px 0;border-bottom:1px solid var(--b2)">
+          <span style="font-size:12px;min-width:44px;color:var(--t2)">${k}</span>
+          <span style="font-size:11px;color:${actColor}">켜짐 ${act}회</span>
+          <span style="font-size:11px;color:var(--t3)">·</span>
+          <span style="font-size:11px;color:${wkColor}">약함 ${wk}회</span>
+        </div>`;
+      }).join('');
+      sixSec.innerHTML = '<div style="font-size:11px;color:var(--t2);font-weight:700;margin-bottom:4px">🔆 6남매 주간 집계</div>'+rows;
+    } else { sixSec.innerHTML = ''; }
+  }
+
+  // 양심노트 주간 집계
+  const JUDGE_MAP = {clear:'①자명',clfy:'②자찜',fycl:'③찜자',fuzzy:'④찜찜'};
+  const csItems = days2.flatMap(({d,e})=>(e.conscience_items||[]).filter(r=>r&&r.text).map(r=>({d,item:r})));
+  const csSec = document.getElementById('wk-daily-conscience');
+  if (csSec) {
+    if (csItems.length) {
+      const csRows = csItems.map(({d,item})=>{
+        const judgeLabel = item.judge ? (JUDGE_MAP[item.judge]||item.judge) : '';
+        const judgeColor = item.judge==='clear'?'var(--green)':item.judge==='clfy'?'var(--yellow)':item.judge==='fycl'?'var(--yellow)':item.judge==='fuzzy'?'var(--red)':'var(--t3)';
+        const judgeSpan = judgeLabel ? '<span style="color:'+judgeColor+';font-size:10px;font-weight:700;flex-shrink:0">'+judgeLabel+'</span>' : '';
+        return '<div style="font-size:11px;padding:3px 0;border-bottom:1px solid var(--b2);display:flex;gap:6px;align-items:flex-start">'
+          + '<span style="color:var(--t3);min-width:50px;flex-shrink:0">'+dayLabel(d)+'</span>'
+          + '<span style="color:var(--t1);flex:1">'+item.text+'</span>'
+          + judgeSpan
+          + '</div>';
+      }).join('');
+      csSec.innerHTML = '<div style="font-size:11px;color:var(--t2);font-weight:700;margin-bottom:4px">📓 양심노트 사안 집계</div>'+csRows;
+    } else { csSec.innerHTML = ''; }
+  }
   // 주간 계획 복원 — 현재 주 데이터 없으면 가장 최근 이전 주 plan_rows 자동 상속
   wkPlanRows = [];
   const tbody = document.getElementById('wk-plan-body');
@@ -1997,8 +2376,8 @@ function renderWeekly() {
     planRowsToLoad = (allWeekly[localDateStr(prevDt)]||{}).plan_rows || [];
   }
   planRowsToLoad.forEach(r => { if(r) addWkPlanRow(r.time, r.plan, r.days); });
-  wkChecks.finance = !!w.finance; wkChecks.emotion = !!w.emotion;
-  ['finance','emotion'].forEach(k => {
+  wkChecks.finance = !!w.finance; wkChecks.emotion = !!w.emotion; wkChecks.practice = !!w.practice;
+  ['finance','emotion','practice'].forEach(k => {
     const el = document.getElementById('wk-'+k);
     if (!el) return;
     const b = el.querySelector('.chk-box'), m = el.querySelector('.chk-mark');
@@ -2254,6 +2633,38 @@ function renderGuide() {
         <div style="font-size:11px;color:var(--green)">원칙: ${p.principle}</div>
       </div>`).join('');
   }
+  // 트리거 6단계 렌더링
+  const t6 = document.getElementById('trigger6-list');
+  if (t6 && !t6.innerHTML) {
+    const STEPS = [
+      { n:1, title:'상황 선택', color:'#58a6ff', desc:'감정이 크게 올라왔던 순간 하나를 선택한다.',
+        guide:'오늘 하루 중 가장 반응이 컸던 한 장면을 떠올린다. 여러 개가 있어도 하나만 고른다.' },
+      { n:2, title:'트리거 포착', color:'#d29922', desc:'어떤 순간 반응이 시작됐는가? 그 정확한 지점을 찾는다.',
+        guide:'언제 감정이 올라오기 시작했는가? 어떤 말, 표정, 상황이 방아쇠였는가? 최대한 구체적으로 짚는다.' },
+      { n:3, title:'감정 집중', color:'#f85149', desc:'그 순간의 감정을 다시 느껴본다 (분노·두려움·서운함 등)',
+        guide:'지금 이 순간 그 감정을 몸으로 느낀다. 분석하지 않고 그냥 느끼는 것. 가슴·목·배 어디에 있는지 확인한다.' },
+      { n:4, title:'신념 추출', color:'#a371f7', desc:'이 감정이 사실이라면 내게 어떤 신념이 있는가?',
+        guide:'"이 반응이 일어났다는 건 내가 속으로 어떤 것을 사실로 믿고 있다는 뜻이다." 반복되는 패턴인가? — 뿌리신념을 한 문장으로 만든다. 예: "나는 인정받아야 한다", "실패하면 안 된다"' },
+      { n:5, title:'분리 선언', color:'#3fb950', desc:'"이것은 내가 아니라 내 생각이다." — 트리거의 힘이 약해지기 시작한다.',
+        guide:'소리 내어 말한다: "이것은 내 생각이지, 내가 아니다." 신념과 자신을 분리하는 행위. 이 순간 에고의 힘이 약해진다.' },
+      { n:6, title:'의식으로 귀환', color:'#58a6ff', desc:'단전호흡과 함께 지금 이 순간을 느낀다. 생각 이전의 고요한 상태.',
+        guide:'단전에 손을 얹고 3~5회 단전호흡을 한다. 숨이 들어오고 나가는 감각에 집중한다. 생각이 없는 고요한 순간을 1인칭으로 알아차린다.' },
+    ];
+    t6.innerHTML = STEPS.map(s=>`
+      <div class="routine-item" id="t6-item-${s.n}" onclick="toggleT6(${s.n})" style="cursor:pointer;border-left:3px solid ${s.color}">
+        <div class="step-num" style="background:${s.color};color:#fff">${s.n}</div>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:700;color:${s.color}">${s.title}</div>
+          <div style="font-size:12px;color:var(--t2);margin-top:1px">${s.desc}</div>
+          <div id="t6-guide-${s.n}" style="display:none;font-size:12px;color:var(--t1);background:var(--s3);border-radius:5px;padding:8px 10px;margin-top:6px;line-height:1.6">${s.guide}</div>
+        </div>
+      </div>`).join('');
+  }
+}
+function toggleT6(n) {
+  const g = document.getElementById('t6-guide-'+n);
+  if (!g) return;
+  g.style.display = g.style.display==='none' ? 'block' : 'none';
 }
 function showSit(i) {
   const s = SITUATIONS[i];
