@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>인생기록표</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;700&family=Noto+Sans+KR:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
 :root {
   --bg:#0d1117; --s1:#161b22; --s2:#0d1117; --s3:#21262d;
@@ -15,16 +16,16 @@
   --acc:#1f6feb; --acc2:#388bfd;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;background:var(--bg);color:var(--t1);font-family:'Apple SD Gothic Neo','Noto Sans KR',sans-serif;font-size:15px;overscroll-behavior:none}
+html,body{height:100%;background:var(--bg);background-image:radial-gradient(ellipse 600px 400px at 15% 20%, rgba(31,111,235,0.07) 0%, transparent 70%),radial-gradient(ellipse 500px 350px at 85% 80%, rgba(63,185,80,0.05) 0%, transparent 70%);color:var(--t1);font-family:'Noto Sans KR','Apple SD Gothic Neo',sans-serif;font-size:15px;overscroll-behavior:none}
 /* ── 탭 ── */
-.topbar{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--s1);border-bottom:1px solid var(--b2)}
+.topbar{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(22,27,34,0.85);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid rgba(48,54,61,0.5)}
 .title-row{display:flex;align-items:center;justify-content:space-between;padding:8px 16px 0}
-.title-main{font-size:13px;font-weight:700;color:var(--t2);letter-spacing:.06em}
+.title-main{font-size:13px;font-weight:700;letter-spacing:.06em;background:linear-gradient(135deg,var(--blue),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 .title-sub{font-size:10px;color:var(--t3);margin-top:1px}
 .tabs{display:flex;overflow-x:auto;padding:5px 16px 0;gap:4px;scrollbar-width:none}
 .tabs::-webkit-scrollbar{display:none}
 .tab{flex-shrink:0;padding:5px 10px;font-size:12px;font-family:inherit;border:1px solid var(--b1);border-radius:6px 6px 0 0;background:transparent;color:var(--t3);cursor:pointer;border-bottom:none;margin-bottom:-1px;transition:all .15s}
-.tab.on{background:var(--s1);color:var(--blue);border-color:var(--b1);border-bottom:1px solid var(--s1);font-weight:700}
+.tab.on{background:var(--s1);color:var(--blue);border-color:var(--b1);border-bottom:2px solid var(--blue);font-weight:700}
 .tabs-row2{display:flex;overflow-x:auto;padding:3px 16px 0;gap:4px;scrollbar-width:none;border-top:1px solid var(--b2)}
 .tabs-row2::-webkit-scrollbar{display:none}
 .tab2{flex-shrink:0;padding:4px 9px;font-size:11px;font-family:inherit;border:1px solid var(--b1);border-radius:5px 5px 0 0;background:transparent;color:var(--t3);cursor:pointer;border-bottom:none;margin-bottom:-1px;transition:all .15s}
@@ -55,10 +56,10 @@ html,body{height:100%;background:var(--bg);color:var(--t1);font-family:'Apple SD
 /* ── 반복 일정 ── */
 .rec-event-item{background:var(--s1);border:1px solid var(--b1);border-radius:6px;padding:7px 10px;margin-bottom:4px;display:flex;align-items:center;gap:8px}
 /* ── 목표 섹션 ── */
-.goal-sec{background:var(--s1);border:1px solid var(--b1);border-radius:10px;padding:12px 14px;margin-bottom:10px}
+.goal-sec{background:linear-gradient(135deg,#0f1520,#0a0f1a);border:1px solid var(--b1);border-radius:10px;padding:12px 14px;margin-bottom:10px}
 .goal-sec-title{font-size:12px;font-weight:700;color:var(--t2);margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
 /* ── 카드 ── */
-.card{background:var(--s1);border:1px solid var(--b1);border-radius:10px;padding:4px 14px 10px;margin-bottom:10px}
+.card{background:linear-gradient(135deg,#0f1520,#0a0f1a);border:1px solid var(--b1);border-radius:10px;padding:4px 14px 10px;margin-bottom:10px;transition:box-shadow .3s}
 .sec-label{font-size:11px;font-weight:700;color:var(--t3);letter-spacing:.08em;padding:10px 0 4px}
 /* ── 행 ── */
 .row{display:flex;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--b2);gap:10px}
@@ -68,7 +69,8 @@ html,body{height:100%;background:var(--bg);color:var(--t1);font-family:'Apple SD
 .rl-s{font-size:11px;color:var(--t3);margin-top:2px}
 .rc{flex:1}
 /* ── 입력 ── */
-input[type=text],input[type=time],textarea{background:transparent;border:none;border-bottom:1.5px solid var(--b1);color:var(--t1);font-family:inherit;outline:none;padding:3px 2px;width:100%}
+input[type=text],input[type=time],textarea{background:rgba(22,27,34,0.5);border:1px solid var(--b1);border-radius:4px;color:var(--t1);font-family:inherit;outline:none;padding:4px 6px;width:100%;transition:border-color .2s,box-shadow .2s}
+input[type=text]:focus,input[type=time]:focus,textarea:focus{border-color:var(--blue);box-shadow:0 0 0 2px rgba(88,166,255,0.15)}
 input[type=number]{background:transparent;border:none;border-bottom:1.5px solid var(--b1);color:var(--t1);font-family:inherit;outline:none;padding:3px 0;width:50px;text-align:center}
 input[type=range]{width:100%;accent-color:var(--blue);margin:4px 0}
 input::placeholder,textarea::placeholder{color:var(--t3)}
@@ -77,9 +79,10 @@ textarea{resize:none;font-size:13px;border:1px solid var(--b1);border-radius:4px
 /* ── 체크박스 ── */
 .chk{display:inline-flex;align-items:center;gap:5px;cursor:pointer;user-select:none;margin-right:10px}
 .chk-box{width:18px;height:18px;border-radius:3px;border:2px solid var(--b1);background:transparent;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
-.chk-box.on{border-color:var(--green);background:var(--gdim)}
+.chk-box.on{border-color:var(--green);background:var(--gdim);box-shadow:0 0 8px rgba(63,185,80,0.3)}
 .chk-mark{color:var(--green);font-size:12px;display:none}
-.chk-box.on .chk-mark{display:block}
+@keyframes checkPop{0%{transform:scale(0)}50%{transform:scale(1.3)}100%{transform:scale(1)}}
+.chk-box.on .chk-mark{display:block;animation:checkPop .25s ease-out}
 .chk-label{font-size:13px;color:var(--t2)}
 .chk.on .chk-label{color:var(--green)}
 /* ── 경보 ── */
@@ -91,31 +94,33 @@ textarea{resize:none;font-size:13px;border:1px solid var(--b1);border-radius:4px
 .tomorrow-title{color:var(--green);font-size:12px;font-weight:700;letter-spacing:.08em;margin-bottom:8px}
 /* ── 저장 버튼 ── */
 .save-btn{display:flex;justify-content:flex-end;margin:10px 0 0}
-.btn{background:var(--bdim);border:1px solid var(--acc);color:var(--blue);border-radius:6px;padding:9px 24px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .2s}
-.btn.ok{background:var(--gdim);border-color:var(--green);color:var(--green)}
+.btn{background:linear-gradient(135deg,var(--acc),var(--acc2));border:1px solid var(--acc);color:#fff;border-radius:6px;padding:9px 24px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .2s}
+.btn:hover{box-shadow:0 0 15px rgba(31,111,235,0.4);transform:translateY(-1px)}
+.btn.ok{background:linear-gradient(135deg,var(--gdim),#0f3d2a);border-color:var(--green);color:var(--green);box-shadow:0 0 10px rgba(63,185,80,0.3)}
 /* ── 주간 기둥 ── */
 .pillar-row{margin-bottom:12px}
 .pillar-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px}
 .pillar-desc{font-size:10px;color:var(--t3);margin-top:1px}
-.pillar-score{font-size:19px;font-weight:700;font-family:monospace}
+.pillar-score{font-size:19px;font-weight:700;font-family:'JetBrains Mono',monospace}
 .pillar-basis{font-size:10px;color:var(--t3);margin-top:2px}
 .warn-box{background:#1a0a0a;border:1px solid var(--rdim);border-radius:6px;padding:8px 12px;margin-top:8px}
 /* ── 상황처방 버튼 ── */
-.sit-btn{background:transparent;border:1px solid var(--b1);color:var(--t2);border-radius:20px;padding:6px 13px;font-size:13px;cursor:pointer;font-family:inherit;transition:all .15s;margin-bottom:4px}
+.sit-btn{background:transparent;border:1px solid var(--b1);color:var(--t2);border-radius:20px;padding:6px 13px;font-size:13px;cursor:pointer;font-family:inherit;transition:all .2s;margin-bottom:4px}
+.sit-btn:hover{border-color:var(--blue);box-shadow:0 0 10px rgba(88,166,255,0.2);transform:translateY(-2px)}
 .risk-btn{background:transparent;border-radius:20px;padding:6px 13px;font-size:13px;cursor:pointer;font-family:inherit;margin-bottom:4px}
 /* ── 결과 카드 ── */
 .result-card{background:var(--s1);border-radius:10px;padding:14px;margin-top:8px}
 /* ── 루틴 아이템 ── */
-.routine-item{background:var(--s1);border:1px solid var(--b1);border-radius:8px;padding:10px 12px;margin-bottom:6px;display:flex;gap:10px;align-items:flex-start}
+.routine-item{background:linear-gradient(135deg,#0f1520,#0a0f1a);border:1px solid var(--b1);border-radius:8px;padding:10px 12px;margin-bottom:6px;display:flex;gap:10px;align-items:flex-start}
 .step-num{border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;width:24px;height:24px}
 /* ── 원칙 카드 ── */
-.principle-card{background:var(--s1);border-radius:8px;padding:11px 13px;margin-bottom:7px;display:flex;gap:10px;border-left:3px solid}
+.principle-card{background:linear-gradient(135deg,#0f1520,#0a0f1a);border-radius:8px;padding:11px 13px;margin-bottom:7px;display:flex;gap:10px;border-left:3px solid}
 /* ── 기록 ── */
-.hist-item{background:var(--s1);border:1px solid var(--b1);border-radius:8px;padding:10px 13px;margin-bottom:7px;cursor:pointer}
+.hist-item{background:linear-gradient(135deg,#0f1520,#0a0f1a);border:1px solid var(--b1);border-radius:8px;padding:10px 13px;margin-bottom:7px;cursor:pointer}
 /* ── 경보 배지 ── */
 .badge{background:var(--rdim);color:var(--red);font-size:10px;padding:1px 5px;border-radius:3px;font-weight:700;margin-left:5px}
 /* ── 월간 섹션 ── */
-.monthly-sec{background:var(--s1);border:1px solid var(--b1);border-radius:10px;padding:12px 14px;margin-bottom:10px}
+.monthly-sec{background:linear-gradient(135deg,#0f1520,#0a0f1a);border:1px solid var(--b1);border-radius:10px;padding:12px 14px;margin-bottom:10px}
 .monthly-sec-title{font-size:13px;font-weight:700;margin-bottom:8px}
 .m-field{margin-bottom:10px}
 .m-label{font-size:12px;color:var(--t2);margin-bottom:4px}
@@ -132,8 +137,9 @@ textarea{resize:none;font-size:13px;border:1px solid var(--b1);border-radius:4px
 .bt-table th{background:#1a3a5c;color:#fff;padding:5px 7px;text-align:left;white-space:nowrap;font-weight:600}
 .bt-table td{padding:5px 7px;border-bottom:1px solid var(--b2)}
 /* ── 날짜 네비 ── */
-.date-nav{display:flex;align-items:center;justify-content:space-between;padding:12px 0 6px}
-.date-arrow{background:none;border:none;color:var(--t2);font-size:22px;cursor:pointer;padding:2px 8px}
+.date-nav{display:flex;align-items:center;justify-content:space-between;padding:12px 0 6px;background:linear-gradient(135deg,rgba(15,21,32,0.6),rgba(10,15,26,0.6));border-radius:8px;margin-bottom:4px}
+.date-arrow{background:none;border:none;color:var(--t2);font-size:22px;cursor:pointer;padding:2px 8px;transition:all .2s}
+.date-arrow:hover{color:var(--blue);text-shadow:0 0 10px rgba(88,166,255,0.5)}
 .date-label{font-weight:700;font-size:17px;text-align:center}
 .date-input{font-size:11px;color:var(--t3);background:none;border:none;cursor:pointer;margin-top:2px;width:100%;text-align:center}
 .sleep-hrs{font-size:12px;margin-left:6px}
@@ -203,8 +209,7 @@ body.has-row2 .view{margin-top:107px}
 .tab:hover:not(.on),.tab2:hover:not(.on){color:var(--t1);background:rgba(255,255,255,.06);border-radius:4px}
 
 /* ── 카드 hover ── */
-.card{transition:box-shadow .2s}
-.card:hover{box-shadow:0 2px 12px rgba(0,0,0,.28)}
+.card:hover{box-shadow:0 4px 20px rgba(0,0,0,0.3)}
 
 /* ── 버튼 hover & active ── */
 .btn{transition:filter .15s,transform .1s}
@@ -420,6 +425,7 @@ body.has-row2 .view{margin-top:107px}
       </table>
     </div>
     <div id="daily-plan-empty" style="font-size:11px;color:var(--t3);padding:6px 0;display:none">주간 탭에서 기본값을 설정하거나 + 행으로 추가하세요</div>
+    <div id="daily-plan-score" style="display:none;margin-top:6px;padding:6px 8px;background:var(--s3);border-radius:6px;font-size:12px;color:var(--t2);text-align:right"></div>
   </div>
 
   <div class="card show-simple-only">
@@ -435,21 +441,17 @@ body.has-row2 .view{margin-top:107px}
       </div>
     </div>
     <div class="row">
-      <div class="rl"><div class="rl-m">수면 <span id="sleep-badge"></span></div><div class="rl-s">취침·기상</div></div>
+      <div class="rl"><div class="rl-m">수면 <span id="sleep-badge"></span></div><div class="rl-s">밤잠+낮잠 합계</div></div>
       <div class="rc">
-        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:4px">
-          <label style="font-size:12px;color:var(--t2)">취침 <input type="time" id="f-bed" style="width:88px" oninput="autoSave();calcSleep()"></label>
-          <label style="font-size:12px;color:var(--t2)">기상 <input type="time" id="f-wake" style="width:88px" oninput="autoSave();calcSleep()"></label>
-        </div>
         <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-          <label style="font-size:12px;color:var(--t2)">중간각성 <input type="number" id="f-wakeups" min="0" max="20" placeholder="회" style="width:44px" oninput="autoSave()"></label>
-          <label style="font-size:12px;color:var(--t2)">낮잠 <input type="text" id="f-nap" placeholder="0" style="width:36px;text-align:center" oninput="autoSave();calcSleep()"> 시간</label>
+          <label style="font-size:12px;color:var(--t2)">밤잠 <input type="number" id="f-sleep-night" min="0" max="24" step="0.5" placeholder="0" style="width:50px;text-align:center" oninput="autoSave();calcSleep()"> 시간</label>
+          <label style="font-size:12px;color:var(--t2)">낮잠 <input type="number" id="f-sleep-nap" min="0" max="24" step="0.5" placeholder="0" style="width:50px;text-align:center" oninput="autoSave();calcSleep()"> 시간</label>
           <span id="sleep-hrs" class="sleep-hrs"></span>
         </div>
       </div>
     </div>
     <div class="row">
-      <div class="rl"><div class="rl-m">오늘 화공 행동</div><div class="rl-s">1개라도</div></div>
+      <div class="rl"><div class="rl-m">오늘 미래준비</div><div class="rl-s">1개라도</div></div>
       <div class="rc">
         <div style="display:flex;flex-wrap:wrap;gap:4px 8px;margin-bottom:6px">
           <span onclick="toggleGroup('g-contact')" style="cursor:pointer;font-size:12px;color:var(--blue);font-weight:700">📞 연락▾</span>
@@ -630,7 +632,7 @@ body.has-row2 .view{margin-top:107px}
       </div>
       <div style="margin-top:8px">
         <div class="m-label">분석 결과 / 향후 개선사항</div>
-        <textarea id="f-cs-result" rows="2" placeholder="종합 결론 및 더 개선해야 할 사항..." oninput="autoSave()"></textarea>
+        <textarea id="f-cs-result" rows="3" placeholder="종합 결론 및 더 개선해야 할 사항..." oninput="autoSave();this.style.height='auto';this.style.height=this.scrollHeight+'px'" style="overflow:hidden;min-height:60px"></textarea>
       </div>
       </div><!-- /acc-body deep -->
     </div>
@@ -638,7 +640,7 @@ body.has-row2 .view{margin-top:107px}
     <!-- 자아성찰 -->
     <div style="border-top:1px solid var(--b2);padding-top:10px">
       <div style="font-size:12px;font-weight:700;color:var(--t2);margin-bottom:6px">● 자아 성찰</div>
-      <textarea id="f-cs-reflection" rows="2" placeholder="깨달음 / 잘한 일 / 반성할 일..." oninput="autoSave()"></textarea>
+      <textarea id="f-cs-reflection" rows="3" placeholder="깨달음 / 잘한 일 / 반성할 일..." oninput="autoSave();this.style.height='auto';this.style.height=this.scrollHeight+'px'" style="overflow:hidden;min-height:60px"></textarea>
     </div>
   </div>
 
@@ -725,7 +727,7 @@ body.has-row2 .view{margin-top:107px}
     </div>
   </div>
 
-  <div class="save-btn"><span class="save-status hidden" id="save-status"></span><button class="btn" id="save-btn" onclick="manualSave()">저장</button></div>
+  <div class="save-btn"><span class="save-status hidden" id="save-status"></span><button class="btn" id="save-btn" onclick="manualSave()">💾 저장</button></div>
 </div>
 
 <!-- ═══════════════════ 주간 ═══════════════════ -->
@@ -864,7 +866,7 @@ body.has-row2 .view{margin-top:107px}
 
   <div class="save-btn" style="gap:8px;display:flex;justify-content:flex-end">
     <button class="btn" onclick="applyWkPlanToDaily()" style="background:transparent;border-color:var(--purple);color:var(--purple)">다음주 일일 적용</button>
-    <button class="btn" id="wk-save-btn" onclick="saveWeeklyBtn()">저장</button>
+    <button class="btn" id="wk-save-btn" onclick="saveWeeklyBtn()">💾 저장</button>
   </div>
 </div>
 
@@ -930,7 +932,7 @@ body.has-row2 .view{margin-top:107px}
       <div id="m-goals-list"></div>
       <div id="m-details-list"></div>
     </div>
-    <div class="save-btn"><button class="btn" id="m-save-btn-goals" onclick="saveMonthlyBtn()">저장</button></div>
+    <div class="save-btn"><button class="btn" id="m-save-btn-goals" onclick="saveMonthlyBtn()">💾 저장</button></div>
   </div>
 
   <!-- ── 0월 주요일정/기록 ── -->
@@ -954,7 +956,7 @@ body.has-row2 .view{margin-top:107px}
       </div>
       <div id="mon-tracking-list"></div>
     </div>
-    <div class="save-btn"><button class="btn" id="m-save-btn-sched" onclick="saveMonthlyBtn()">저장</button></div>
+    <div class="save-btn"><button class="btn" id="m-save-btn-sched" onclick="saveMonthlyBtn()">💾 저장</button></div>
   </div>
 
   <!-- ── 60분 운영회의 ── -->
@@ -1059,7 +1061,7 @@ body.has-row2 .view{margin-top:107px}
     <div style="overflow-x:auto"><table class="bt-table" id="backtrack-tbl"></table></div>
   </div>
 
-  <div class="save-btn"><button class="btn" id="m-save-btn" onclick="saveMonthlyBtn()">저장</button></div>
+  <div class="save-btn"><button class="btn" id="m-save-btn" onclick="saveMonthlyBtn()">💾 저장</button></div>
   </div><!-- /msub-review -->
 </div>
 
@@ -1114,7 +1116,7 @@ body.has-row2 .view{margin-top:107px}
       </table>
     </div>
   </div>
-  <div class="save-btn"><button class="btn" id="life-save-btn" onclick="saveLifeGoalsBtn()">저장</button></div>
+  <div class="save-btn"><button class="btn" id="life-save-btn" onclick="saveLifeGoalsBtn()">💾 저장</button></div>
 </div>
 
 <!-- ═══════════════════ 10년 계획 ═══════════════════ -->
@@ -1130,7 +1132,7 @@ body.has-row2 .view{margin-top:107px}
       <tbody id="tenyear-body"></tbody>
     </table>
   </div>
-  <div class="save-btn"><button class="btn" id="tenyear-save-btn" onclick="saveTenYearBtn()">저장</button></div>
+  <div class="save-btn"><button class="btn" id="tenyear-save-btn" onclick="saveTenYearBtn()">💾 저장</button></div>
 </div>
 
 <!-- ═══════════════════ 연간 ═══════════════════ -->
@@ -1246,13 +1248,13 @@ body.has-row2 .view{margin-top:107px}
       </div>
       <div id="annual-work-list"></div>
     </div>
-    <div class="save-btn"><button class="btn" id="annual-save-btn" onclick="saveAnnualBtn()">저장</button></div>
+    <div class="save-btn"><button class="btn" id="annual-save-btn" onclick="saveAnnualBtn()">💾 저장</button></div>
   </div>
   <!-- 월간 주요일정 (연간) -->
   <div class="subview" id="asub-schedule">
     <div style="font-size:11px;color:var(--t3);margin-bottom:8px">연간 월별 주요 일정 / 목표 — 월 헤더를 탭하면 펼쳐집니다</div>
     <div id="annual-sched-accordion"></div>
-    <div class="save-btn"><button class="btn" onclick="saveAnnualSchedBtn()">저장</button></div>
+    <div class="save-btn"><button class="btn" onclick="saveAnnualSchedBtn()">💾 저장</button></div>
   </div>
 </div>
 
@@ -1735,6 +1737,26 @@ function setFocus(idx, val) {
     planEl.style.textDecoration = nv==='o'?'line-through':'none';
   }
   autoSave();
+  updatePlanScore();
+}
+function updatePlanScore() {
+  const el = document.getElementById('daily-plan-score');
+  if (!el) return;
+  const active = dailyPlanRows.filter(r => r && r.focus);
+  if (!active.length) { el.style.display = 'none'; return; }
+  const total = dailyPlanRows.filter(r => r).length;
+  const score = active.reduce((sum, r) => {
+    if (r.focus === 'o') return sum + 100;
+    if (r.focus === 'd') return sum + 75;
+    return sum;
+  }, 0);
+  const pct = Math.round(score / (total * 100) * 100);
+  const oCount = dailyPlanRows.filter(r => r && r.focus === 'o').length;
+  const dCount = dailyPlanRows.filter(r => r && r.focus === 'd').length;
+  const xCount = dailyPlanRows.filter(r => r && r.focus === 'x').length;
+  const col = pct >= 75 ? 'var(--green)' : pct >= 50 ? 'var(--yellow)' : 'var(--red)';
+  el.style.display = 'block';
+  el.innerHTML = `오늘 집중도 <b style="color:${col};font-size:14px">${pct}%</b> <span style="font-size:11px;color:var(--t3)">(○${oCount} △${dCount} ×${xCount} / 전체 ${total})</span>`;
 }
 function updateDailyPlanRow(idx) {
   if (dailyPlanRows[idx]!==undefined) {
@@ -1750,6 +1772,7 @@ function removeDailyPlanRow(idx) {
   const tr=document.getElementById('dpr-'+idx); if(tr) tr.remove();
   const tr2=document.getElementById('dpr-exec-row-'+idx); if(tr2) tr2.remove();
   autoSave();
+  updatePlanScore();
 }
 function renderDailyPlan(rows) {
   dailyPlanRows=[];
@@ -1772,6 +1795,7 @@ function renderDailyPlan(rows) {
   } else {
     sortRowsByTime(rows).forEach(r=>{ if(r) addDailyPlanRow(r.time,r.plan,r.exec,r.focus); });
   }
+  updatePlanScore();
 }
 
 // ── 주간 목표/세부 행 관리
@@ -1779,9 +1803,10 @@ let wkGoalRows = [], wkDetailRows = [];
 function _makeListRow(prefix, idx, text, removeFn) {
   const div = document.createElement('div');
   div.id = prefix+'-'+idx;
-  div.style.cssText = 'display:flex;align-items:center;gap:6px;margin-bottom:4px';
-  div.innerHTML = `<span style="color:var(--blue);font-weight:700;font-size:12px;flex-shrink:0">•</span>
-    <input type="text" id="${prefix}-text-${idx}" value="${(text||'').replace(/"/g,'&quot;')}" placeholder="항목..." oninput="${prefix==='wkgr'?'updateWkGoalRow':'updateWkDetailRow'}(${idx})" style="flex:1;background:transparent;border:none;border-bottom:1px solid var(--b1);color:var(--t1);font-family:inherit;font-size:12px;outline:none">
+  div.style.cssText = 'display:flex;align-items:flex-start;gap:6px;margin-bottom:4px';
+  const updateFn = prefix==='wkgr'?'updateWkGoalRow':prefix==='wkdr'?'updateWkDetailRow':prefix==='mngr'?'updateMonGoalRow':'updateMonDetailRow';
+  div.innerHTML = `<span style="color:var(--blue);font-weight:700;font-size:12px;flex-shrink:0;padding-top:4px">•</span>
+    <textarea id="${prefix}-text-${idx}" rows="1" placeholder="항목..." oninput="${updateFn}(${idx});this.style.height='auto';this.style.height=this.scrollHeight+'px'" style="flex:1;background:transparent;border:none;border-bottom:1px solid var(--b1);color:var(--t1);font-family:inherit;font-size:12px;outline:none;resize:none;overflow:hidden;min-height:22px;padding:2px 0">${(text||'').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</textarea>
     <button onclick="${removeFn}(${idx})" style="background:transparent;border:none;color:var(--red);font-size:14px;cursor:pointer;flex-shrink:0">×</button>`;
   return div;
 }
@@ -1884,13 +1909,18 @@ function monthLabel(mk) { const [y,m]=mk.split('-'); return `${y}년 ${parseInt(
 // 일일 탭
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 function gv(id) { const el = document.getElementById(id); return el ? el.value : ''; }
-function sv(id, v) { const el = document.getElementById(id); if(el) el.value = v || ''; }
+function sv(id, v) { const el = document.getElementById(id); if(el) { el.value = v || ''; if(el.tagName==='TEXTAREA'){ el.style.height='auto'; el.style.height=el.scrollHeight+'px'; } } }
+function autoResizeAll() {
+  document.querySelectorAll('textarea').forEach(el => {
+    if(el.offsetParent !== null) { el.style.height='auto'; el.style.height=el.scrollHeight+'px'; }
+  });
+}
 
 function readForm() {
   return {
     date: curDate,
     depression: gv('f-dep'), anxiety: gv('f-anx'), dep_context: gv('f-dep-context'),
-    sleep_bed: gv('f-bed'), sleep_wake: gv('f-wake'), sleep_wakeups: gv('f-wakeups'), nap: gv('f-nap'),
+    sleep_night: gv('f-sleep-night'), sleep_nap: gv('f-sleep-nap'),
     action_checks: Object.assign({}, checks),
     action_contact: gv('f-action-contact'),
     action_record: gv('f-action-record'),
@@ -1929,7 +1959,14 @@ function readForm() {
 }
 function fillForm(e) {
   sv('f-dep', e.depression); sv('f-anx', e.anxiety); sv('f-dep-context', e.dep_context);
-  sv('f-bed', e.sleep_bed); sv('f-wake', e.sleep_wake); sv('f-wakeups', e.sleep_wakeups); sv('f-nap', e.nap);
+  // 기존 데이터 마이그레이션 (sleep_bed/wake → sleep_night)
+  if (!e.sleep_night && e.sleep_bed && e.sleep_wake) {
+    const [bh,bm]=e.sleep_bed.split(':').map(Number),[wh,wm]=e.sleep_wake.split(':').map(Number);
+    let d=(wh*60+wm)-(bh*60+bm); if(d<0) d+=1440;
+    e.sleep_night = (d/60).toFixed(1);
+    if(e.nap) e.sleep_nap = e.nap;
+  }
+  sv('f-sleep-night', e.sleep_night); sv('f-sleep-nap', e.sleep_nap);
   sv('f-action-contact', e.action_contact); sv('f-action-record', e.action_record);
   sv('f-action-study', e.action_study); sv('f-action-apply', e.action_apply);
   sv('f-navig', e.navig); sv('f-hema', e.hema);
@@ -2001,38 +2038,29 @@ function manualSave() {
   saveDaily();
   renderAlerts();
   const btn = document.getElementById('save-btn');
-  btn.textContent = '✓ 저장됨'; btn.classList.add('ok');
-  setTimeout(() => { btn.textContent = '저장'; btn.classList.remove('ok'); }, 2000);
+  btn.textContent = '✅ 저장됨'; btn.classList.add('ok');
+  setTimeout(() => { btn.textContent = '💾 저장'; btn.classList.remove('ok'); }, 2000);
   const ts = new Date();
   showSaveStatus('saved', '방금 저장됨 ' + ts.getHours() + ':' + String(ts.getMinutes()).padStart(2, '0'));
 }
 function calcSleep() {
-  const bed = gv('f-bed'), wake = gv('f-wake');
+  const night = parseFloat(gv('f-sleep-night')) || 0;
+  const nap = parseFloat(gv('f-sleep-nap')) || 0;
+  const total = night + nap;
   const hEl = document.getElementById('sleep-hrs'), bEl = document.getElementById('sleep-badge');
-  if (!bed || !wake) { hEl.textContent = ''; bEl.innerHTML = ''; return; }
-  const [bh,bm] = bed.split(':').map(Number), [wh,wm] = wake.split(':').map(Number);
-  let diff = (wh*60+wm)-(bh*60+bm);
-  if (diff < 0) diff += 1440;
-  const napRaw = gv('f-nap');
-  const napMin = napRaw ? Math.round(parseFloat(napRaw) * 60) : 0;
-  const total = diff + (isNaN(napMin) ? 0 : napMin);
-  const hrs = (total/60).toFixed(1);
-  const napLabel = napMin > 0 ? ` (+낮잠 ${(napMin/60).toFixed(1)}h)` : '';
-  hEl.textContent = hrs + '시간' + napLabel;
-  hEl.style.color = total < 360 ? 'var(--red)' : 'var(--green)';
-  bEl.innerHTML = total < 360 ? '<span class="badge">6시간↓</span>' : '';
+  if (!night && !nap) { if(hEl) hEl.textContent = ''; if(bEl) bEl.innerHTML = ''; return; }
+  const napLabel = nap > 0 ? ` (밤${night}h+낮${nap}h)` : '';
+  if(hEl) { hEl.textContent = total.toFixed(1) + '시간' + napLabel; hEl.style.color = total < 7 ? 'var(--red)' : 'var(--green)'; }
+  if(bEl) bEl.innerHTML = total < 7 ? '<span class="badge">7시간↓</span>' : '';
 }
 function calcAlerts(e) {
   const a = [];
   if (parseInt(e.depression) >= 7) a.push('우울 7점↑ — 상담사 연락');
-  if (e.sleep_bed && e.sleep_wake) {
-    const [bh,bm]=e.sleep_bed.split(':').map(Number),[wh,wm]=e.sleep_wake.split(':').map(Number);
-    let d=(wh*60+wm)-(bh*60+bm); if(d<0)d+=1440;
-    if(d<360) a.push('수면 6시간 미만');
-  }
+  const sleepTotal = (parseFloat(e.sleep_night)||0) + (parseFloat(e.sleep_nap)||0);
+  if (e.sleep_night && sleepTotal < 7) a.push('수면 7시간 미만');
   const ac = e.action_checks || {};
   const hasAction = Object.values(ac).some(v=>v);
-  if (!hasAction) a.push('화공 행동 미기록');
+  if (!hasAction) a.push('미래준비 미기록');
   return a;
 }
 function renderAlerts() {
@@ -2244,8 +2272,8 @@ function saveWeekly() {
 function saveWeeklyBtn() {
   saveWeekly(); renderWeekly();
   const btn = document.getElementById('wk-save-btn');
-  btn.textContent='✓ 저장됨'; btn.classList.add('ok');
-  setTimeout(()=>{ btn.textContent='저장'; btn.classList.remove('ok'); },2000);
+  btn.textContent='✅ 저장됨'; btn.classList.add('ok');
+  setTimeout(()=>{ btn.textContent='💾 저장'; btn.classList.remove('ok'); },2000);
 }
 function toggleWkChk(k) {
   wkChecks[k] = !wkChecks[k];
@@ -2264,9 +2292,14 @@ function calcAutoPillarScores() {
   const deps = days.map(e=>parseFloat(e.depression)).filter(v=>!isNaN(v));
   const depAvg = deps.length ? deps.reduce((a,b)=>a+b,0)/deps.length : null;
   const sleepDays = days.filter(e=>{
-    if(!e.sleep_bed||!e.sleep_wake)return false;
-    const [bh,bm]=e.sleep_bed.split(':').map(Number),[wh,wm]=e.sleep_wake.split(':').map(Number);
-    let d=(wh*60+wm)-(bh*60+bm); if(d<0)d+=1440; return d>=420;
+    const night=parseFloat(e.sleep_night)||0, nap=parseFloat(e.sleep_nap)||0;
+    if(!night && !nap && !e.sleep_bed) return false;
+    // 마이그레이션: 구버전 데이터
+    if(!night && e.sleep_bed && e.sleep_wake){
+      const [bh,bm]=e.sleep_bed.split(':').map(Number),[wh,wm]=e.sleep_wake.split(':').map(Number);
+      let d=(wh*60+wm)-(bh*60+bm); if(d<0)d+=1440; return d>=420;
+    }
+    return (night+nap)>=7;
   }).length;
   const trainDays = days.filter(e=>e.exercise&&(e.exercise.gicheon||e.exercise.hongik||e.exercise.mindful)).length;
   let rec = 0;
@@ -2538,8 +2571,8 @@ function saveMonthlyBtn() {
   saveMonthly();
   ['m-save-btn','m-save-btn-goals','m-save-btn-sched'].forEach(id=>{
     const btn=document.getElementById(id); if(!btn) return;
-    btn.textContent='✓ 저장됨'; btn.classList.add('ok');
-    setTimeout(()=>{ btn.textContent='저장'; btn.classList.remove('ok'); },2000);
+    btn.textContent='✅ 저장됨'; btn.classList.add('ok');
+    setTimeout(()=>{ btn.textContent='💾 저장'; btn.classList.remove('ok'); },2000);
   });
 }
 function renderMonthly() {
@@ -2942,6 +2975,7 @@ function switchTab(v) {
   if (v==='routine')   { renderRoutine(); renderRecurring(); }
   if (v==='guide')     renderGuide();
   if (v==='history')   renderHistory();
+  setTimeout(autoResizeAll, 50);
 }
 
 // 상단 탭 클릭 → data-default로 해당 그룹의 기본 뷰 이동
@@ -3140,11 +3174,11 @@ function _addMonDetailGoalItem(catKey, text) {
   const idx=arr.length; arr.push({text:text||''});
   const el=document.getElementById('mdetail-list-'+catKey); if(!el) return;
   const div=document.createElement('div'); div.id=`mdetail-${catKey}-${idx}`;
-  div.style.cssText='display:flex;align-items:center;gap:4px;margin-bottom:3px';
-  div.innerHTML=`<span style="font-size:10px;color:var(--t3)">•</span>
-    <input type="text" value="${(text||'').replace(/"/g,'&quot;')}" placeholder="..."
-      oninput="monDetailGoals['${catKey}'][${idx}].text=this.value;saveMonthly()"
-      style="flex:1;font-size:12px;background:transparent;border:none;border-bottom:1px solid var(--b2);color:var(--t1);font-family:inherit;outline:none;padding:2px 0">
+  div.style.cssText='display:flex;align-items:flex-start;gap:4px;margin-bottom:3px';
+  div.innerHTML=`<span style="font-size:10px;color:var(--t3);padding-top:4px">•</span>
+    <textarea rows="1" placeholder="..."
+      oninput="monDetailGoals['${catKey}'][${idx}].text=this.value;saveMonthly();this.style.height='auto';this.style.height=this.scrollHeight+'px'"
+      style="flex:1;font-size:12px;background:transparent;border:none;border-bottom:1px solid var(--b2);color:var(--t1);font-family:inherit;outline:none;padding:2px 0;resize:none;overflow:hidden;min-height:22px">${(text||'').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</textarea>
     <button onclick="removeMonDetailGoalRow('${catKey}',${idx})" style="background:transparent;border:none;color:var(--red);font-size:13px;cursor:pointer">×</button>`;
   el.appendChild(div);
 }
@@ -3417,8 +3451,8 @@ function saveLifeGoals() {
 function saveLifeGoalsBtn() {
   saveLifeGoals();
   const btn=document.getElementById('life-save-btn');
-  btn.textContent='✓ 저장됨'; btn.classList.add('ok');
-  setTimeout(()=>{btn.textContent='저장';btn.classList.remove('ok');},2000);
+  btn.textContent='✅ 저장됨'; btn.classList.add('ok');
+  setTimeout(()=>{btn.textContent='💾 저장';btn.classList.remove('ok');},2000);
 }
 function renderLifePlan() {
   const g=lifeGoals||{};
@@ -3473,8 +3507,8 @@ function saveTenYear() {
 function saveTenYearBtn() {
   saveTenYear();
   const btn=document.getElementById('tenyear-save-btn');
-  btn.textContent='✓ 저장됨'; btn.classList.add('ok');
-  setTimeout(()=>{btn.textContent='저장';btn.classList.remove('ok');},2000);
+  btn.textContent='✅ 저장됨'; btn.classList.add('ok');
+  setTimeout(()=>{btn.textContent='💾 저장';btn.classList.remove('ok');},2000);
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -3515,13 +3549,13 @@ function saveAnnual() {
 function saveAnnualBtn() {
   saveAnnual();
   const btn=document.getElementById('annual-save-btn');
-  btn.textContent='✓ 저장됨'; btn.classList.add('ok');
-  setTimeout(()=>{btn.textContent='저장';btn.classList.remove('ok');},2000);
+  btn.textContent='✅ 저장됨'; btn.classList.add('ok');
+  setTimeout(()=>{btn.textContent='💾 저장';btn.classList.remove('ok');},2000);
 }
 function saveAnnualSchedBtn() {
   if(window._fbSet) window._fbSet('diary/annual_sched', annualSched);
   const btn=document.querySelector('#asub-schedule .btn');
-  if(btn){btn.textContent='✓ 저장됨';btn.classList.add('ok');setTimeout(()=>{btn.textContent='저장';btn.classList.remove('ok');},2000);}
+  if(btn){btn.textContent='✅ 저장됨';btn.classList.add('ok');setTimeout(()=>{btn.textContent='💾 저장';btn.classList.remove('ok');},2000);}
 }
 function addAnnualRow(type, text) {
   if(type==='comp') {
@@ -3582,11 +3616,11 @@ function renderAnnualDetailGoals() {
   cont.innerHTML=html;
 }
 function _adgItemHTML(cat,half,idx,text) {
-  return `<div id="adg-${cat}-${half}-${idx}" style="display:flex;align-items:center;gap:3px;margin-bottom:3px">
-    <span style="font-size:10px;color:var(--t3)">•</span>
-    <input type="text" value="${(text||'').replace(/"/g,'&quot;')}" placeholder="..."
-      oninput="annualDetailGoals['${cat}']['${half}'][${idx}].text=this.value;saveAnnual()"
-      style="flex:1;font-size:11px;background:transparent;border:none;border-bottom:1px solid var(--b2);color:var(--t1);font-family:inherit;outline:none;padding:1px 0">
+  return `<div id="adg-${cat}-${half}-${idx}" style="display:flex;align-items:flex-start;gap:3px;margin-bottom:3px">
+    <span style="font-size:10px;color:var(--t3);padding-top:4px">•</span>
+    <textarea rows="1" placeholder="..."
+      oninput="annualDetailGoals['${cat}']['${half}'][${idx}].text=this.value;saveAnnual();this.style.height='auto';this.style.height=this.scrollHeight+'px'"
+      style="flex:1;font-size:11px;background:transparent;border:none;border-bottom:1px solid var(--b2);color:var(--t1);font-family:inherit;outline:none;padding:1px 0;resize:none;overflow:hidden;min-height:22px">${(text||'').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</textarea>
     <button onclick="removeAnnualDetailGoalRow('${cat}','${half}',${idx})" style="background:transparent;border:none;color:var(--red);font-size:12px;cursor:pointer">×</button>
   </div>`;
 }
@@ -3852,6 +3886,7 @@ function setDailyMode(mode) {
   const fb = document.getElementById('mode-btn-full');
   if (sb) { sb.classList.toggle('on', mode === 'simple'); }
   if (fb) { fb.classList.toggle('on', mode === 'full'); }
+  if (mode === 'full') { setTimeout(()=>{ updatePlanScore(); autoResizeAll(); }, 50); }
 }
 // 초기 간편 모드
 setDailyMode('simple');
