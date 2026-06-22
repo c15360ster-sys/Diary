@@ -1756,7 +1756,7 @@ function updatePlanScore() {
   const xCount = dailyPlanRows.filter(r => r && r.focus === 'x').length;
   const col = pct >= 75 ? 'var(--green)' : pct >= 50 ? 'var(--yellow)' : 'var(--red)';
   el.style.display = 'block';
-  el.innerHTML = `오늘 집중도 <b style="color:${col};font-size:14px">${pct}%</b> <span style="font-size:11px;color:var(--t3)">(○${oCount} △${dCount} ×${xCount} / 전체 ${total})</span>`;
+  el.innerHTML = `오늘의 이행률/집중도 <b style="color:${col};font-size:14px">${pct}%</b> <span style="font-size:11px;color:var(--t3)">(○${oCount} △${dCount} ×${xCount} / 전체 ${total})</span>`;
 }
 function updateDailyPlanRow(idx) {
   if (dailyPlanRows[idx]!==undefined) {
