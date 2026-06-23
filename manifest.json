@@ -1,0 +1,15 @@
+{
+  "name": "인생기록표 달력",
+  "short_name": "달력",
+  "start_url": "./calendar.html",
+  "display": "standalone",
+  "background_color": "#0d1117",
+  "theme_color": "#0d1117",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%230d1117' width='100' height='100' rx='20'/><text x='50' y='68' text-anchor='middle' font-size='50'>📅</text></svg>",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

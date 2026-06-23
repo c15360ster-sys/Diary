@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>달력 — 인생기록표</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0d1117">
+<link rel="manifest" href="manifest.json">
+<style>
+:root{--bg:#0d1117;--s1:#161b22;--s3:#21262d;--b1:#30363d;--b2:#21262d;--t1:#e6edf3;--t2:#8b949e;--t3:#484f58;--green:#3fb950;--red:#f85149;--yellow:#d29922;--blue:#58a6ff;--purple:#a371f7;--acc:#1f6feb}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--bg);background-image:radial-gradient(ellipse 600px 400px at 15% 20%,rgba(31,111,235,.07) 0%,transparent 70%),radial-gradient(ellipse 500px 350px at 85% 80%,rgba(63,185,80,.05) 0%,transparent 70%);color:var(--t1);font-family:'Apple SD Gothic Neo','Noto Sans KR',sans-serif;font-size:15px;overscroll-behavior:none}
+.header{position:sticky;top:0;z-index:10;background:rgba(22,27,34,.9);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid rgba(48,54,61,.5);padding:10px 16px;display:flex;align-items:center;justify-content:space-between}
+.hdr-title{font-size:14px;font-weight:700;background:linear-gradient(135deg,var(--blue),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hdr-sub{font-size:10px;color:var(--t3);margin-top:1px}
+.nav{display:flex;align-items:center;justify-content:space-between;padding:10px 16px}
+.nav-btn{background:none;border:none;color:var(--t2);font-size:24px;cursor:pointer;padding:4px 10px;transition:color .2s}
+.nav-btn:hover{color:var(--blue)}
+.nav-label{font-size:17px;font-weight:700;text-align:center}
+.grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;padding:0 12px 8px}
+.day-hdr{text-align:center;font-size:10px;color:var(--t3);padding:4px 0}
+.day-cell{cursor:pointer;text-align:center;padding:4px 1px;border-radius:6px;min-height:48px;transition:background .15s}
+.day-num{font-size:13px}
+.evt{font-size:9px;color:var(--t3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;line-height:1.3}
+.card{background:linear-gradient(135deg,#0f1520,#0a0f1a);border:1px solid var(--b1);border-radius:10px;padding:10px 14px;margin:0 12px 12px}
+.card-title{font-size:12px;font-weight:700;color:var(--t3);letter-spacing:.06em;margin-bottom:8px}
+.sched-row{display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid var(--b2)}
+.sched-row:last-child{border-bottom:none}
+.sched-time{font-size:11px;color:var(--t3);min-width:40px}
+.sched-text{font-size:13px;flex:1}
+.sched-del{background:transparent;border:none;color:var(--red);font-size:14px;cursor:pointer;padding:2px 4px}
+.add-row{display:flex;gap:4px;margin-top:8px}
+.add-row input{background:rgba(22,27,34,.5);border:1px solid var(--b1);border-radius:4px;color:var(--t1);font-family:inherit;outline:none;padding:6px 8px;font-size:13px}
+.add-row input:focus{border-color:var(--blue);box-shadow:0 0 0 2px rgba(88,166,255,.15)}
+.add-btn{background:linear-gradient(135deg,var(--acc),#388bfd);border:1px solid var(--acc);color:#fff;border-radius:6px;padding:6px 14px;font-size:13px;font-weight:700;cursor:pointer}
+.empty{font-size:12px;color:var(--t3);padding:8px 0;text-align:center}
+.spinner{position:fixed;inset:0;background:rgba(13,17,23,.92);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px}
+.spin-ring{width:36px;height:36px;border:3px solid var(--b1);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.sun{color:var(--red)}.sat{color:var(--blue)}
+</style>
+<!-- Firebase SDK -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBPU6uqf3pvKAhPPEF9OTwKx20S_YdbO0s",
+    authDomain: "diary-629dd.firebaseapp.com",
+    databaseURL: "https://diary-629dd-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "diary-629dd",
+    storageBucket: "diary-629dd.firebasestorage.app",
+    messagingSenderId: "698468942403",
+    appId: "1:698468942403:web:043767c021232d0c420af6"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  window._db = db;
+  window._dbRef = ref;
+  window._dbSet = (path, data) => set(ref(db, path), data);
+
+  async function loadData() {
+    document.getElementById('spinner').style.display = 'flex';
+    try {
+      const snap = await get(ref(db, 'diary/monthly_v2'));
+      window.allMonthly = snap.val() || {};
+    } catch(e) {
+      window.allMonthly = {};
+    }
+    document.getElementById('spinner').style.display = 'none';
+    window.renderCalendar();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadData);
+  } else {
+    loadData();
+  }
+</script>
+</head>
+<body>
+
+<div id="spinner" class="spinner">
+  <div class="spin-ring"></div>
+  <div style="font-size:13px;color:var(--t2)">달력 불러오는 중...</div>
+</div>
+
+<div class="header">
+  <div>
+    <div class="hdr-title">인생기록표 달력</div>
+    <div class="hdr-sub">월간 주요일정</div>
+  </div>
+  <a href="index.html" style="font-size:11px;color:var(--blue);text-decoration:none">전체 기록표 →</a>
+</div>
+
+<div class="nav">
+  <button class="nav-btn" onclick="shiftMonth(-1)">‹</button>
+  <div class="nav-label" id="month-label"></div>
+  <button class="nav-btn" onclick="shiftMonth(1)">›</button>
+</div>
+
+<div class="grid" id="cal-grid"></div>
+
+<div id="day-section" style="display:none">
+  <div class="card">
+    <div class="card-title" id="day-label"></div>
+    <div id="day-items"></div>
+    <div class="add-row">
+      <input type="text" id="add-time" placeholder="시간" style="width:60px">
+      <input type="text" id="add-text" placeholder="일정 내용..." style="flex:1">
+      <button class="add-btn" onclick="addItem()">+</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let curMonth = '';
+let selDay = 0;
+
+function init() {
+  const now = new Date();
+  curMonth = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
+}
+init();
+
+function renderCalendar() {
+  const [yr, mo] = curMonth.split('-').map(Number);
+  document.getElementById('month-label').textContent = `${yr}년 ${mo}월`;
+
+  const firstDay = new Date(yr, mo-1, 1).getDay();
+  const daysInMonth = new Date(yr, mo, 0).getDate();
+  const startOffset = firstDay === 0 ? 6 : firstDay - 1;
+  const mData = (window.allMonthly || {})[curMonth] || {};
+  const msched = mData.monthly_schedule || {};
+  const today = new Date(), tyyyy = today.getFullYear(), tmm = today.getMonth()+1, tdd = today.getDate();
+
+  let html = '';
+  ['월','화','수','목','금','토','일'].forEach((d,i) => {
+    const cls = i===5 ? 'sat' : i===6 ? 'sun' : '';
+    html += `<div class="day-hdr ${cls}">${d}</div>`;
+  });
+
+  for (let i = 0; i < startOffset; i++) html += '<div></div>';
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const items = (msched[d] || []).filter(r => r && r.text);
+    const cnt = items.length;
+    const isToday = yr === tyyyy && mo === tmm && d === tdd;
+    const isSel = d === selDay;
+    const bg = isSel ? 'var(--acc)' : isToday ? 'var(--s3)' : 'transparent';
+    const col = isSel ? '#fff' : isToday ? 'var(--blue)' : 'var(--t2)';
+    const evtCol = isSel ? 'rgba(255,255,255,.85)' : 'var(--t3)';
+
+    // 요일 색상 (일=빨강, 토=파랑)
+    const cellDow = new Date(yr, mo-1, d).getDay();
+    const dowCol = cellDow === 0 ? 'var(--red)' : cellDow === 6 ? 'var(--blue)' : col;
+    const finalCol = isSel ? '#fff' : isToday ? 'var(--blue)' : dowCol;
+
+    const shown = items.slice(0, 3);
+    const extra = cnt - shown.length;
+    const evtHtml = shown.map(r =>
+      `<div class="evt" style="color:${evtCol}">${r.text.slice(0, 7)}</div>`
+    ).join('') + (extra > 0 ? `<div class="evt" style="color:${evtCol};opacity:.7">·${extra}</div>` : '');
+
+    html += `<div class="day-cell" onclick="selectDay(${d})" style="background:${bg}">
+      <div class="day-num" style="color:${finalCol};font-weight:${isToday?700:400}">${d}</div>
+      ${cnt ? evtHtml : ''}
+    </div>`;
+  }
+
+  document.getElementById('cal-grid').innerHTML = html;
+}
+
+function selectDay(d) {
+  selDay = d;
+  renderCalendar();
+  document.getElementById('day-section').style.display = 'block';
+  const [, mo] = curMonth.split('-').map(Number);
+  document.getElementById('day-label').textContent = `📅 ${mo}월 ${d}일 일정`;
+  renderDayItems();
+}
+
+function renderDayItems() {
+  if (!selDay) return;
+  const el = document.getElementById('day-items');
+  const msched = ((window.allMonthly || {})[curMonth] || {}).monthly_schedule || {};
+  const items = (msched[selDay] || []).filter(r => r && r.text);
+
+  if (!items.length) {
+    el.innerHTML = '<div class="empty">일정이 없습니다</div>';
+    return;
+  }
+  el.innerHTML = items.map((r, i) => `
+    <div class="sched-row">
+      <span class="sched-time">${r.time || ''}</span>
+      <span class="sched-text">${r.text}</span>
+      <button class="sched-del" onclick="removeItem(${i})">×</button>
+    </div>
+  `).join('');
+}
+
+function addItem() {
+  const text = document.getElementById('add-text').value.trim();
+  if (!text) return;
+  const time = document.getElementById('add-time').value || '';
+  const mk = curMonth;
+  if (!window.allMonthly[mk]) window.allMonthly[mk] = {};
+  if (!window.allMonthly[mk].monthly_schedule) window.allMonthly[mk].monthly_schedule = {};
+  if (!window.allMonthly[mk].monthly_schedule[selDay]) window.allMonthly[mk].monthly_schedule[selDay] = [];
+  window.allMonthly[mk].monthly_schedule[selDay].push({ text, time });
+  document.getElementById('add-text').value = '';
+  document.getElementById('add-time').value = '';
+  saveMonthly();
+  renderCalendar();
+  renderDayItems();
+}
+
+function removeItem(i) {
+  const mk = curMonth;
+  const sched = window.allMonthly[mk]?.monthly_schedule?.[selDay];
+  if (!sched) return;
+  sched.splice(i, 1);
+  saveMonthly();
+  renderDayItems();
+  renderCalendar();
+}
+
+function saveMonthly() {
+  if (window._dbSet) window._dbSet('diary/monthly_v2', window.allMonthly);
+}
+
+function shiftMonth(d) {
+  let [y, m] = curMonth.split('-').map(Number);
+  m += d;
+  if (m < 1) { m = 12; y--; }
+  if (m > 12) { m = 1; y++; }
+  curMonth = y + '-' + String(m).padStart(2, '0');
+  selDay = 0;
+  document.getElementById('day-section').style.display = 'none';
+  renderCalendar();
+}
+</script>
+</body>
+</html>
