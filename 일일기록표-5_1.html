@@ -339,11 +339,13 @@ body.has-row2 .view{margin-top:107px}
     <span id="sync-badge" style="display:none;background:#2d1010;color:var(--red);font-size:10px;padding:2px 7px;border-radius:4px;font-weight:700">⚡ 오프라인 기록 중</span>
   </div>
   <div class="tabs" id="tabs">
+    <button class="tab" data-group="task" data-default="task">업무</button>
     <button class="tab on" data-group="today" data-default="today">일일</button>
     <button class="tab" data-group="juki" data-default="weekly">주기</button>
     <button class="tab" data-group="principle-g" data-default="principle">원칙</button>
     <button class="tab" data-group="guide" data-default="guide">처방</button>
     <button class="tab" data-group="history" data-default="history">기록</button>
+    <button class="tab" data-group="calendar" data-default="calendar" style="margin-left:12px">달력</button>
   </div>
   <div class="tabs-row2" id="tabs2" style="display:none">
     <div id="sub-juki" class="sub-group">
@@ -360,6 +362,91 @@ body.has-row2 .view{margin-top:107px}
   </div>
 </div>
 
+<!-- ═══════════════════ 업무 ═══════════════════ -->
+<div class="view" id="v-task">
+  <div class="date-nav">
+    <button class="date-arrow" onclick="taskGoDate(-1)">&#8249;</button>
+    <div style="text-align:center">
+      <div class="date-label" id="task-date-label"></div>
+      <div style="font-size:11px;color:var(--t3);margin-top:2px" id="task-date-iso"></div>
+    </div>
+    <button class="date-arrow" id="task-btn-next" onclick="taskGoDate(1)">&#8250;</button>
+  </div>
+
+  <div style="display:flex;gap:14px;flex-wrap:wrap;background:var(--s3);border-radius:8px;padding:7px 12px;margin-bottom:10px" id="task-sum-bar">
+    <span style="font-size:11px;color:var(--t3)">전체 <b style="color:var(--t1)">0</b></span>
+  </div>
+
+  <div class="card">
+    <div class="sec-label">&#x1F4CB; 업무 등록</div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div>
+        <div style="font-size:11px;color:var(--t3);margin-bottom:3px">업무명</div>
+        <input type="text" id="task-fN" placeholder="업무를 입력하세요" style="font-size:13px">
+      </div>
+      <div>
+        <div style="font-size:11px;color:var(--t3);display:flex;justify-content:space-between;margin-bottom:3px"><span>중요도</span><span id="task-iDesc" style="color:var(--t3)">선택하면 기준 표시</span></div>
+        <div style="display:flex;gap:4px" id="task-impR"></div>
+      </div>
+      <div>
+        <div style="font-size:11px;color:var(--t3);margin-bottom:3px">마감기한 &#x2192; 긴급도 자동계산</div>
+        <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:4px" id="task-dlR"></div>
+        <div style="display:flex;gap:6px;align-items:center;margin-top:4px">
+          <input type="date" id="task-fDt" onchange="taskOnDtPick()" style="flex:1;font-size:12px">
+          <span style="font-size:10px;color:var(--t3)">날짜 직접 선택</span>
+        </div>
+        <div id="task-uarRow" style="display:none;margin-top:4px;font-size:11px;color:var(--t3);display:flex;align-items:center;gap:6px">
+          <span>자동 긴급도</span>
+          <span id="task-uBadge" style="font-weight:700;color:var(--yellow);background:#2a1f0a;border:1px solid var(--yellow);border-radius:3px;padding:1px 7px"></span>
+        </div>
+        <div id="task-uovRow" style="display:none;display:flex;gap:3px;margin-top:3px"></div>
+        <div id="task-uDesc" style="font-size:11px;color:var(--t3);margin-top:3px">마감기한을 선택하세요</div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;background:var(--s3);border:1px solid var(--b1);border-radius:7px;padding:7px 10px">
+        <span style="font-size:13px;color:var(--t2)">위임 가능 여부</span>
+        <div style="display:flex;gap:5px">
+          <button id="task-tY" onclick="taskPickD(true)" style="padding:3px 10px;border-radius:4px;border:1px solid var(--b1);background:transparent;font-size:11px;font-weight:700;cursor:pointer;color:var(--t3)">&#x2713; 가능</button>
+          <button id="task-tN" onclick="taskPickD(false)" style="padding:3px 10px;border-radius:4px;border:1px solid var(--b1);background:transparent;font-size:11px;font-weight:700;cursor:pointer;color:var(--t3)">&#x2717; 불가</button>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;background:var(--s3);border:1px solid var(--b1);border-radius:7px;padding:7px 10px">
+        <div>
+          <div style="font-size:13px;color:var(--t2)">처리 가중치</div>
+          <div style="font-size:10px;color:var(--t3)">높은 숫자 = 높은 우선순위 &#xB7; 10단위 권장</div>
+        </div>
+        <input type="number" id="task-fW" value="10" min="1" max="999" style="width:60px;text-align:center;font-size:13px;font-weight:700">
+      </div>
+      <button onclick="taskAdd()" style="width:100%;padding:10px;background:var(--bdim);border:1px solid var(--acc);border-radius:8px;color:var(--blue);font-size:14px;font-weight:600;cursor:pointer">&#xFF0B; 업무 추가</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="sec-label">&#x1F4CA; 우선순위 매트릭스</div>
+    <div style="font-size:9px;color:var(--t3);text-align:center;margin:4px 0">&#x25B2; 중요도 높음</div>
+    <div style="position:relative" id="task-mWrap">
+      <div style="display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:4px">
+        <div style="background:#0e1f1a;border:1px solid #14352a;border-radius:7px;min-height:105px;position:relative"><span style="position:absolute;top:6px;left:7px;font-size:10px;font-weight:700;color:#34d399">계획 수립</span><span style="position:absolute;bottom:5px;right:6px;font-size:9px;opacity:.4">중요&#xB7;여유</span></div>
+        <div style="background:#1a1220;border:1px solid #3b1a1a;border-radius:7px;min-height:105px;position:relative"><span style="position:absolute;top:6px;left:7px;font-size:10px;font-weight:700;color:#f87171">즉시 처리</span><span style="position:absolute;bottom:5px;right:6px;font-size:9px;opacity:.4">중요&#xB7;긴급</span></div>
+        <div style="background:#111827;border:1px solid #1e2235;border-radius:7px;min-height:105px;position:relative"><span style="position:absolute;top:6px;left:7px;font-size:10px;font-weight:700;color:#64748b">제거 검토</span><span style="position:absolute;bottom:5px;right:6px;font-size:9px;opacity:.4">낮음&#xB7;여유</span></div>
+        <div style="background:#1a1a10;border:1px solid #332e10;border-radius:7px;min-height:105px;position:relative"><span style="position:absolute;top:6px;left:7px;font-size:10px;font-weight:700;color:#fbbf24">위임 검토</span><span style="position:absolute;bottom:5px;right:6px;font-size:9px;opacity:.4">낮음&#xB7;긴급</span></div>
+      </div>
+      <div style="position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none" id="task-bLyr"></div>
+    </div>
+    <div style="font-size:9px;color:var(--t3);text-align:center;margin:4px 0">&#x25C0; 긴급도 낮음 &#xB7; &#x25BC; 중요도 낮음 &#xB7; 긴급도 높음 &#x25B6;</div>
+    <div style="display:flex;gap:12px;justify-content:center;font-size:11px;color:var(--t3);margin-top:8px">
+      <span><span style="width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:3px;vertical-align:middle;background:#22c55e"></span>위임 가능</span>
+      <span><span style="width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:3px;vertical-align:middle;background:#ef4444"></span>위임 불가</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="sec-label">&#x1F4CC; 등록된 업무 목록</div>
+    <div id="task-tList" style="display:flex;flex-direction:column;gap:6px">
+      <div style="text-align:center;color:var(--t3);padding:14px 0;font-size:12px">등록된 업무가 없습니다.</div>
+    </div>
+  </div>
+</div>
+
 <!-- ═══════════════════ 일일 ═══════════════════ -->
 <div class="view on" id="v-today">
   <div class="date-nav">
@@ -371,10 +458,10 @@ body.has-row2 .view{margin-top:107px}
     <button class="date-arrow" onclick="shiftDate(1)">›</button>
   </div>
 
-  <!-- 모드 토글 -->
-  <div class="mode-toggle-bar">
-    <button class="mode-btn on quick" id="mode-btn-simple" onclick="setDailyMode('simple')">⚡ 간편 모드 (3분)</button>
-    <button class="mode-btn full" id="mode-btn-full" onclick="setDailyMode('full')">📋 전체 기록 모드</button>
+  <!-- 모드 서브탭 -->
+  <div class="subtabs" style="margin-top:-4px">
+    <button class="subtab on" id="mode-btn-simple" onclick="setDailyMode('simple')">⚡ 간편 (3분)</button>
+    <button class="subtab" id="mode-btn-full" onclick="setDailyMode('full')">📋 전체 기록</button>
   </div>
 
   <div id="alert-box"></div>
@@ -1369,6 +1456,29 @@ body.has-row2 .view{margin-top:107px}
   <!-- 연간기록 -->
   <div class="subview" id="hsub-annual">
     <div id="hist-annual-list"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════ 달력 ═══════════════════ -->
+<div class="view" id="v-calendar">
+  <div class="date-nav">
+    <button class="date-arrow" onclick="shiftCalMonth(-1)">&#8249;</button>
+    <div style="text-align:center">
+      <div class="date-label" id="cal-month-label"></div>
+    </div>
+    <button class="date-arrow" onclick="shiftCalMonth(1)">&#8250;</button>
+  </div>
+  <div id="cal-grid-container"></div>
+  <div id="cal-day-section" style="display:none;margin-top:10px">
+    <div class="card">
+      <div class="sec-label" id="cal-day-label"></div>
+      <div id="cal-day-items"></div>
+      <div style="display:flex;gap:4px;margin-top:8px">
+        <input type="text" id="cal-sched-time" placeholder="시간" style="width:60px;font-size:12px">
+        <input type="text" id="cal-sched-text" placeholder="일정 내용..." style="flex:1;font-size:12px">
+        <button onclick="calAddItem()" style="background:var(--bdim);border:1px solid var(--acc);color:var(--blue);border-radius:4px;padding:4px 10px;font-size:12px;cursor:pointer">+</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -2926,11 +3036,13 @@ function goAnnual(yr) {
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // ── 탭 그룹 맵 (view ID → 상위 그룹 ID)
 const _groupMap = {
+  task:'task',
   today:'today',
   weekly:'juki', monthly:'juki', annual:'juki', tenyear:'juki', lifeplan:'juki',
   principle:'principle-g', routine:'principle-g',
   guide:'guide',
-  history:'history'
+  history:'history',
+  calendar:'calendar'
 };
 let _activeGroup = 'today';
 
@@ -2975,6 +3087,8 @@ function switchTab(v) {
   if (v==='routine')   { renderRoutine(); renderRecurring(); }
   if (v==='guide')     renderGuide();
   if (v==='history')   renderHistory();
+  if (v==='task')      renderTask();
+  if (v==='calendar')  renderCalendar();
   setTimeout(autoResizeAll, 50);
 }
 
@@ -3945,6 +4059,391 @@ let _offlineTimerId = setTimeout(() => {
 function _clearOfflineTimer() { clearTimeout(_offlineTimerId); }
 window._clearOfflineTimer = _clearOfflineTimer;
 
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 업무 탭
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const TASK_ID={
+  imp:{1:'나 혼자 영향 · 언제든 처리 가능',2:'특정 인원/팀만 영향 · 대체수단 존재',
+       3:'대/중대 전체 영향 · 미처리 시 파급',4:'학교급 이상 영향 · 상급부대 보고 필요',
+       5:'지휘관 직결 · 대외보고 · 돌이킬 수 없는 결과'},
+  urg:{1:'D+15 이상 · 충분한 여유',2:'D-8~14 · 다음주 이내',
+       3:'D-4~7 · 이번주 내',4:'D-2~3 · 이틀 내',5:'D-0~1 · 오늘/내일 마감'}
+};
+const TASK_SOPT=[
+  {v:'inprogress',l:'∼ 진행중'},{v:'done',l:'√ 완료'},{v:'deferred',l:'→ 연기'},{v:'cancelled',l:'× 취소'},{v:'delegated',l:'◦ 위임'}
+];
+const TASK_IC=['','#9ca3af','#60a5fa','#fbbf24','#fb923c','#f87171'];
+const TASK_UC=['','#9ca3af','#4ade80','#fbbf24','#fb923c','#f87171'];
+let taskCurD=localDateStr(new Date()), taskFI=null, taskFU=null, taskFDl=null, taskFDn=null, taskSeq=Date.now()%100000;
+
+function taskLocalDate(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function taskToday(){ return taskLocalDate(new Date()); }
+function taskDlDs(k){
+  const d=new Date();
+  if(k==='t0') return taskLocalDate(d);
+  if(k==='t2'){ d.setDate(d.getDate()+2); }
+  else if(k==='tw'){ d.setDate(d.getDate()+5); }
+  else if(k==='nw'){ d.setDate(d.getDate()+10); }
+  else if(k==='em'){ return taskLocalDate(new Date(d.getFullYear(),d.getMonth()+1,0)); }
+  return taskLocalDate(d);
+}
+function taskUrgFD(ds){
+  const t0=new Date(taskToday()+'T00:00:00'), t1=new Date(ds+'T00:00:00');
+  const diff=Math.round((t1-t0)/86400000);
+  return diff<=1?5:diff<=3?4:diff<=7?3:diff<=14?2:1;
+}
+function taskLd(d){try{return JSON.parse(localStorage.getItem('tm_'+d)||'[]');}catch{return[];}}
+function taskSd(d,a){localStorage.setItem('tm_'+d,JSON.stringify(a));}
+
+function taskGoDate(n){
+  const d=new Date(taskCurD+'T00:00:00');
+  d.setDate(d.getDate()+n);
+  const s=taskLocalDate(d);
+  if(s>taskToday()) return;
+  taskCurD=s; taskUpdDate(); taskRender();
+}
+function taskUpdDate(){
+  const d=new Date(taskCurD+'T00:00:00');
+  const m=d.getMonth()+1, dy=d.getDate(), dw=DAYS[d.getDay()];
+  const el1=document.getElementById('task-date-label');
+  const el2=document.getElementById('task-date-iso');
+  const el3=document.getElementById('task-btn-next');
+  if(el1) el1.textContent=m+'월 '+dy+'일 ('+dw+')';
+  if(el2) el2.textContent=taskCurD+(taskCurD===taskToday()?' \xB7 오늘':'');
+  if(el3) el3.disabled=(taskCurD>=taskToday());
+}
+
+function taskInitForm(){
+  var impR=document.getElementById('task-impR');
+  if(impR){
+    impR.innerHTML='';
+    for(var i=1;i<=5;i++){
+      var btn=document.createElement('button');
+      btn.textContent=i;
+      btn.style.cssText='flex:1;height:28px;background:var(--s3);border:1px solid var(--b1);border-radius:5px;color:var(--t3);font-size:12px;font-weight:700;cursor:pointer;transition:all .12s';
+      btn.onclick=(function(idx){return function(){taskPickI(idx);};})(i);
+      btn.id='task-imp-'+i;
+      impR.appendChild(btn);
+    }
+  }
+  var dlR=document.getElementById('task-dlR');
+  if(dlR){
+    var dls=[{k:'t0',l:'오늘 (5)',u:5},{k:'t2',l:'이틀후 (4)',u:4},{k:'tw',l:'이번주 (3)',u:3},{k:'nw',l:'다음주 (2)',u:2},{k:'em',l:'이번달 (1)',u:1}];
+    dlR.innerHTML='';
+    dls.forEach(function(d){
+      var btn=document.createElement('button');
+      btn.textContent=d.l;
+      btn.style.cssText='padding:3px 9px;background:var(--s3);border:1px solid var(--b1);border-radius:5px;color:var(--t3);font-size:11px;font-weight:600;cursor:pointer;transition:all .12s;white-space:nowrap';
+      btn.onclick=(function(dk,du){return function(){taskPickDL(dk,du);};})(d.k,d.u);
+      btn.dataset.dlk=d.k;
+      dlR.appendChild(btn);
+    });
+  }
+  var uovR=document.getElementById('task-uovRow');
+  if(uovR){
+    uovR.innerHTML='';
+    for(var i=1;i<=5;i++){
+      var btn=document.createElement('button');
+      btn.textContent=i;
+      btn.style.cssText='flex:1;height:22px;background:var(--s3);border:1px solid var(--b1);border-radius:4px;color:var(--t3);font-size:11px;font-weight:600;cursor:pointer';
+      btn.onclick=(function(idx){return function(){taskOvU(idx);};})(i);
+      btn.id='task-uov-'+i;
+      uovR.appendChild(btn);
+    }
+  }
+}
+
+function taskPickI(v){
+  taskFI=v;
+  for(var i=1;i<=5;i++){
+    var btn=document.getElementById('task-imp-'+i);
+    if(!btn) continue;
+    var c=TASK_IC[i];
+    if(i===v){ btn.style.background=c+'26'; btn.style.borderColor=c; btn.style.color=c; }
+    else { btn.style.background='var(--s3)'; btn.style.borderColor='var(--b1)'; btn.style.color='var(--t3)'; }
+  }
+  var el=document.getElementById('task-iDesc');
+  if(el){ el.textContent=TASK_ID.imp[v]; el.style.color=TASK_IC[v]; }
+}
+function taskPickDL(k,urg){
+  taskFDn=taskDlDs(k); taskFU=urg;
+  var dtEl=document.getElementById('task-fDt'); if(dtEl) dtEl.value=taskFDn;
+  document.querySelectorAll('#task-dlR button').forEach(function(b){
+    if(b.dataset.dlk===k){ b.style.background='#2a1f0a'; b.style.borderColor='var(--yellow)'; b.style.color='var(--yellow)'; }
+    else { b.style.background='var(--s3)'; b.style.borderColor='var(--b1)'; b.style.color='var(--t3)'; }
+  });
+  taskShowU(taskFU);
+}
+function taskOnDtPick(){
+  var v=document.getElementById('task-fDt')?.value;
+  if(!v) return; taskFDn=v; taskFU=taskUrgFD(v);
+  document.querySelectorAll('#task-dlR button').forEach(function(b){ b.style.background='var(--s3)'; b.style.borderColor='var(--b1)'; b.style.color='var(--t3)'; });
+  taskShowU(taskFU);
+}
+function taskShowU(u){
+  document.getElementById('task-uarRow').style.display='flex';
+  document.getElementById('task-uovRow').style.display='flex';
+  var badge=document.getElementById('task-uBadge'); if(badge) badge.textContent=u;
+  var el=document.getElementById('task-uDesc');
+  if(el){ el.textContent=TASK_ID.urg[u]; el.style.color=TASK_UC[u]; }
+  for(var i=1;i<=5;i++){
+    var btn=document.getElementById('task-uov-'+i);
+    if(!btn) continue;
+    var c=TASK_UC[i];
+    if(i===u){ btn.style.background=c+'26'; btn.style.borderColor=c; btn.style.color=c; }
+    else { btn.style.background='var(--s3)'; btn.style.borderColor='var(--b1)'; btn.style.color='var(--t3)'; }
+  }
+}
+function taskOvU(v){
+  taskFU=v;
+  var badge=document.getElementById('task-uBadge'); if(badge) badge.textContent=v+'*';
+  var el=document.getElementById('task-uDesc');
+  if(el){ el.textContent=TASK_ID.urg[v]+' (수동조정)'; el.style.color=TASK_UC[v]; }
+  for(var i=1;i<=5;i++){
+    var btn=document.getElementById('task-uov-'+i);
+    if(!btn) continue;
+    var c=TASK_UC[i];
+    if(i===v){ btn.style.background=c+'26'; btn.style.borderColor=c; btn.style.color=c; }
+    else { btn.style.background='var(--s3)'; btn.style.borderColor='var(--b1)'; btn.style.color='var(--t3)'; }
+  }
+}
+function taskPickD(v){
+  taskFDl=v;
+  var y=document.getElementById('task-tY'), n=document.getElementById('task-tN');
+  if(y){ if(v){ y.style.background='#14532d'; y.style.borderColor='#22c55e'; y.style.color='#22c55e'; } else { y.style.background='transparent'; y.style.borderColor='var(--b1)'; y.style.color='var(--t3)'; } }
+  if(n){ if(!v){ n.style.background='#450a0a'; n.style.borderColor='#ef4444'; n.style.color='#ef4444'; } else { n.style.background='transparent'; n.style.borderColor='var(--b1)'; n.style.color='var(--t3)'; } }
+}
+function taskAdd(){
+  var nm=document.getElementById('task-fN')?.value.trim();
+  if(!nm){ alert('업무명을 입력하세요.'); return; }
+  if(!taskFI){ alert('중요도를 선택하세요.'); return; }
+  if(!taskFU){ alert('마감기한을 선택하세요.'); return; }
+  if(taskFDl===null){ alert('위임 가능 여부를 선택하세요.'); return; }
+  var wt=Math.max(1,Math.min(999,parseInt(document.getElementById('task-fW')?.value)||10));
+  var arr=taskLd(taskCurD);
+  arr.push({id:'t'+(++taskSeq),nm:nm,imp:taskFI,urg:taskFU,del:taskFDl,wt:wt,dl:taskFDn,st:'inprogress',note:'',ts:Date.now()});
+  taskSd(taskCurD,arr); taskResetF(); taskRender();
+}
+function taskResetF(){
+  var fN=document.getElementById('task-fN'); if(fN) fN.value='';
+  taskFI=taskFU=null; taskFDl=null; taskFDn=null;
+  for(var i=1;i<=5;i++){
+    var btn=document.getElementById('task-imp-'+i);
+    if(btn){ btn.style.background='var(--s3)'; btn.style.borderColor='var(--b1)'; btn.style.color='var(--t3)'; }
+    var ubtn=document.getElementById('task-uov-'+i);
+    if(ubtn){ ubtn.style.background='var(--s3)'; ubtn.style.borderColor='var(--b1)'; ubtn.style.color='var(--t3)'; }
+  }
+  document.querySelectorAll('#task-dlR button').forEach(function(b){ b.style.background='var(--s3)'; b.style.borderColor='var(--b1)'; b.style.color='var(--t3)'; });
+  var y=document.getElementById('task-tY'),n=document.getElementById('task-tN');
+  if(y){ y.style.background='transparent'; y.style.borderColor='var(--b1)'; y.style.color='var(--t3)'; }
+  if(n){ n.style.background='transparent'; n.style.borderColor='var(--b1)'; n.style.color='var(--t3)'; }
+  document.getElementById('task-fW').value='10';
+  var dtEl=document.getElementById('task-fDt'); if(dtEl) dtEl.value='';
+  var iDesc=document.getElementById('task-iDesc'); if(iDesc){ iDesc.textContent='선택하면 기준 표시'; iDesc.style.color='var(--t3)'; }
+  var uDesc=document.getElementById('task-uDesc'); if(uDesc){ uDesc.textContent='마감기한을 선택하세요'; uDesc.style.color='var(--t3)'; }
+  document.getElementById('task-uarRow').style.display='none';
+  document.getElementById('task-uovRow').style.display='none';
+}
+function taskUpdSt(id,v){
+  var arr=taskLd(taskCurD), t=arr.find(function(x){return x.id===id;});
+  if(!t) return; t.st=v; taskSd(taskCurD,arr); taskRender();
+}
+function taskSaveNote(id,v){
+  var arr=taskLd(taskCurD), t=arr.find(function(x){return x.id===id;});
+  if(t){ t.note=v; taskSd(taskCurD,arr); }
+}
+function taskDel(id){
+  if(!confirm('업무를 삭제하시겠습니까?')) return;
+  taskSd(taskCurD,taskLd(taskCurD).filter(function(t){return t.id!==id;})); taskRender();
+}
+function taskTogMemo(id){
+  var box=document.getElementById('tmb_'+id);
+  if(box) box.style.display=box.style.display==='block'?'none':'block';
+}
+function taskSortT(arr){
+  return arr.slice().sort(function(a,b){ var pa=a.imp+a.urg, pb=b.imp+b.urg; if(pb!==pa) return pb-pa; if(b.wt!==a.wt) return b.wt-a.wt; return a.ts-b.ts; });
+}
+function taskRender(){ taskRenderSum(); taskRenderMx(); taskRenderList(); }
+function taskRenderSum(){
+  var t=taskLd(taskCurD), n=t.length,
+    dn=t.filter(function(x){return x.st==='done';}).length,
+    pr=t.filter(function(x){return x.st==='inprogress';}).length,
+    df=t.filter(function(x){return x.st==='deferred';}).length;
+  var el=document.getElementById('task-sum-bar'); if(!el) return;
+  el.innerHTML='<span style="font-size:11px;color:var(--t3)">전체 <b style="color:var(--t1)">'+n+'</b></span>'+
+    '<span style="font-size:11px;color:var(--t3)">완료 <b style="color:var(--green)">'+dn+'</b></span>'+
+    '<span style="font-size:11px;color:var(--t3)">진행중 <b style="color:var(--purple)">'+pr+'</b></span>'+
+    '<span style="font-size:11px;color:var(--t3)">연기 <b style="color:var(--yellow)">'+df+'</b></span>'+
+    (n?'<span style="font-size:11px;color:var(--t3)">완료율 <b style="color:var(--blue)">'+Math.round(dn/n*100)+'%</b></span>':'');
+}
+function taskRenderMx(){
+  var lyr=document.getElementById('task-bLyr'); if(!lyr) return; lyr.innerHTML='';
+  var raw=taskLd(taskCurD), sorted=taskSortT(raw);
+  var vis=sorted.filter(function(t){return t.st!=='cancelled';});
+  var posMap={};
+  vis.forEach(function(t){
+    var xP=(t.urg-1)/4*80+10, yP=(5-t.imp)/4*80+10;
+    var k=t.imp+'_'+t.urg;
+    if(!posMap[k]) posMap[k]=0;
+    else{ var n=posMap[k], ang=n*(Math.PI*2/6); xP=Math.max(8,Math.min(92,xP+Math.cos(ang)*9)); yP=Math.max(8,Math.min(92,yP+Math.sin(ang)*9)); }
+    posMap[k]++;
+    var rank=sorted.findIndex(function(x){return x.id===t.id;})+1;
+    var faded=(t.st==='done'||t.st==='deferred')?'opacity:.38;':'';
+    var dotC=t.del?'#22c55e':'#ef4444';
+    var div=document.createElement('div');
+    div.style.cssText='position:absolute;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;transform:translate(-50%,-50%);pointer-events:all;cursor:pointer;transition:transform .15s;border:2px solid '+dotC+';background:'+(t.del?'#14532d':'#450a0a')+';color:'+dotC+';z-index:10;'+faded+'left:'+xP+'%;top:'+yP+'%';
+    div.innerHTML='<span>'+rank+'</span>';
+    div.title=t.nm+' (중요'+t.imp+' 긴급'+t.urg+')';
+    lyr.appendChild(div);
+  });
+}
+function taskCtag(label,c){
+  return '<span style="font-size:10px;font-weight:600;padding:1px 5px;border-radius:3px;background:'+c+'26;color:'+c+';border:1px solid '+c+'55">'+label+'</span>';
+}
+function taskRenderList(){
+  var raw=taskLd(taskCurD), sorted=taskSortT(raw), el=document.getElementById('task-tList');
+  if(!el) return;
+  if(!sorted.length){ el.innerHTML='<div style="text-align:center;color:var(--t3);padding:14px 0;font-size:12px">등록된 업무가 없습니다.</div>'; return; }
+  var sCls={inprogress:'border-left:3px solid var(--purple)',done:'opacity:.52',cancelled:'opacity:.38',deferred:'opacity:.58'};
+  el.innerHTML=sorted.map(function(t,i){
+    var pri=t.imp+t.urg, dlS=t.dl?t.dl.slice(5)+' 마감':'-';
+    var sty=sCls[t.st]||'';
+    var nDec=t.st==='done'?'text-decoration:line-through;color:var(--t3)':'';
+    var opts=TASK_SOPT.map(function(s){return '<option value="'+s.v+'"'+(t.st===s.v?' selected':'')+'>'+s.l+'</option>';}).join('');
+    return '<div style="background:var(--s3);border:1px solid var(--b1);border-radius:8px;overflow:hidden;'+sty+'">'+
+      '<div style="display:flex;align-items:center;padding:8px 10px;gap:7px">'+
+        '<div style="width:6px;height:6px;border-radius:50%;flex-shrink:0;background:'+(t.del?'#22c55e':'#ef4444')+'"></div>'+
+        '<span style="flex:1;font-size:13px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'+nDec+'">'+(i+1)+'. '+t.nm+'</span>'+
+        '<div style="display:flex;align-items:center;gap:4px;flex-shrink:0">'+
+          '<select onchange="taskUpdSt(\''+t.id+'\',this.value)" style="background:var(--s1);border:1px solid var(--b1);border-radius:5px;color:var(--t1);font-size:11px;padding:3px 4px;outline:none;cursor:pointer">'+opts+'</select>'+
+          '<button onclick="taskTogMemo(\''+t.id+'\')" style="background:none;border:none;color:'+(t.note?'var(--purple)':'var(--t3)')+';font-size:12px;cursor:pointer;padding:2px">📝</button>'+
+          '<button onclick="taskDel(\''+t.id+'\')" style="background:none;border:none;color:var(--t3);font-size:14px;cursor:pointer;padding:2px">×</button>'+
+        '</div>'+
+      '</div>'+
+      '<div style="display:flex;gap:3px;flex-wrap:wrap;padding:0 10px 7px">'+
+        '<span style="font-size:10px;font-weight:600;padding:1px 5px;border-radius:3px;background:var(--bdim);color:var(--blue)">우선 '+pri+'</span>'+
+        taskCtag('중요 '+t.imp, TASK_IC[t.imp])+
+        taskCtag('긴급 '+t.urg, TASK_UC[t.urg])+
+        '<span style="font-size:10px;font-weight:600;padding:1px 5px;border-radius:3px;background:#1e1b2e;color:#a78bfa">가중 '+t.wt+'</span>'+
+        taskCtag('📅 '+dlS, TASK_UC[t.urg])+
+        '<span style="font-size:10px;font-weight:600;padding:1px 5px;border-radius:3px;background:'+(t.del?'#14532d':'#450a0a')+';color:'+(t.del?'#22c55e':'#ef4444')+'">'+(t.del?'✓위임':'✗직접')+'</span>'+
+      '</div>'+
+      '<div id="tmb_'+t.id+'" style="display:'+(t.note?'block':'none')+';padding:0 10px 8px">'+
+        '<textarea placeholder="메모를 입력하세요..." oninput="taskSaveNote(\''+t.id+'\',this.value)" style="width:100%;background:var(--s1);border:1px solid var(--b1);border-radius:6px;color:var(--t2);padding:6px 8px;font-size:12px;resize:vertical;min-height:48px;outline:none;font-family:inherit">'+(t.note||'')+'</textarea>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+
+function renderTask() {
+  taskInitForm();
+  taskUpdDate();
+  taskRender();
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 달력 탭 (월간 주요일정 연동)
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+var calMonth = '';
+var calSelectedDay = 0;
+
+function initCalMonth() {
+  var now = new Date();
+  calMonth = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
+}
+
+function renderCalendar() {
+  if (!calMonth) initCalMonth();
+  var parts = calMonth.split('-'), yr = parseInt(parts[0]), mo = parseInt(parts[1]);
+  var lbl = document.getElementById('cal-month-label');
+  if (lbl) lbl.textContent = yr + '년 ' + mo + '월';
+
+  var firstDay = new Date(yr, mo-1, 1).getDay();
+  var daysInMonth = new Date(yr, mo, 0).getDate();
+  var startOffset = firstDay === 0 ? 6 : firstDay - 1;
+  var mData = allMonthly[calMonth] || {};
+  var msched = mData.monthly_schedule || {};
+  var today = new Date(), tyyyy = today.getFullYear(), tmm = today.getMonth()+1, tdd = today.getDate();
+
+  var html = '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:4px">';
+  ['월','화','수','목','금','토','일'].forEach(function(d) { html += '<div style="text-align:center;font-size:10px;color:var(--t3);padding:2px 0">' + d + '</div>'; });
+  for (var i = 0; i < startOffset; i++) html += '<div></div>';
+
+  for (var d = 1; d <= daysInMonth; d++) {
+    var items = (msched[d] || []).filter(function(r) { return r && r.text; });
+    var cnt = items.length;
+    var isToday = yr === tyyyy && mo === tmm && d === tdd;
+    var isSel = d === calSelectedDay;
+    var bg = isSel ? 'var(--acc)' : isToday ? 'var(--s3)' : 'transparent';
+    var col = isSel ? '#fff' : isToday ? 'var(--blue)' : 'var(--t2)';
+    var evtCol = isSel ? 'rgba(255,255,255,0.85)' : 'var(--t3)';
+    var shown = items.slice(0, 4);
+    var extra = cnt - shown.length;
+    var evtHtml = shown.map(function(r) { return '<div style="font-size:9px;color:' + evtCol + ';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;line-height:1.3">' + r.text.slice(0, 7) + '</div>'; }).join('')
+      + (extra > 0 ? '<div style="font-size:9px;color:' + evtCol + ';opacity:.7">\xB7' + extra + '</div>' : '');
+    html += '<div onclick="calSelectDay(' + d + ')" style="cursor:pointer;text-align:center;padding:3px 1px;border-radius:4px;background:' + bg + '">' +
+      '<div style="font-size:12px;color:' + col + ';font-weight:' + (isToday ? 700 : 400) + '">' + d + '</div>' +
+      (cnt ? evtHtml : '<div style="height:5px"></div>') +
+    '</div>';
+  }
+  html += '</div>';
+  var cont = document.getElementById('cal-grid-container'); if (cont) cont.innerHTML = html;
+}
+
+function calSelectDay(d) {
+  calSelectedDay = d; renderCalendar();
+  var sec = document.getElementById('cal-day-section'); if (sec) sec.style.display = 'block';
+  var parts = calMonth.split('-'), mo = parseInt(parts[1]);
+  var lbl = document.getElementById('cal-day-label');
+  if (lbl) lbl.textContent = mo + '월 ' + d + '일 일정';
+  calRenderDayItems();
+}
+
+function calRenderDayItems() {
+  if (!calSelectedDay) return;
+  var el = document.getElementById('cal-day-items'); if (!el) return;
+  var msched = ((allMonthly[calMonth] || {}).monthly_schedule || {})[calSelectedDay] || [];
+  var filtered = msched.filter(function(r) { return r && r.text; });
+  el.innerHTML = filtered.map(function(r, i) {
+    return '<div style="display:flex;align-items:center;gap:6px;padding:3px 0;border-bottom:1px solid var(--b2)">' +
+      '<span style="font-size:11px;color:var(--t3);min-width:36px">' + (r.time || '') + '</span>' +
+      '<span style="font-size:12px;flex:1">' + r.text + '</span>' +
+      '<button onclick="calRemoveItem(' + i + ')" style="background:transparent;border:none;color:var(--red);font-size:13px;cursor:pointer">×</button>' +
+    '</div>';
+  }).join('') || '<div style="font-size:11px;color:var(--t3);padding:6px 0">일정이 없습니다</div>';
+}
+
+function calAddItem() {
+  var text = document.getElementById('cal-sched-text')?.value.trim();
+  if (!text) return;
+  var time = document.getElementById('cal-sched-time')?.value || '';
+  var mk = calMonth;
+  if (!allMonthly[mk]) allMonthly[mk] = {};
+  if (!allMonthly[mk].monthly_schedule) allMonthly[mk].monthly_schedule = {};
+  if (!allMonthly[mk].monthly_schedule[calSelectedDay]) allMonthly[mk].monthly_schedule[calSelectedDay] = [];
+  allMonthly[mk].monthly_schedule[calSelectedDay].push({text: text, time: time});
+  document.getElementById('cal-sched-text').value = '';
+  document.getElementById('cal-sched-time').value = '';
+  saveMonthlyStore(); renderCalendar(); calRenderDayItems();
+}
+
+function calRemoveItem(i) {
+  var mk = calMonth;
+  if (!allMonthly[mk] || !allMonthly[mk].monthly_schedule || !allMonthly[mk].monthly_schedule[calSelectedDay]) return;
+  allMonthly[mk].monthly_schedule[calSelectedDay].splice(i, 1);
+  saveMonthlyStore(); calRenderDayItems(); renderCalendar();
+}
+
+function shiftCalMonth(d) {
+  var parts = calMonth.split('-'), y = parseInt(parts[0]), m = parseInt(parts[1]);
+  m += d;
+  if (m < 1) { m = 12; y--; } if (m > 12) { m = 1; y++; }
+  calMonth = y + '-' + String(m).padStart(2, '0');
+  calSelectedDay = 0;
+  var sec = document.getElementById('cal-day-section'); if (sec) sec.style.display = 'none';
+  renderCalendar();
+}
 
 load();
 loadDate();
