@@ -360,6 +360,10 @@ body.has-row2 .view{margin-top:107px}
       <button class="tab2" data-v="routine" data-parent="principle-g">루틴</button>
     </div>
   </div>
+  <div id="daily-mode-bar" class="tabs-row2" style="display:none">
+    <button class="tab2 on" id="mode-btn-simple" onclick="setDailyMode('simple')">⚡ 간편 (3분)</button>
+    <button class="tab2" id="mode-btn-full" onclick="setDailyMode('full')">📋 전체 기록</button>
+  </div>
 </div>
 
 <!-- ═══════════════════ 업무 ═══════════════════ -->
@@ -395,11 +399,11 @@ body.has-row2 .view{margin-top:107px}
           <input type="date" id="task-fDt" onchange="taskOnDtPick()" style="flex:1;font-size:12px">
           <span style="font-size:10px;color:var(--t3)">날짜 직접 선택</span>
         </div>
-        <div id="task-uarRow" style="display:none;margin-top:4px;font-size:11px;color:var(--t3);display:flex;align-items:center;gap:6px">
+        <div id="task-uarRow" style="display:none;margin-top:4px;font-size:11px;color:var(--t3);align-items:center;gap:6px">
           <span>자동 긴급도</span>
           <span id="task-uBadge" style="font-weight:700;color:var(--yellow);background:#2a1f0a;border:1px solid var(--yellow);border-radius:3px;padding:1px 7px"></span>
         </div>
-        <div id="task-uovRow" style="display:none;display:flex;gap:3px;margin-top:3px"></div>
+        <div id="task-uovRow" style="display:none;gap:3px;margin-top:3px"></div>
         <div id="task-uDesc" style="font-size:11px;color:var(--t3);margin-top:3px">마감기한을 선택하세요</div>
       </div>
       <div style="display:flex;align-items:center;justify-content:space-between;background:var(--s3);border:1px solid var(--b1);border-radius:7px;padding:7px 10px">
@@ -456,12 +460,6 @@ body.has-row2 .view{margin-top:107px}
       <input type="date" class="date-input" id="date-picker" onchange="onDateChange()">
     </div>
     <button class="date-arrow" onclick="shiftDate(1)">›</button>
-  </div>
-
-  <!-- 모드 서브탭 -->
-  <div class="subtabs" style="margin-top:-4px">
-    <button class="subtab on" id="mode-btn-simple" onclick="setDailyMode('simple')">⚡ 간편 (3분)</button>
-    <button class="subtab" id="mode-btn-full" onclick="setDailyMode('full')">📋 전체 기록</button>
   </div>
 
   <div id="alert-box"></div>
@@ -1030,7 +1028,7 @@ body.has-row2 .view{margin-top:107px}
       <div id="msched-day-label" style="font-size:12px;font-weight:700;color:var(--blue);margin-bottom:6px"></div>
       <div id="msched-day-items"></div>
       <div style="display:flex;gap:6px;margin-top:6px;align-items:center">
-        <input type="text" id="msched-time-input" placeholder="HH:MM" maxlength="5" style="width:52px;font-size:12px">
+        <input type="text" id="msched-time-input" placeholder="HH:MM" maxlength="5" oninput="autoFormatTime(this)" style="width:52px;font-size:12px">
         <input type="text" id="msched-text-input" placeholder="일정 입력..." style="flex:1;font-size:12px">
         <button onclick="addMonSchedItem()" style="background:var(--bdim);border:1px solid var(--acc);color:var(--blue);border-radius:4px;padding:4px 10px;font-size:12px;cursor:pointer;font-family:inherit;flex-shrink:0">추가</button>
       </div>
@@ -1474,7 +1472,7 @@ body.has-row2 .view{margin-top:107px}
       <div class="sec-label" id="cal-day-label"></div>
       <div id="cal-day-items"></div>
       <div style="display:flex;gap:4px;margin-top:8px">
-        <input type="text" id="cal-sched-time" placeholder="시간" style="width:60px;font-size:12px">
+        <input type="text" id="cal-sched-time" placeholder="시간" oninput="autoFormatTime(this)" style="width:60px;font-size:12px">
         <input type="text" id="cal-sched-text" placeholder="일정 내용..." style="flex:1;font-size:12px">
         <button onclick="calAddItem()" style="background:var(--bdim);border:1px solid var(--acc);color:var(--blue);border-radius:4px;padding:4px 10px;font-size:12px;cursor:pointer">+</button>
       </div>
@@ -1797,7 +1795,7 @@ function addDailyPlanRow(time_v, plan_v, exec_v, focus_v) {
   tr1.innerHTML = `
     <td style="padding:3px 2px;vertical-align:middle">
       <input type="text" id="dpr-time-${idx}" value="${time_v||''}" placeholder="HH:MM" maxlength="5"
-        oninput="updateDailyPlanRow(${idx})"
+        oninput="autoFormatTime(this);updateDailyPlanRow(${idx})"
         style="width:46px;background:transparent;border:none;border-bottom:1px solid var(--b1);color:var(--t1);font-family:inherit;font-size:12px;outline:none;text-align:center">
     </td>
     <td style="padding:3px 2px;vertical-align:middle">
@@ -3061,6 +3059,16 @@ function switchTab(v) {
   tabs2.style.display = hasSub ? 'flex' : 'none';
   document.body.classList.toggle('has-row2', hasSub);
 
+  // 일일 탭 모드 바 표시
+  const dailyBar = document.getElementById('daily-mode-bar');
+  if (dailyBar) {
+    const showDaily = (group === 'today');
+    dailyBar.style.display = showDaily ? 'flex' : 'none';
+    if (showDaily && !hasSub) {
+      document.body.classList.add('has-row2');
+    }
+  }
+
   if (hasSub) {
     document.querySelectorAll('.sub-group').forEach(sg =>
       sg.style.display = sg.id === 'sub-' + group ? 'flex' : 'none'
@@ -3162,6 +3170,37 @@ function loadTodaySchedule() {
     <span style="font-size:13px;flex:1">${it.text}</span>
     <span style="font-size:10px;color:var(--t3)">${it.src}</span>
   </div>`).join('');
+  injectScheduleToPlan();
+}
+
+function injectScheduleToPlan() {
+  if (!window._dataReady) return;
+  const items = [];
+  // Collect same sources as loadTodaySchedule
+  const dt = new Date(curDate+'T00:00:00'); dt.setDate(dt.getDate()-1);
+  const prevDay = localDateStr(dt);
+  ((allDaily[prevDay]||{}).tmr_schedule||[]).filter(r=>r&&r.text).forEach(r=>{
+    if(r.time) items.push({time:r.time, text:r.text});
+  });
+  const mk = curDate.slice(0,7);
+  const dd = parseInt(curDate.slice(8,10));
+  const mSched = ((allMonthly[mk]||{}).monthly_schedule||{})[dd]||[];
+  mSched.filter(r=>r&&r.text).forEach(r=>{
+    if(r.time) items.push({time:r.time, text:r.text});
+  });
+  const dow = new Date(curDate+'T00:00:00').getDay();
+  (recurringEvt.weekly||[]).filter(r=>r&&+r.dayOfWeek===dow)
+    .forEach(r=>{ if(r.time) items.push({time:r.time, text:r.title}); });
+
+  if (!items.length) return;
+  // Check existing plan rows to avoid duplicates
+  const existingTimes = dailyPlanRows.filter(r=>r).map(r=>r.time+r.plan);
+  items.forEach(it=>{
+    const key = it.time + '\u{1F4C5} '+it.text;
+    if (!existingTimes.includes(key)) {
+      addDailyPlanRow(it.time, '\u{1F4C5} '+it.text, '', '');
+    }
+  });
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -3175,7 +3214,7 @@ function addTmrSchedRow(text, time) {
   div.id='tsr-'+idx;
   div.style.cssText='display:flex;align-items:center;gap:6px;margin-bottom:4px';
   div.innerHTML=`<input type="text" id="tsr-time-${idx}" value="${time||''}" placeholder="HH:MM" maxlength="5"
-    oninput="updateTmrSchedRow(${idx})"
+    oninput="autoFormatTime(this);updateTmrSchedRow(${idx})"
     style="width:46px;background:transparent;border:none;border-bottom:1px solid var(--b1);color:var(--t2);font-family:inherit;font-size:12px;outline:none;text-align:center">
   <input type="text" id="tsr-text-${idx}" value="${(text||'').replace(/"/g,'&quot;')}" placeholder="일정..."
     oninput="updateTmrSchedRow(${idx})"
@@ -3991,6 +4030,15 @@ function removeRecWeekly(i) {
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // 초기화
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ── 시간 자동 포맷 (HH:MM)
+function autoFormatTime(el) {
+  let v = el.value.replace(/[^0-9]/g, '');
+  if (v.length >= 3) {
+    v = v.slice(0, 4);
+    el.value = v.slice(0, v.length-2) + ':' + v.slice(v.length-2);
+  }
+}
+
 // ── 모드 토글
 let dailyMode = 'simple';
 function setDailyMode(mode) {
@@ -4367,7 +4415,7 @@ function renderCalendar() {
   var today = new Date(), tyyyy = today.getFullYear(), tmm = today.getMonth()+1, tdd = today.getDate();
 
   var html = '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:4px">';
-  ['월','화','수','목','금','토','일'].forEach(function(d) { html += '<div style="text-align:center;font-size:10px;color:var(--t3);padding:2px 0">' + d + '</div>'; });
+  ['월','화','수','목','금','토','일'].forEach(function(d,i) { var hc=i===5?'var(--blue)':i===6?'var(--red)':'var(--t3)'; html += '<div style="text-align:center;font-size:10px;color:'+hc+';padding:2px 0">' + d + '</div>'; });
   for (var i = 0; i < startOffset; i++) html += '<div></div>';
 
   for (var d = 1; d <= daysInMonth; d++) {
@@ -4376,7 +4424,9 @@ function renderCalendar() {
     var isToday = yr === tyyyy && mo === tmm && d === tdd;
     var isSel = d === calSelectedDay;
     var bg = isSel ? 'var(--acc)' : isToday ? 'var(--s3)' : 'transparent';
-    var col = isSel ? '#fff' : isToday ? 'var(--blue)' : 'var(--t2)';
+    var dow = new Date(yr, mo-1, d).getDay();
+    var dowCol = dow===0?'var(--red)':dow===6?'var(--blue)':'var(--t2)';
+    var col = isSel ? '#fff' : isToday ? 'var(--blue)' : dowCol;
     var evtCol = isSel ? 'rgba(255,255,255,0.85)' : 'var(--t3)';
     var shown = items.slice(0, 4);
     var extra = cnt - shown.length;
