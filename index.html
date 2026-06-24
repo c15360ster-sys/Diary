@@ -4326,7 +4326,7 @@ function taskTogMemo(id){
   if(box) box.style.display=box.style.display==='block'?'none':'block';
 }
 function taskSortT(arr){
-  return arr.slice().sort(function(a,b){ var pa=a.imp+a.urg, pb=b.imp+b.urg; if(pb!==pa) return pb-pa; if(b.wt!==a.wt) return b.wt-a.wt; return a.ts-b.ts; });
+  return arr.slice().sort(function(a,b){ var pa=a.imp*2+a.urg, pb=b.imp*2+b.urg; if(pb!==pa) return pb-pa; if(b.wt!==a.wt) return b.wt-a.wt; return a.ts-b.ts; });
 }
 function taskRender(){ taskRenderSum(); taskRenderMx(); taskRenderList(); }
 function taskRenderSum(){
@@ -4371,7 +4371,7 @@ function taskRenderList(){
   if(!sorted.length){ el.innerHTML='<div style="text-align:center;color:var(--t3);padding:14px 0;font-size:12px">등록된 업무가 없습니다.</div>'; return; }
   var sCls={inprogress:'border-left:3px solid var(--purple)',done:'opacity:.52',cancelled:'opacity:.38',deferred:'opacity:.58'};
   el.innerHTML=sorted.map(function(t,i){
-    var pri=t.imp+t.urg, dlS=t.dl?t.dl.slice(5)+' 마감':'-';
+    var pri=t.imp*2+t.urg, dlS=t.dl?t.dl.slice(5)+' 마감':'-';
     var sty=sCls[t.st]||'';
     var nDec=t.st==='done'?'text-decoration:line-through;color:var(--t3)':'';
     var opts=TASK_SOPT.map(function(s){return '<option value="'+s.v+'"'+(t.st===s.v?' selected':'')+'>'+s.l+'</option>';}).join('');
