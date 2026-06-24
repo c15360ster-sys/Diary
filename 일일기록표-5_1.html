@@ -339,9 +339,9 @@ body.has-row2 .view{margin-top:107px}
     <span id="sync-badge" style="display:none;background:#2d1010;color:var(--red);font-size:10px;padding:2px 7px;border-radius:4px;font-weight:700">⚡ 오프라인 기록 중</span>
   </div>
   <div class="tabs" id="tabs">
-    <button class="tab" data-group="task" data-default="task">업무</button>
     <button class="tab on" data-group="today" data-default="today">일일</button>
     <button class="tab" data-group="juki" data-default="weekly">주기</button>
+    <button class="tab" data-group="task" data-default="task">업무</button>
     <button class="tab" data-group="principle-g" data-default="principle">원칙</button>
     <button class="tab" data-group="guide" data-default="guide">처방</button>
     <button class="tab" data-group="history" data-default="history">기록</button>
@@ -360,9 +360,9 @@ body.has-row2 .view{margin-top:107px}
       <button class="tab2" data-v="routine" data-parent="principle-g">루틴</button>
     </div>
   </div>
-  <div id="daily-mode-bar" class="tabs-row2" style="display:none">
-    <button class="tab2 on" id="mode-btn-simple" onclick="setDailyMode('simple')">⚡ 간편 (3분)</button>
-    <button class="tab2" id="mode-btn-full" onclick="setDailyMode('full')">📋 전체 기록</button>
+  <div id="daily-mode-bar" class="tabs-row2" style="display:flex">
+    <button class="tab2" id="mode-btn-simple" onclick="setDailyMode('simple')">⚡ 간편 (3분)</button>
+    <button class="tab2 on" id="mode-btn-full" onclick="setDailyMode('full')">📋 전체 기록</button>
   </div>
 </div>
 
@@ -4040,7 +4040,7 @@ function autoFormatTime(el) {
 }
 
 // ── 모드 토글
-let dailyMode = 'simple';
+let dailyMode = 'full';
 function setDailyMode(mode) {
   dailyMode = mode;
   document.body.classList.toggle('mode-simple', mode === 'simple');
@@ -4050,8 +4050,9 @@ function setDailyMode(mode) {
   if (fb) { fb.classList.toggle('on', mode === 'full'); }
   if (mode === 'full') { setTimeout(()=>{ updatePlanScore(); autoResizeAll(); }, 50); }
 }
-// 초기 간편 모드
-setDailyMode('simple');
+// 초기 전체기록 모드
+setDailyMode('full');
+document.body.classList.add('has-row2');
 
 // ── 아코디언
 function toggleAccordion(hdrId, bodyId) {
