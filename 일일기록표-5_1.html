@@ -303,10 +303,12 @@ body.has-row2 .view{margin-top:107px}
       window.lifeGoals  = data.life_goals  || {};
       window.tenYearPlan = data.ten_year_plan || {};
       window.recurringEvt = data.recurring || {annual:[], weekly:[]};
+      window.allTasks   = data.tasks || {};
     } catch(e) {
       window.allDaily   = {}; window.allWeekly  = {}; window.allMonthly = {};
       window.wkPlanDefaults = {}; window.allAnnual = {}; window.annualSched = {};
       window.lifeGoals = {}; window.tenYearPlan = {}; window.recurringEvt = {annual:[], weekly:[]};
+      window.allTasks = {};
     }
     showSpinner(false);
     window._dataReady = true;
@@ -4142,8 +4144,21 @@ function taskUrgFD(ds){
   const diff=Math.round((t1-t0)/86400000);
   return diff<=1?5:diff<=3?4:diff<=7?3:diff<=14?2:1;
 }
-function taskLd(d){try{return JSON.parse(localStorage.getItem('tm_'+d)||'[]');}catch{return[];}}
-function taskSd(d,a){localStorage.setItem('tm_'+d,JSON.stringify(a));}
+function taskLd(d){
+  // localStorage → Firebase 마이그레이션
+  if(window.allTasks && window.allTasks[d]) return window.allTasks[d];
+  try{
+    const local=JSON.parse(localStorage.getItem('tm_'+d)||'[]');
+    if(local.length && window.allTasks) { window.allTasks[d]=local; taskSaveStore(); localStorage.removeItem('tm_'+d); }
+    return local;
+  }catch{return[];}
+}
+function taskSd(d,a){
+  if(!window.allTasks) window.allTasks={};
+  window.allTasks[d]=a;
+  taskSaveStore();
+}
+function taskSaveStore(){ if(window._fbSet) window._fbSet('diary/tasks', window.allTasks||{}); }
 
 function taskGoDate(n){
   const d=new Date(taskCurD+'T00:00:00');
