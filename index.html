@@ -410,7 +410,10 @@ body.has-row2 .view{margin-top:107px}
   </div>
 
   <div class="card" id="task-form-card">
-    <div class="sec-label">&#x1F4CB; 업무 등록/수정</div>
+    <div style="display:flex;gap:0;border-bottom:1px solid var(--b1);margin-bottom:8px;padding-top:6px">
+      <button id="task-mode-add" onclick="taskSetMode('add')" class="subtab on" style="font-size:12px">📋 등록</button>
+      <button id="task-mode-edit" onclick="taskSetMode('edit')" class="subtab" style="font-size:12px;opacity:.5;pointer-events:none">✏ 수정</button>
+    </div>
     <div style="display:flex;flex-direction:column;gap:8px">
       <div>
         <div style="font-size:11px;color:var(--t3);margin-bottom:3px">업무명</div>
@@ -448,7 +451,7 @@ body.has-row2 .view{margin-top:107px}
         </div>
         <input type="number" id="task-fW" value="10" min="1" max="999" style="width:60px;text-align:center;font-size:13px;font-weight:700">
       </div>
-      <button id="task-add-btn" onclick="taskAdd()" style="width:100%;padding:10px;background:var(--bdim);border:1px solid var(--acc);border-radius:8px;color:var(--blue);font-size:14px;font-weight:600;cursor:pointer">&#xFF0B; 업무 추가</button>
+      <button id="task-add-btn" onclick="taskAdd()" style="width:100%;padding:10px;background:linear-gradient(135deg,var(--acc),#388bfd);border:1px solid var(--acc);border-radius:8px;color:#fff;font-size:14px;font-weight:600;cursor:pointer">업무 등록/수정</button>
     </div>
   </div>
 </div>
@@ -4299,11 +4302,23 @@ function taskPickD(v){
   if(n){ if(!v){ n.style.background='#450a0a'; n.style.borderColor='#ef4444'; n.style.color='#ef4444'; } else { n.style.background='transparent'; n.style.borderColor='var(--b1)'; n.style.color='var(--t3)'; } }
 }
 var taskEditId = null;
+function taskSetMode(mode) {
+  const addTab=document.getElementById('task-mode-add'), editTab=document.getElementById('task-mode-edit');
+  if(mode==='add') {
+    if(addTab){addTab.classList.add('on');addTab.style.opacity='1';addTab.style.pointerEvents='auto';}
+    if(editTab){editTab.classList.remove('on');editTab.style.opacity='.5';editTab.style.pointerEvents='none';}
+    taskResetF();
+  } else {
+    if(addTab){addTab.classList.remove('on');}
+    if(editTab){editTab.classList.add('on');editTab.style.opacity='1';editTab.style.pointerEvents='auto';}
+  }
+}
 function taskEdit(id) {
   const arr = taskLd(taskCurD);
   const t = arr.find(x => x.id === id);
   if (!t) return;
   taskEditId = id;
+  taskSetMode('edit');
   document.getElementById('task-fN').value = t.nm;
   taskPickI(t.imp);
   if (t.dl) {
@@ -4314,10 +4329,7 @@ function taskEdit(id) {
   }
   taskPickD(t.del);
   document.getElementById('task-fW').value = t.wt || 10;
-  // Scroll to form
   document.getElementById('task-form-card').scrollIntoView({behavior:'smooth'});
-  // Change button text
-  document.getElementById('task-add-btn').textContent = '✏ 업무 수정';
 }
 function taskAdd(){
   const nm=document.getElementById('task-fN')?.value.trim();
@@ -4328,11 +4340,9 @@ function taskAdd(){
   const wt=Math.max(1,Math.min(999,parseInt(document.getElementById('task-fW')?.value)||10));
   const arr=taskLd(taskCurD);
   if(taskEditId) {
-    // 수정 모드
     const t = arr.find(x => x.id === taskEditId);
     if(t) { t.nm=nm; t.imp=taskFI; t.urg=taskFU; t.del=taskFDl; t.wt=wt; t.dl=taskFDn; }
     taskEditId = null;
-    document.getElementById('task-add-btn').textContent = '＋ 업무 추가';
   } else {
     // 추가 모드
     arr.push({id:'t'+(++taskSeq),nm,imp:taskFI,urg:taskFU,del:taskFDl,wt,dl:taskFDn,st:'inprogress',note:'',ts:Date.now()});
@@ -4359,8 +4369,7 @@ function taskResetF(){
   document.getElementById('task-uarRow').style.display='none';
   document.getElementById('task-uovRow').style.display='none';
   taskEditId = null;
-  var addBtn = document.getElementById('task-add-btn');
-  if(addBtn) addBtn.textContent = '＋ 업무 추가';
+  taskSetMode('add');
 }
 function taskUpdSt(id,v){
   var arr=taskLd(taskCurD), t=arr.find(function(x){return x.id===id;});
