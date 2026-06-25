@@ -4146,12 +4146,29 @@ function taskUrgFD(ds){
 }
 function taskLd(d){
   // localStorage → Firebase 마이그레이션
-  if(window.allTasks && window.allTasks[d]) return window.allTasks[d];
+  if(window.allTasks && window.allTasks[d] && window.allTasks[d].length) return window.allTasks[d];
   try{
     const local=JSON.parse(localStorage.getItem('tm_'+d)||'[]');
-    if(local.length && window.allTasks) { window.allTasks[d]=local; taskSaveStore(); localStorage.removeItem('tm_'+d); }
-    return local;
-  }catch{return[];}
+    if(local.length && window.allTasks) { window.allTasks[d]=local; taskSaveStore(); localStorage.removeItem('tm_'+d); return local; }
+  }catch{}
+  // 미완료 업무 자동 이월: 최근 날짜에서 진행중/연기 업무 가져오기
+  if(!window.allTasks) return [];
+  const dates=Object.keys(window.allTasks).filter(k=>k<d).sort().reverse();
+  for(const prev of dates){
+    const prevTasks=window.allTasks[prev]||[];
+    const carry=prevTasks.filter(t=>t&&(t.st==='inprogress'||t.st==='deferred'));
+    if(carry.length){
+      const copied=carry.map(t=>{
+        const c=Object.assign({},t);
+        if(c.dl) c.urg=taskUrgFD(c.dl);
+        return c;
+      });
+      window.allTasks[d]=copied;
+      taskSaveStore();
+      return copied;
+    }
+  }
+  return [];
 }
 function taskSd(d,a){
   if(!window.allTasks) window.allTasks={};
