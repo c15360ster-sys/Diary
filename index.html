@@ -4161,7 +4161,7 @@ function taskLd(d){
   let carried = false;
   for(const prev of dates){
     const prevTasks = window.allTasks[prev] || [];
-    prevTasks.filter(t=>t && (t.st==='inprogress'||t.st==='deferred') && !todayIds.has(t.id))
+    prevTasks.filter(t=>t && t.st!=='cancelled' && !todayIds.has(t.id))
       .forEach(t=>{
         const c = Object.assign({}, t);
         if(c.dl) c.urg = taskUrgFD(c.dl);
@@ -4432,13 +4432,18 @@ function taskRenderList(){
   var raw=taskLd(taskCurD), sorted=taskSortT(raw), el=document.getElementById('task-tList');
   if(!el) return;
   if(!sorted.length){ el.innerHTML='<div style="text-align:center;color:var(--t3);padding:14px 0;font-size:12px">등록된 업무가 없습니다.</div>'; return; }
-  var sCls={inprogress:'border-left:3px solid var(--purple)',done:'opacity:.52',cancelled:'opacity:.38',deferred:'opacity:.58'};
-  el.innerHTML=sorted.map(function(t,i){
+  var active=sorted.filter(function(t){return t.st==='inprogress'||t.st==='deferred';});
+  var done=sorted.filter(function(t){return t.st==='done'||t.st==='delegated'||t.st==='cancelled';});
+  var all=active.concat(done);
+  var sCls={inprogress:'border-left:3px solid var(--purple)',done:'opacity:.65',cancelled:'opacity:.38',deferred:'border-left:3px solid var(--yellow);opacity:.75',delegated:'border-left:3px solid var(--green);opacity:.65'};
+  var hasDivider=active.length>0&&done.length>0;
+  el.innerHTML=all.map(function(t,i){
+    var divider=(hasDivider&&i===active.length)?'<div style="font-size:10px;color:var(--t3);text-align:center;padding:6px 0;border-top:1px solid var(--b1);margin-top:4px">── 처리 완료 ──</div>':'';
     var pri=t.imp*2+t.urg, dlS=t.dl?t.dl.slice(5)+' 마감':'-';
     var sty=sCls[t.st]||'';
     var nDec=t.st==='done'?'text-decoration:line-through;text-decoration-color:var(--red);color:var(--t3)':'';
     var opts=TASK_SOPT.map(function(s){return '<option value="'+s.v+'"'+(t.st===s.v?' selected':'')+'>'+s.l+'</option>';}).join('');
-    return '<div style="background:var(--s3);border:1px solid var(--b1);border-radius:8px;overflow:hidden;'+sty+'">'+
+    return divider+'<div style="background:var(--s3);border:1px solid var(--b1);border-radius:8px;overflow:hidden;'+sty+'">'+
       '<div style="display:flex;align-items:center;padding:8px 10px;gap:7px">'+
         '<div style="width:6px;height:6px;border-radius:50%;flex-shrink:0;background:'+(t.del?'#22c55e':'#ef4444')+'"></div>'+
         '<span onclick="taskEdit(\''+t.id+'\')" style="cursor:pointer;flex:1;font-size:13px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'+nDec+'">'+(i+1)+'. '+t.nm+'</span>'+
