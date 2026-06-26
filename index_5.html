@@ -1881,6 +1881,7 @@ function updateDailyPlanRow(idx) {
   }
 }
 function removeDailyPlanRow(idx) {
+  if(!confirm('해당 일정을 삭제하시겠습니까?')) return;
   dailyPlanRows[idx]=null;
   const tr=document.getElementById('dpr-'+idx); if(tr) tr.remove();
   const tr2=document.getElementById('dpr-exec-row-'+idx); if(tr2) tr2.remove();
@@ -4147,21 +4148,24 @@ function taskUrgFD(ds){
   const diff=Math.round((t1-t0)/86400000);
   return diff<=1?5:diff<=3?4:diff<=7?3:diff<=14?2:1;
 }
+var _taskCarriedDates = {};
 function taskLd(d){
   if(!window.allTasks) window.allTasks={};
+  // 이미 이월 완료된 날짜면 바로 반환
+  if(_taskCarriedDates[d] && window.allTasks[d]) return window.allTasks[d];
   let todayTasks = (window.allTasks[d] || []).slice();
   // localStorage 마이그레이션
   try{
     const local=JSON.parse(localStorage.getItem('tm_'+d)||'[]');
     if(local.length) { todayTasks=todayTasks.concat(local); localStorage.removeItem('tm_'+d); }
   }catch{}
-  // 미완료 업무 자동 이월 (모든 이전 날짜에서, ID 중복 제거)
+  // 미완료 업무 자동 이월 (진행중/연기만, ID 중복 제거)
   const todayIds = new Set(todayTasks.filter(t=>t).map(t=>t.id));
   const dates = Object.keys(window.allTasks).filter(k=>k<d).sort().reverse();
   let carried = false;
   for(const prev of dates){
     const prevTasks = window.allTasks[prev] || [];
-    prevTasks.filter(t=>t && t.st!=='cancelled' && !todayIds.has(t.id))
+    prevTasks.filter(t=>t && (t.st==='inprogress'||t.st==='deferred') && !todayIds.has(t.id))
       .forEach(t=>{
         const c = Object.assign({}, t);
         if(c.dl) c.urg = taskUrgFD(c.dl);
@@ -4174,6 +4178,7 @@ function taskLd(d){
     window.allTasks[d] = todayTasks;
     taskSaveStore();
   }
+  _taskCarriedDates[d] = true;
   return todayTasks;
 }
 function taskSd(d,a){
