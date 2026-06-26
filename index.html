@@ -454,6 +454,17 @@ body.has-row2 .view{margin-top:107px}
       <button id="task-add-btn" onclick="taskAdd()" style="width:100%;padding:10px;background:linear-gradient(135deg,var(--acc),#388bfd);border:1px solid var(--acc);border-radius:8px;color:#fff;font-size:14px;font-weight:600;cursor:pointer">업무 등록/수정</button>
     </div>
   </div>
+
+  <div class="card">
+    <div class="sec-label">🔁 매일 반복 업무</div>
+    <div style="font-size:11px;color:var(--t3);margin-bottom:8px">등록하면 매일 자동으로 업무 목록에 추가됩니다</div>
+    <div id="task-recurring-list"></div>
+    <div style="display:flex;gap:4px;margin-top:6px">
+      <input type="text" id="task-rec-name" placeholder="반복 업무명..." style="flex:1;font-size:12px">
+      <input type="number" id="task-rec-imp" placeholder="중요도" min="1" max="5" style="width:55px;font-size:12px;text-align:center">
+      <button onclick="addTaskRecurring()" style="background:var(--bdim);border:1px solid var(--acc);color:var(--blue);border-radius:4px;padding:4px 10px;font-size:12px;cursor:pointer;font-weight:600">+</button>
+    </div>
+  </div>
 </div>
 
 <!-- ═══════════════════ 일일 ═══════════════════ -->
@@ -471,8 +482,10 @@ body.has-row2 .view{margin-top:107px}
 
   <!-- 이번달 목표 (월간 탭 종합목표 → 읽기 전용) -->
   <div id="daily-month-goal" style="display:none;background:#1a0a2a;border:1px solid #4a1f7f;border-radius:8px;padding:10px 14px;margin-bottom:10px">
-    <div style="font-size:11px;color:var(--purple);font-weight:700;letter-spacing:.06em;margin-bottom:5px">🎯 이번달 목표</div>
-    <div id="daily-month-goals-list"></div>
+    <div onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none';this.querySelector('.chevron').textContent=this.nextElementSibling.style.display==='none'?'▸':'▾'" style="font-size:11px;color:var(--purple);font-weight:700;letter-spacing:.06em;cursor:pointer;display:flex;justify-content:space-between;align-items:center">
+      <span>🎯 이번달 목표</span><span class="chevron">▸</span>
+    </div>
+    <div id="daily-month-goals-list" style="display:none;margin-top:5px"></div>
   </div>
 
   <!-- 이번 주 목표 (주간 탭 다음주 목표 → 읽기 전용 리스트) -->
@@ -873,16 +886,16 @@ body.has-row2 .view{margin-top:107px}
     <!-- 이번주 완성한 산출물 -->
     <div class="m-field">
       <div class="m-label">◽ 이번주 완성한 산출물</div>
-      <input type="text" id="wk-output" placeholder="논문 1문단 / AI샘플 1개 / 브런치 1편..." oninput="saveWeekly()">
+      <input type="text" id="wk-output" placeholder="논문 1문단 / AI샘플 1개 / 브런치 1편..." oninput="tabAutoSave('weekly')">
     </div>
 
     <!-- 다음주 CEO 질문 (통합) -->
-    <div class="m-field"><div class="m-label">◽ 다음주 가장 중요한 전장(업무)은 무엇인가?</div><input type="text" id="wk-ceo-q1" placeholder="주간 핵심 목표 1개" oninput="saveWeekly()"></div>
-    <div class="m-field"><div class="m-label">◽ 다음주 반드시 남길 산출물은 무엇인가?</div><input type="text" id="wk-ceo-q2" placeholder="문서·계약·콘텐츠·제품 중 1개" oninput="saveWeekly()"></div>
-    <div class="m-field"><div class="m-label">◽ 다음주 회피가 예상되는 과제는 무엇인가?</div><input type="text" id="wk-ceo-q3" placeholder="위험 과제 1개" oninput="saveWeekly()"></div>
-    <div class="m-field"><div class="m-label">◽ 그 과제를 언제 첫 25분 실행할 것인가?</div><input type="text" id="wk-ceo-q4" placeholder="캘린더 고정 시간" oninput="saveWeekly()"></div>
-    <div class="m-field"><div class="m-label">◽ 누구에게 언제 공유할 것인가?</div><input type="text" id="wk-ceo-q5" placeholder="외부 마감 설정" oninput="saveWeekly()"></div>
-    <div class="m-field"><div class="m-label">◽ 다음주 하지 않을 것은 무엇인가?</div><input type="text" id="wk-ceo-q6" placeholder="제거 항목 1개" oninput="saveWeekly()"></div>
+    <div class="m-field"><div class="m-label">◽ 다음주 가장 중요한 전장(업무)은 무엇인가?</div><input type="text" id="wk-ceo-q1" placeholder="주간 핵심 목표 1개" oninput="tabAutoSave('weekly')"></div>
+    <div class="m-field"><div class="m-label">◽ 다음주 반드시 남길 산출물은 무엇인가?</div><input type="text" id="wk-ceo-q2" placeholder="문서·계약·콘텐츠·제품 중 1개" oninput="tabAutoSave('weekly')"></div>
+    <div class="m-field"><div class="m-label">◽ 다음주 회피가 예상되는 과제는 무엇인가?</div><input type="text" id="wk-ceo-q3" placeholder="위험 과제 1개" oninput="tabAutoSave('weekly')"></div>
+    <div class="m-field"><div class="m-label">◽ 그 과제를 언제 첫 25분 실행할 것인가?</div><input type="text" id="wk-ceo-q4" placeholder="캘린더 고정 시간" oninput="tabAutoSave('weekly')"></div>
+    <div class="m-field"><div class="m-label">◽ 누구에게 언제 공유할 것인가?</div><input type="text" id="wk-ceo-q5" placeholder="외부 마감 설정" oninput="tabAutoSave('weekly')"></div>
+    <div class="m-field"><div class="m-label">◽ 다음주 하지 않을 것은 무엇인가?</div><input type="text" id="wk-ceo-q6" placeholder="제거 항목 1개" oninput="tabAutoSave('weekly')"></div>
 
     <!-- 일일 자동 집계 -->
     <div style="background:var(--s3);border-radius:6px;padding:10px;margin-bottom:10px">
@@ -903,22 +916,22 @@ body.has-row2 .view{margin-top:107px}
       </div>
       <div class="m-field" style="margin-bottom:0">
         <div class="m-label">◽ 이번주 반복된 뿌리 신념 <span style="color:var(--t3);font-size:11px">— 집계 보고 종합</span></div>
-        <input type="text" id="wk-trigger" placeholder="반복 트리거의 핵심 신념 (예: 나는 인정받아야 한다 / 실패하면 안 된다)..." oninput="saveWeekly()">
+        <input type="text" id="wk-trigger" placeholder="반복 트리거의 핵심 신념 (예: 나는 인정받아야 한다 / 실패하면 안 된다)..." oninput="tabAutoSave('weekly')">
       </div>
     </div>
 
     <!-- 패턴 요약 -->
     <div class="m-field">
       <div class="m-label">◽ 나는 언제 살아나는가? <span style="color:var(--t3);font-size:11px">— 집계 보고 종합</span></div>
-      <input type="text" id="wk-alive" placeholder="패턴 요약..." oninput="saveWeekly()">
+      <input type="text" id="wk-alive" placeholder="패턴 요약..." oninput="tabAutoSave('weekly')">
     </div>
     <div class="m-field">
       <div class="m-label">◽ 나는 언제 기운 빠지는가? <span style="color:var(--t3);font-size:11px">— 집계 보고 종합</span></div>
-      <input type="text" id="wk-drained" placeholder="패턴 요약..." oninput="saveWeekly()">
+      <input type="text" id="wk-drained" placeholder="패턴 요약..." oninput="tabAutoSave('weekly')">
     </div>
     <div class="m-field">
       <div class="m-label">◽ 주간결산 느낀 점 / 다음주 각오</div>
-      <textarea id="wk-review" rows="2" placeholder="이번 주를 돌아보며..." oninput="saveWeekly()"></textarea>
+      <textarea id="wk-review" rows="2" placeholder="이번 주를 돌아보며..." oninput="tabAutoSave('weekly')"></textarea>
     </div>
 
     <!-- 다음주 목표 (행추가/삭제) -->
@@ -1027,16 +1040,9 @@ body.has-row2 .view{margin-top:107px}
 
   <!-- ── 0월 주요일정/기록 ── -->
   <div class="subview" id="msub-schedule">
-    <div style="font-size:11px;color:var(--t3);margin-bottom:8px">일정을 입력하면 해당 날짜 일일탭 '오늘 주요 일정'에 자동 표시됩니다</div>
-    <div id="msched-calendar"></div>
-    <div id="msched-day-section" style="display:none;background:var(--s1);border:1px solid var(--b1);border-radius:8px;padding:10px 12px;margin-top:8px">
-      <div id="msched-day-label" style="font-size:12px;font-weight:700;color:var(--blue);margin-bottom:6px"></div>
-      <div id="msched-day-items"></div>
-      <div style="display:flex;gap:6px;margin-top:6px;align-items:center">
-        <input type="text" id="msched-time-input" placeholder="HH:MM" maxlength="5" oninput="autoFormatTime(this)" style="width:52px;font-size:12px">
-        <input type="text" id="msched-text-input" placeholder="일정 입력..." style="flex:1;font-size:12px">
-        <button onclick="addMonSchedItem()" style="background:var(--bdim);border:1px solid var(--acc);color:var(--blue);border-radius:4px;padding:4px 10px;font-size:12px;cursor:pointer;font-family:inherit;flex-shrink:0">추가</button>
-      </div>
+    <div style="text-align:center;padding:20px 0">
+      <div style="font-size:13px;color:var(--t2);margin-bottom:8px">월간 주요일정은 [달력] 탭에서 관리합니다</div>
+      <button onclick="switchTab('calendar')" style="background:linear-gradient(135deg,var(--acc),#388bfd);border:1px solid var(--acc);color:#fff;border-radius:6px;padding:8px 20px;font-size:13px;font-weight:600;cursor:pointer">📅 달력 탭으로 이동</button>
     </div>
     <!-- 월간 트래킹 -->
     <div style="margin-top:12px">
@@ -1058,7 +1064,7 @@ body.has-row2 .view{margin-top:107px}
   <div class="monthly-sec" style="border-left:3px solid var(--green)">
     <div class="monthly-sec-title" style="color:var(--green)">🧘 修身 — 내면 점검</div>
     <div class="m-label">지금 나의 상태와 내면은 어떠한가. 이번 달 판단들은 1.0의 방향과 일치했는가.</div>
-    <textarea id="m-sinsin" rows="2" oninput="saveMonthly()" placeholder="솔직하게 한 줄..."></textarea>
+    <textarea id="m-sinsin" rows="2" oninput="tabAutoSave('monthly')" placeholder="솔직하게 한 줄..."></textarea>
   </div>
 
   <!-- 확인 5분 -->
@@ -1066,11 +1072,11 @@ body.has-row2 .view{margin-top:107px}
     <div class="monthly-sec-title" style="color:var(--blue)">✅ 확인 <span style="font-size:11px;font-weight:400;color:var(--t3)">5분 — 주간 점수 평균 기반 한 줄</span></div>
     <div class="m-field">
       <div class="m-label">이번 달 가장 안정된 기둥</div>
-      <input type="text" id="m-strong" oninput="saveMonthly()" placeholder="회복 / 관계 / 생계 / 성장 / 의미">
+      <input type="text" id="m-strong" oninput="tabAutoSave('monthly')" placeholder="회복 / 관계 / 생계 / 성장 / 의미">
     </div>
     <div class="m-field" style="margin-bottom:0">
       <div class="m-label">이번 달 가장 의미 있었던 작은 행동</div>
-      <input type="text" id="m-best" oninput="saveMonthly()" placeholder="어떤 행동이었는가...">
+      <input type="text" id="m-best" oninput="tabAutoSave('monthly')" placeholder="어떤 행동이었는가...">
     </div>
   </div>
 
@@ -1079,11 +1085,11 @@ body.has-row2 .view{margin-top:107px}
     <div class="monthly-sec-title" style="color:var(--yellow)">🔍 분석 <span style="font-size:11px;font-weight:400;color:var(--t3)">10분</span></div>
     <div class="m-field">
       <div class="m-label">이번 달 가장 약해진 기둥</div>
-      <input type="text" id="m-weak" oninput="saveMonthly()" placeholder="회복 / 관계 / 생계 / 성장 / 의미">
+      <input type="text" id="m-weak" oninput="tabAutoSave('monthly')" placeholder="회복 / 관계 / 생계 / 성장 / 의미">
     </div>
     <div class="m-field" style="margin-bottom:0">
       <div class="m-label">이번 달 반복된 회피 행동</div>
-      <input type="text" id="m-avoid-pattern" oninput="saveMonthly()" placeholder="어떤 패턴이었는가...">
+      <input type="text" id="m-avoid-pattern" oninput="tabAutoSave('monthly')" placeholder="어떤 패턴이었는가...">
     </div>
   </div>
 
@@ -1092,15 +1098,15 @@ body.has-row2 .view{margin-top:107px}
     <div class="monthly-sec-title" style="color:var(--red)">⚡ 결정 <span style="font-size:11px;font-weight:400;color:var(--t3)">10분</span></div>
     <div class="m-field">
       <div class="m-label">다음 달 줄일 것 <span style="color:var(--red);font-size:11px">[필수 — 없으면 과부하 신호]</span></div>
-      <input type="text" id="m-reduce" oninput="saveMonthly()" placeholder="무엇을 줄일 것인가...">
+      <input type="text" id="m-reduce" oninput="tabAutoSave('monthly')" placeholder="무엇을 줄일 것인가...">
     </div>
     <div class="m-field">
       <div class="m-label">다음 달 반드시 유지할 것</div>
-      <input type="text" id="m-maintain" oninput="saveMonthly()" placeholder="무엇을 지킬 것인가...">
+      <input type="text" id="m-maintain" oninput="tabAutoSave('monthly')" placeholder="무엇을 지킬 것인가...">
     </div>
     <div class="m-field" style="margin-bottom:0">
       <div class="m-label">다음 달 실험할 작은 행동</div>
-      <input type="text" id="m-experiment" oninput="saveMonthly()" placeholder="어떤 실험을 해볼 것인가...">
+      <input type="text" id="m-experiment" oninput="tabAutoSave('monthly')" placeholder="어떤 실험을 해볼 것인가...">
     </div>
   </div>
 
@@ -1112,19 +1118,19 @@ body.has-row2 .view{margin-top:107px}
     </div>
     <div class="m-field">
       <div class="m-label">[필수] 재무 — 월 고정비·비상금·생존 가능 개월 수</div>
-      <input type="text" id="m-finance" oninput="saveMonthly()" placeholder="비상금 N개월치 / 고정지출 확인...">
+      <input type="text" id="m-finance" oninput="tabAutoSave('monthly')" placeholder="비상금 N개월치 / 고정지출 확인...">
     </div>
     <div class="m-field">
       <div class="m-label">[필수] 관계 — 배우자에게 공유할 사실·사과·요청</div>
-      <textarea id="m-relation" rows="2" oninput="saveMonthly()" placeholder="이번 달 공유할 내용..."></textarea>
+      <textarea id="m-relation" rows="2" oninput="tabAutoSave('monthly')" placeholder="이번 달 공유할 내용..."></textarea>
     </div>
     <div class="m-field">
       <div class="m-label">생계 — 지원 건수·인터뷰·포트폴리오 진행</div>
-      <input type="text" id="m-livelihood" oninput="saveMonthly()" placeholder="지원 N건 / 인터뷰 N명 / 산출물 N개...">
+      <input type="text" id="m-livelihood" oninput="tabAutoSave('monthly')" placeholder="지원 N건 / 인터뷰 N명 / 산출물 N개...">
     </div>
     <div class="m-field" style="margin-bottom:0">
       <div class="m-label">다음 진료 때 보고할 내용</div>
-      <input type="text" id="m-medical" oninput="saveMonthly()" placeholder="수면 추이 / 우울 패턴...">
+      <input type="text" id="m-medical" oninput="tabAutoSave('monthly')" placeholder="수면 추이 / 우울 패턴...">
     </div>
   </div>
 
@@ -1133,7 +1139,7 @@ body.has-row2 .view{margin-top:107px}
     <div class="monthly-sec-title" style="color:var(--green)">🌿 의미축 확인 <span style="font-size:11px;font-weight:400;color:var(--t3)">5분</span></div>
     <div class="m-field" style="margin-bottom:0">
       <div class="m-label">게임제작·수련·AI 산출물 중 이번 달 의미 있었던 결과물</div>
-      <input type="text" id="m-meaning" oninput="saveMonthly()" placeholder="어떤 결과물이었는가...">
+      <input type="text" id="m-meaning" oninput="tabAutoSave('monthly')" placeholder="어떤 결과물이었는가...">
     </div>
   </div>
 
@@ -1197,11 +1203,11 @@ body.has-row2 .view{margin-top:107px}
       <table class="plan-table">
         <thead><tr><th style="width:54px">구분</th><th>내 용</th><th style="width:80px">비 고</th></tr></thead>
         <tbody>
-          <tr><td style="color:var(--blue);font-weight:700">40대</td><td><textarea id="life-dec-40" rows="2" oninput="saveLifeGoals()" placeholder="내용..."></textarea></td><td><textarea id="life-dec-40n" rows="2" oninput="saveLifeGoals()" placeholder="비고..."></textarea></td></tr>
-          <tr><td style="color:var(--green);font-weight:700">50대</td><td><textarea id="life-dec-50" rows="2" oninput="saveLifeGoals()" placeholder="내용..."></textarea></td><td><textarea id="life-dec-50n" rows="2" oninput="saveLifeGoals()" placeholder="비고..."></textarea></td></tr>
-          <tr><td style="color:var(--yellow);font-weight:700">60대</td><td><textarea id="life-dec-60" rows="2" oninput="saveLifeGoals()" placeholder="내용..."></textarea></td><td><textarea id="life-dec-60n" rows="2" oninput="saveLifeGoals()" placeholder="비고..."></textarea></td></tr>
-          <tr><td style="color:var(--purple);font-weight:700">70대</td><td><textarea id="life-dec-70" rows="2" oninput="saveLifeGoals()" placeholder="내용..."></textarea></td><td><textarea id="life-dec-70n" rows="2" oninput="saveLifeGoals()" placeholder="비고..."></textarea></td></tr>
-          <tr><td style="color:var(--t2);font-weight:700">80대</td><td><textarea id="life-dec-80" rows="2" oninput="saveLifeGoals()" placeholder="내용..."></textarea></td><td><textarea id="life-dec-80n" rows="2" oninput="saveLifeGoals()" placeholder="비고..."></textarea></td></tr>
+          <tr><td style="color:var(--blue);font-weight:700">40대</td><td><textarea id="life-dec-40" rows="2" oninput="tabAutoSave('lifegoals')" placeholder="내용..."></textarea></td><td><textarea id="life-dec-40n" rows="2" oninput="tabAutoSave('lifegoals')" placeholder="비고..."></textarea></td></tr>
+          <tr><td style="color:var(--green);font-weight:700">50대</td><td><textarea id="life-dec-50" rows="2" oninput="tabAutoSave('lifegoals')" placeholder="내용..."></textarea></td><td><textarea id="life-dec-50n" rows="2" oninput="tabAutoSave('lifegoals')" placeholder="비고..."></textarea></td></tr>
+          <tr><td style="color:var(--yellow);font-weight:700">60대</td><td><textarea id="life-dec-60" rows="2" oninput="tabAutoSave('lifegoals')" placeholder="내용..."></textarea></td><td><textarea id="life-dec-60n" rows="2" oninput="tabAutoSave('lifegoals')" placeholder="비고..."></textarea></td></tr>
+          <tr><td style="color:var(--purple);font-weight:700">70대</td><td><textarea id="life-dec-70" rows="2" oninput="tabAutoSave('lifegoals')" placeholder="내용..."></textarea></td><td><textarea id="life-dec-70n" rows="2" oninput="tabAutoSave('lifegoals')" placeholder="비고..."></textarea></td></tr>
+          <tr><td style="color:var(--t2);font-weight:700">80대</td><td><textarea id="life-dec-80" rows="2" oninput="tabAutoSave('lifegoals')" placeholder="내용..."></textarea></td><td><textarea id="life-dec-80n" rows="2" oninput="tabAutoSave('lifegoals')" placeholder="비고..."></textarea></td></tr>
         </tbody>
       </table>
     </div>
@@ -1253,7 +1259,7 @@ body.has-row2 .view{margin-top:107px}
     <!-- 돌아보기 -->
     <div class="goal-sec">
       <div class="goal-sec-title"><span id="annual-review-label">□ 전년도 돌아보기</span><span style="font-size:10px;color:var(--t3);font-weight:400">3칸까지 입력</span></div>
-      <textarea id="annual-review" rows="3" oninput="saveAnnual()" placeholder="전년도를 돌아보며..."></textarea>
+      <textarea id="annual-review" rows="3" oninput="tabAutoSave('annual')" placeholder="전년도를 돌아보며..."></textarea>
     </div>
     <!-- 세부목표 (동적 행, 전반기/후반기) -->
     <div class="goal-sec">
@@ -1269,15 +1275,15 @@ body.has-row2 .view{margin-top:107px}
           <div style="font-size:12px;font-weight:700;color:var(--t2);margin-bottom:6px">■ 1/4분기</div>
           <div style="display:flex;align-items:center;gap:4px;margin-bottom:5px">
             <span style="font-size:11px;color:var(--blue);min-width:30px;flex-shrink:0">◦ 호흡:</span>
-            <input type="text" id="aq-br-1" oninput="saveAnnual()" placeholder="..." style="flex:1;font-size:11px">
+            <input type="text" id="aq-br-1" oninput="tabAutoSave('annual')" placeholder="..." style="flex:1;font-size:11px">
           </div>
           <div style="display:flex;align-items:center;gap:4px;margin-bottom:5px">
             <span style="font-size:11px;color:var(--yellow);min-width:30px;flex-shrink:0">◦ 공부:</span>
-            <input type="text" id="aq-st-1" oninput="saveAnnual()" placeholder="..." style="flex:1;font-size:11px">
+            <input type="text" id="aq-st-1" oninput="tabAutoSave('annual')" placeholder="..." style="flex:1;font-size:11px">
           </div>
           <div style="display:flex;align-items:center;gap:4px">
             <span style="font-size:11px;color:var(--green);min-width:30px;flex-shrink:0">◦ 운동:</span>
-            <input type="text" id="aq-ex-1" oninput="saveAnnual()" placeholder="..." style="flex:1;font-size:11px">
+            <input type="text" id="aq-ex-1" oninput="tabAutoSave('annual')" placeholder="..." style="flex:1;font-size:11px">
           </div>
         </div>
         <!-- 2/4분기 -->
@@ -1285,15 +1291,15 @@ body.has-row2 .view{margin-top:107px}
           <div style="font-size:12px;font-weight:700;color:var(--t2);margin-bottom:6px">■ 2/4분기</div>
           <div style="display:flex;align-items:center;gap:4px;margin-bottom:5px">
             <span style="font-size:11px;color:var(--blue);min-width:30px;flex-shrink:0">◦ 호흡:</span>
-            <input type="text" id="aq-br-2" oninput="saveAnnual()" placeholder="..." style="flex:1;font-size:11px">
+            <input type="text" id="aq-br-2" oninput="tabAutoSave('annual')" placeholder="..." style="flex:1;font-size:11px">
           </div>
           <div style="display:flex;align-items:center;gap:4px;margin-bottom:5px">
             <span style="font-size:11px;color:var(--yellow);min-width:30px;flex-shrink:0">◦ 공부:</span>
-            <input type="text" id="aq-st-2" oninput="saveAnnual()" placeholder="..." style="flex:1;font-size:11px">
+            <input type="text" id="aq-st-2" oninput="tabAutoSave('annual')" placeholder="..." style="flex:1;font-size:11px">
           </div>
           <div style="display:flex;align-items:center;gap:4px">
             <span style="font-size:11px;color:var(--green);min-width:30px;flex-shrink:0">◦ 운동:</span>
-            <input type="text" id="aq-ex-2" oninput="saveAnnual()" placeholder="..." style="flex:1;font-size:11px">
+            <input type="text" id="aq-ex-2" oninput="tabAutoSave('annual')" placeholder="..." style="flex:1;font-size:11px">
           </div>
         </div>
         <!-- 3/4분기 -->
@@ -1301,15 +1307,15 @@ body.has-row2 .view{margin-top:107px}
           <div style="font-size:12px;font-weight:700;color:var(--t2);margin-bottom:6px">■ 3/4분기</div>
           <div style="display:flex;align-items:center;gap:4px;margin-bottom:5px">
             <span style="font-size:11px;color:var(--blue);min-width:30px;flex-shrink:0">◦ 호흡:</span>
-            <input type="text" id="aq-br-3" oninput="saveAnnual()" placeholder="..." style="flex:1;font-size:11px">
+            <input type="text" id="aq-br-3" oninput="tabAutoSave('annual')" placeholder="..." style="flex:1;font-size:11px">
           </div>
           <div style="display:flex;align-items:center;gap:4px;margin-bottom:5px">
             <span style="font-size:11px;color:var(--yellow);min-width:30px;flex-shrink:0">◦ 공부:</span>
-            <input type="text" id="aq-st-3" oninput="saveAnnual()" placeholder="..." style="flex:1;font-size:11px">
+            <input type="text" id="aq-st-3" oninput="tabAutoSave('annual')" placeholder="..." style="flex:1;font-size:11px">
           </div>
           <div style="display:flex;align-items:center;gap:4px">
             <span style="font-size:11px;color:var(--green);min-width:30px;flex-shrink:0">◦ 운동:</span>
-            <input type="text" id="aq-ex-3" oninput="saveAnnual()" placeholder="..." style="flex:1;font-size:11px">
+            <input type="text" id="aq-ex-3" oninput="tabAutoSave('annual')" placeholder="..." style="flex:1;font-size:11px">
           </div>
         </div>
         <!-- 4/4분기 -->
@@ -1317,15 +1323,15 @@ body.has-row2 .view{margin-top:107px}
           <div style="font-size:12px;font-weight:700;color:var(--t2);margin-bottom:6px">■ 4/4분기</div>
           <div style="display:flex;align-items:center;gap:4px;margin-bottom:5px">
             <span style="font-size:11px;color:var(--blue);min-width:30px;flex-shrink:0">◦ 호흡:</span>
-            <input type="text" id="aq-br-4" oninput="saveAnnual()" placeholder="..." style="flex:1;font-size:11px">
+            <input type="text" id="aq-br-4" oninput="tabAutoSave('annual')" placeholder="..." style="flex:1;font-size:11px">
           </div>
           <div style="display:flex;align-items:center;gap:4px;margin-bottom:5px">
             <span style="font-size:11px;color:var(--yellow);min-width:30px;flex-shrink:0">◦ 공부:</span>
-            <input type="text" id="aq-st-4" oninput="saveAnnual()" placeholder="..." style="flex:1;font-size:11px">
+            <input type="text" id="aq-st-4" oninput="tabAutoSave('annual')" placeholder="..." style="flex:1;font-size:11px">
           </div>
           <div style="display:flex;align-items:center;gap:4px">
             <span style="font-size:11px;color:var(--green);min-width:30px;flex-shrink:0">◦ 운동:</span>
-            <input type="text" id="aq-ex-4" oninput="saveAnnual()" placeholder="..." style="flex:1;font-size:11px">
+            <input type="text" id="aq-ex-4" oninput="tabAutoSave('annual')" placeholder="..." style="flex:1;font-size:11px">
           </div>
         </div>
       </div>
@@ -1439,9 +1445,14 @@ body.has-row2 .view{margin-top:107px}
 
 <!-- ═══════════════════ 기록 ═══════════════════ -->
 <div class="view" id="v-history">
+  <div style="margin-bottom:10px">
+    <input type="text" id="hist-search" placeholder="🔍 해마노트 / 메모 검색..." oninput="searchHistory()" style="width:100%;font-size:13px;padding:8px 12px;border-radius:8px">
+  </div>
+  <div id="hist-search-results" style="display:none;margin-bottom:12px"></div>
   <div class="subtabs">
     <button class="subtab on" id="hist-btn-daily" onclick="switchHistSub('daily')">일일기록</button>
     <button class="subtab" id="hist-btn-annual" onclick="switchHistSub('annual')">연간기록</button>
+    <button class="subtab" id="hist-btn-trend" onclick="switchHistSub('trend')">📊 추세</button>
   </div>
 
   <!-- 일일기록 -->
@@ -1459,6 +1470,34 @@ body.has-row2 .view{margin-top:107px}
   <!-- 연간기록 -->
   <div class="subview" id="hsub-annual">
     <div id="hist-annual-list"></div>
+  </div>
+
+  <!-- 추세 -->
+  <div class="subview" id="hsub-trend">
+    <div class="card">
+      <div class="sec-label">📊 최근 30일 추세</div>
+      <div id="trend-chart-container">
+        <canvas id="trend-canvas" style="width:100%;height:200px"></canvas>
+      </div>
+      <div style="display:flex;gap:12px;justify-content:center;margin-top:8px;font-size:11px">
+        <span style="color:var(--red)">● 우울</span>
+        <span style="color:var(--yellow)">● 불안</span>
+        <span style="color:var(--blue)">● 수면</span>
+        <span style="color:var(--green)">● 이행률</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:20px">
+    <div class="sec-label">💾 데이터 백업/복원</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button onclick="exportData()" style="flex:1;padding:8px;background:var(--bdim);border:1px solid var(--acc);color:var(--blue);border-radius:6px;font-size:12px;font-weight:600;cursor:pointer">📥 JSON 내보내기</button>
+      <label style="flex:1;padding:8px;background:var(--s3);border:1px solid var(--b1);color:var(--t2);border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;text-align:center">
+        📤 JSON 가져오기
+        <input type="file" accept=".json" onchange="importData(event)" style="display:none">
+      </label>
+    </div>
+    <div style="font-size:10px;color:var(--t3);margin-top:6px">내보내기: 모든 데이터를 JSON 파일로 다운로드 / 가져오기: 기존 데이터 덮어쓰기</div>
   </div>
 </div>
 
@@ -2960,10 +2999,11 @@ let histMon = (()=>{ const d=new Date(); return d.getFullYear()+'-'+String(d.get
 
 function switchHistSub(sub) {
   curHistSub = sub;
-  ['daily','annual'].forEach(s=>{
+  ['daily','annual','trend'].forEach(s=>{
     const btn=document.getElementById('hist-btn-'+s); if(btn) btn.classList.toggle('on',s===sub);
     const v=document.getElementById('hsub-'+s); if(v) v.classList.toggle('on',s===sub);
   });
+  if(sub==='trend') setTimeout(renderTrend,50);
   if(sub==='daily') renderHistoryDaily();
   else renderHistoryAnnual();
 }
@@ -3649,9 +3689,9 @@ function renderTenYear() {
   const data=tenYearPlan.rows||{};
   tbody.innerHTML=TEN_YEAR_ROWS.map((r,i)=>`<tr style="background:${i%2===0?'var(--s1)':'var(--s2)'}">
     <td style="color:var(--blue);font-weight:700;white-space:nowrap">${r.yr}<div style="font-size:10px;color:var(--t3)">${r.label}</div></td>
-    <td><textarea id="ty-gen-${i}" rows="2" oninput="saveTenYear()" placeholder="일반 계획/목표..."
+    <td><textarea id="ty-gen-${i}" rows="2" oninput="tabAutoSave('tenyear')" placeholder="일반 계획/목표..."
       style="width:100%;resize:none;background:transparent;border:none;border-bottom:1px solid var(--b2);color:var(--t1);font-family:inherit;font-size:12px;outline:none;padding:2px 0">${((data[i]||{}).gen||'').replace(/</g,'&lt;')}</textarea></td>
-    <td><textarea id="ty-det-${i}" rows="2" oninput="saveTenYear()" placeholder="세부계획..."
+    <td><textarea id="ty-det-${i}" rows="2" oninput="tabAutoSave('tenyear')" placeholder="세부계획..."
       style="width:100%;resize:none;background:transparent;border:none;border-bottom:1px solid var(--b2);color:var(--t2);font-family:inherit;font-size:12px;outline:none;padding:2px 0">${((data[i]||{}).det||'').replace(/</g,'&lt;')}</textarea></td>
   </tr>`).join('');
 }
@@ -4174,6 +4214,17 @@ function taskLd(d){
         carried = true;
       });
   }
+  // 반복 업무 자동 추가 (오늘만)
+  if(d===taskToday()){
+    var recList=(window.allTasks&&window.allTasks._recurring)||[];
+    recList.forEach(function(r){
+      var recId='rec_'+r.nm.replace(/\s/g,'_');
+      if(!todayIds.has(recId)){
+        todayTasks.push({id:recId,nm:'🔁 '+r.nm,imp:r.imp,urg:3,del:false,wt:10,dl:'',st:'inprogress',note:'',ts:Date.now()});
+        todayIds.add(recId); carried=true;
+      }
+    });
+  }
   if(carried || todayTasks.length !== (window.allTasks[d]||[]).length) {
     window.allTasks[d] = todayTasks;
     taskSaveStore();
@@ -4477,6 +4528,7 @@ function renderTask() {
   taskInitForm();
   taskUpdDate();
   taskRender();
+  renderTaskRecurring();
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -4583,6 +4635,129 @@ function shiftCalMonth(d) {
   var sec = document.getElementById('cal-day-section'); if (sec) sec.style.display = 'none';
   renderCalendar();
 }
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 추세 차트
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function renderTrend(){
+  const canvas=document.getElementById('trend-canvas'); if(!canvas) return;
+  const ctx=canvas.getContext('2d');
+  const dpr=window.devicePixelRatio||1;
+  canvas.width=canvas.offsetWidth*dpr; canvas.height=200*dpr;
+  ctx.scale(dpr,dpr);
+  const W=canvas.offsetWidth, H=200;
+  ctx.clearRect(0,0,W,H);
+  const days=[];
+  const dt=new Date();
+  for(let i=29;i>=0;i--){
+    const d=new Date(dt); d.setDate(d.getDate()-i);
+    const key=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    const e=allDaily[key]||{};
+    const dep=parseFloat(e.depression)||0, anx=parseFloat(e.anxiety)||0;
+    const slp=(parseFloat(e.sleep_night)||0)+(parseFloat(e.sleep_nap)||0);
+    let pct=0; const rows=e.daily_plan_rows||[]; const total=rows.filter(r=>r).length;
+    if(total>0){ const sc=rows.filter(r=>r).reduce((s,r)=>{if(r.focus==='o')return s+100;if(r.focus==='d')return s+75;return s;},0); pct=Math.round(sc/(total*100)*100); }
+    days.push({key,dep,anx,slp,pct,day:d.getDate()});
+  }
+  const pL=28,pR=8,pT=10,pB=22,gW=W-pL-pR,gH=H-pT-pB;
+  ctx.strokeStyle='#21262d'; ctx.lineWidth=0.5;
+  for(let i=0;i<=4;i++){const y=pT+gH*i/4;ctx.beginPath();ctx.moveTo(pL,y);ctx.lineTo(W-pR,y);ctx.stroke();}
+  function drawLine(data,max,color){ctx.strokeStyle=color;ctx.lineWidth=1.5;ctx.beginPath();data.forEach((v,i)=>{const x=pL+(i/(data.length-1))*gW;const y=pT+gH-(v/max)*gH;if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);});ctx.stroke();}
+  drawLine(days.map(d=>d.dep),10,'#f85149');
+  drawLine(days.map(d=>d.anx),10,'#d29922');
+  drawLine(days.map(d=>d.slp),12,'#58a6ff');
+  drawLine(days.map(d=>d.pct),100,'#3fb950');
+  ctx.fillStyle='#484f58';ctx.font='9px sans-serif';ctx.textAlign='center';
+  days.forEach((d,i)=>{if(i%5===0||i===days.length-1){const x=pL+(i/(days.length-1))*gW;ctx.fillText(d.day+'일',x,H-4);}});
+  ctx.textAlign='right';ctx.fillText('10',pL-4,pT+4);ctx.fillText('5',pL-4,pT+gH/2+4);ctx.fillText('0',pL-4,pT+gH+4);
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 데이터 백업/복원
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function exportData(){
+  const data={daily_v2:allDaily,weekly_v2:allWeekly,monthly_v2:allMonthly,wk_plan_defaults:wkPlanDefaults,annual_v2:allAnnual,annual_sched:annualSched,life_goals:lifeGoals,ten_year_plan:tenYearPlan,recurring:recurringEvt,tasks:window.allTasks||{}};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download='diary_backup_'+localDateStr(new Date())+'.json'; a.click(); URL.revokeObjectURL(a.href);
+}
+function importData(evt){
+  const file=evt.target.files[0]; if(!file) return;
+  if(!confirm('기존 데이터를 덮어씁니다. 계속하시겠습니까?')){evt.target.value='';return;}
+  const reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      const data=JSON.parse(e.target.result);
+      if(window._fbSet){
+        window._fbSet('diary/daily_v2',data.daily_v2||{});window._fbSet('diary/weekly_v2',data.weekly_v2||{});
+        window._fbSet('diary/monthly_v2',data.monthly_v2||{});window._fbSet('diary/wk_plan_defaults',data.wk_plan_defaults||{});
+        window._fbSet('diary/annual_v2',data.annual_v2||{});window._fbSet('diary/annual_sched',data.annual_sched||{});
+        window._fbSet('diary/life_goals',data.life_goals||{});window._fbSet('diary/ten_year_plan',data.ten_year_plan||{});
+        window._fbSet('diary/recurring',data.recurring||{});window._fbSet('diary/tasks',data.tasks||{});
+      }
+      alert('복원 완료. 페이지를 새로고침합니다.'); location.reload();
+    }catch(err){alert('파일 형식 오류: '+err.message);}
+  };
+  reader.readAsText(file); evt.target.value='';
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 자동저장 (주간/월간/연간/10년/인생계획)
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+var _tabSaveTimers={};
+function tabAutoSave(tabName){
+  clearTimeout(_tabSaveTimers[tabName]);
+  _tabSaveTimers[tabName]=setTimeout(function(){
+    if(tabName==='weekly')saveWeekly();else if(tabName==='monthly')saveMonthly();
+    else if(tabName==='annual')saveAnnual();else if(tabName==='tenyear')saveTenYear();
+    else if(tabName==='lifegoals')saveLifeGoals();
+  },1500);
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 검색 기능
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function searchHistory(){
+  const q=document.getElementById('hist-search').value.trim().toLowerCase();
+  const el=document.getElementById('hist-search-results');
+  if(!q||q.length<2){el.style.display='none';el.innerHTML='';return;}
+  const results=[];
+  Object.keys(allDaily).sort().reverse().forEach(function(date){
+    const e=allDaily[date];
+    [{label:'해마노트',val:e.hema},{label:'항법기록',val:e.navig},{label:'버텨낸것',val:e.survived},{label:'살아난순간',val:e.alive},{label:'기운빠진순간',val:e.drained}].forEach(function(f){
+      if(f.val&&f.val.toLowerCase().includes(q)) results.push({date:date,label:f.label,text:f.val});
+    });
+  });
+  if(!results.length){el.style.display='block';el.innerHTML='<div style="font-size:12px;color:var(--t3);padding:8px">검색 결과 없음</div>';return;}
+  el.style.display='block';
+  el.innerHTML=results.slice(0,20).map(function(r){
+    var snippet=r.text.length>60?r.text.slice(0,60)+'...':r.text;
+    return '<div onclick="goDate(\''+r.date+'\')" style="background:var(--s1);border:1px solid var(--b1);border-radius:6px;padding:8px 10px;margin-bottom:4px;cursor:pointer"><div style="display:flex;justify-content:space-between;margin-bottom:2px"><span style="font-size:11px;color:var(--blue);font-weight:600">'+r.date+'</span><span style="font-size:10px;color:var(--t3)">'+r.label+'</span></div><div style="font-size:12px;color:var(--t2)">'+snippet+'</div></div>';
+  }).join('')+(results.length>20?'<div style="font-size:11px;color:var(--t3);text-align:center;padding:4px">... 외 '+(results.length-20)+'건</div>':'');
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 매일 반복 업무
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function loadTaskRecurring(){return(window.allTasks&&window.allTasks._recurring)||[];}
+function saveTaskRecurring(arr){if(!window.allTasks)window.allTasks={};window.allTasks._recurring=arr;taskSaveStore();}
+function renderTaskRecurring(){
+  var list=loadTaskRecurring(), el=document.getElementById('task-recurring-list'); if(!el) return;
+  if(!list.length){el.innerHTML='<div style="font-size:11px;color:var(--t3);padding:4px 0">등록된 반복 업무 없음</div>';return;}
+  el.innerHTML=list.map(function(r,i){
+    return '<div style="display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid var(--b2)"><span style="font-size:12px;flex:1">🔁 '+r.nm+'</span><span style="font-size:10px;color:'+TASK_IC[r.imp]+'">중요 '+r.imp+'</span><button onclick="removeTaskRecurring('+i+')" style="background:none;border:none;color:var(--red);font-size:13px;cursor:pointer">×</button></div>';
+  }).join('');
+}
+function addTaskRecurring(){
+  var nm=document.getElementById('task-rec-name').value.trim();
+  var imp=parseInt(document.getElementById('task-rec-imp').value)||3;
+  if(!nm) return; imp=Math.max(1,Math.min(5,imp));
+  var list=loadTaskRecurring(); list.push({nm:nm,imp:imp});
+  saveTaskRecurring(list);
+  document.getElementById('task-rec-name').value=''; document.getElementById('task-rec-imp').value='';
+  renderTaskRecurring();
+}
+function removeTaskRecurring(i){var list=loadTaskRecurring();list.splice(i,1);saveTaskRecurring(list);renderTaskRecurring();}
 
 load();
 loadDate();
