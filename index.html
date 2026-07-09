@@ -363,8 +363,8 @@ body.has-row2 .view{margin-top:107px}
     </div>
   </div>
   <div id="daily-mode-bar" class="tabs-row2" style="display:flex">
-    <button class="tab2" id="mode-btn-simple" onclick="setDailyMode('simple')">⚡ 간편 (3분)</button>
-    <button class="tab2 on" id="mode-btn-full" onclick="setDailyMode('full')">📋 전체 기록</button>
+    <button class="tab2 on" id="mode-btn-simple" onclick="setDailyMode('simple')">⚡ 간편 (90초)</button>
+    <button class="tab2" id="mode-btn-full" onclick="setDailyMode('full')">📋 전체 기록 (쓰고 싶은 날만)</button>
   </div>
 </div>
 
@@ -481,7 +481,7 @@ body.has-row2 .view{margin-top:107px}
   <div id="alert-box"></div>
 
   <!-- 이번달 목표 (월간 탭 종합목표 → 읽기 전용) -->
-  <div id="daily-month-goal" style="display:none;background:#1a0a2a;border:1px solid #4a1f7f;border-radius:8px;padding:10px 14px;margin-bottom:10px">
+  <div id="daily-month-goal" class="hide-simple" style="display:none;background:#1a0a2a;border:1px solid #4a1f7f;border-radius:8px;padding:10px 14px;margin-bottom:10px">
     <div onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none';this.querySelector('.chevron').textContent=this.nextElementSibling.style.display==='none'?'▸':'▾'" style="font-size:11px;color:var(--purple);font-weight:700;letter-spacing:.06em;cursor:pointer;display:flex;justify-content:space-between;align-items:center">
       <span>🎯 이번달 목표</span><span class="chevron">▸</span>
     </div>
@@ -489,7 +489,7 @@ body.has-row2 .view{margin-top:107px}
   </div>
 
   <!-- 이번 주 목표 (주간 탭 다음주 목표 → 읽기 전용 리스트) -->
-  <div id="daily-week-goal" style="display:none;background:#0a1a2a;border:1px solid #1e4a7f;border-radius:8px;padding:10px 14px;margin-bottom:10px">
+  <div id="daily-week-goal" class="hide-simple" style="display:none;background:#0a1a2a;border:1px solid #1e4a7f;border-radius:8px;padding:10px 14px;margin-bottom:10px">
     <div style="font-size:11px;color:var(--blue);font-weight:700;letter-spacing:.06em;margin-bottom:5px">📌 이번 주 목표</div>
     <div id="daily-week-goals-list" style="margin-bottom:8px"></div>
     <div style="font-size:11px;color:var(--t3);font-weight:700;margin-bottom:3px">세부 실천사항</div>
@@ -531,7 +531,7 @@ body.has-row2 .view{margin-top:107px}
     <div id="daily-plan-score" style="display:none;margin-top:6px;padding:6px 8px;background:var(--s3);border-radius:6px;font-size:12px;color:var(--t2);text-align:right"></div>
   </div>
 
-  <div class="card show-simple-only">
+  <div class="card">
     <div class="sec-label">✅ 오늘 반드시 확인할 것</div>
     <div class="row">
       <div class="rl"><div class="rl-m">우울 / 불안</div><div class="rl-s">각 0~10</div></div>
@@ -540,7 +540,7 @@ body.has-row2 .view{margin-top:107px}
           <label style="font-size:12px;color:var(--t2)">우울 <input type="number" id="f-dep" min="0" max="10" oninput="autoSave()"></label>
           <label style="font-size:12px;color:var(--t2)">불안 <input type="number" id="f-anx" min="0" max="10" oninput="autoSave()"></label>
         </div>
-        <input type="text" id="f-dep-context" placeholder="어떤 상황에서 우울/불안했는지 (선택, 5점↑ 권장)..." oninput="autoSave()" style="font-size:12px;color:var(--yellow)">
+        <input type="text" id="f-dep-context" class="hide-simple" placeholder="어떤 상황에서 우울/불안했는지 (선택, 5점↑ 권장)..." oninput="autoSave()" style="font-size:12px;color:var(--yellow)">
       </div>
     </div>
     <div class="row">
@@ -554,6 +554,14 @@ body.has-row2 .view{margin-top:107px}
       </div>
     </div>
     <div class="row">
+      <div class="rl"><div class="rl-m">오늘 한 것</div><div class="rl-s">딱 1줄</div></div>
+      <div class="rc"><input type="text" id="f-done" placeholder="오늘 한 것 한 줄..." oninput="autoSave()"></div>
+    </div>
+    <div class="row">
+      <div class="rl"><div class="rl-m">버텨낸 것</div><div class="rl-s">성과 아닌 버팀</div></div>
+      <div class="rc"><input type="text" id="f-survived" placeholder="오늘 내가 버텨낸 것 한 가지..." oninput="autoSave()"></div>
+    </div>
+    <div class="row hide-simple">
       <div class="rl"><div class="rl-m">오늘 미래준비</div><div class="rl-s">1개라도</div></div>
       <div class="rc">
         <div style="display:flex;flex-wrap:wrap;gap:4px 8px;margin-bottom:6px">
@@ -606,10 +614,6 @@ body.has-row2 .view{margin-top:107px}
     <div class="row">
       <div class="rl"><div class="rl-m">해마 노트</div><div class="rl-s">장소+대상+순간+감정 2개↑</div></div>
       <div class="rc"><textarea id="f-hema" rows="5" placeholder="오늘 가장 선명했던 장면 — 뿌듯함·깨달음·인상깊은 기억 등" oninput="autoSave();this.style.height='auto';this.style.height=this.scrollHeight+'px'" style="overflow:hidden;min-height:110px"></textarea></div>
-    </div>
-    <div class="row">
-      <div class="rl"><div class="rl-m">버텨낸 것</div><div class="rl-s">성과 아닌 버팀</div></div>
-      <div class="rc"><input type="text" id="f-survived" placeholder="오늘 내가 버텨낸 것 한 가지..." oninput="autoSave()"></div>
     </div>
     <div class="row">
       <div class="rl"><div class="rl-m">살아난 순간</div><div class="rl-s">에너지 올라온 때</div></div>
@@ -808,7 +812,7 @@ body.has-row2 .view{margin-top:107px}
     <input type="text" id="f-tmr-agenda" placeholder="내일 하루 염두에 둘 한 가지..." oninput="autoSave()">
   </div>
 
-  <div class="tomorrow-box show-simple-only">
+  <div class="tomorrow-box hide-simple">
     <div class="tomorrow-title">🟢 내일 아침 바로 할 일 — 퇴근 전 결정</div>
     <div class="m-field">
       <div class="m-label">첫 행동 <span style="color:var(--t3);font-size:11px">(무엇을 열거나 쓰거나 보낼지)</span></div>
@@ -2081,6 +2085,7 @@ function readForm() {
     action_apply: gv('f-action-apply'),
     navig: gv('f-navig'),
     hema: gv('f-hema'),
+    done_today: gv('f-done'),
     survived: gv('f-survived'),
     alive: gv('f-alive'),
     drained: gv('f-drained'),
@@ -2123,6 +2128,7 @@ function fillForm(e) {
   sv('f-action-contact', e.action_contact); sv('f-action-record', e.action_record);
   sv('f-action-study', e.action_study); sv('f-action-apply', e.action_apply);
   sv('f-navig', e.navig); sv('f-hema', e.hema);
+  sv('f-done', e.done_today);
   sv('f-survived', e.survived); sv('f-alive', e.alive);
   sv('f-drained', e.drained); sv('f-wife', e.wife);
   sv('f-trigger', e.trigger);
@@ -2217,7 +2223,10 @@ function calcAlerts(e) {
   return a;
 }
 function renderAlerts() {
-  const e = readForm(), a = calcAlerts(e);
+  const e = readForm();
+  let a = calcAlerts(e);
+  // 간편 모드에는 미래준비 입력란이 없으므로 해당 경고 제외
+  if (document.body.classList.contains('mode-simple')) a = a.filter(x => x !== '미래준비 미기록');
   const box = document.getElementById('alert-box');
   if (!a.length) { box.innerHTML = ''; return; }
   box.innerHTML = '<div class="alert-box">' + a.map(x=>`<div class="alert-item">⚠ ${x}</div>`).join('') + '</div>';
@@ -3032,7 +3041,7 @@ function renderHistoryDaily() {
     hasAny=true;
     const dt=new Date(ds+'T00:00:00');
     const dayKr=DAYS[dt.getDay()];
-    const hema=(e.hema||'').trim();
+    const hema=(e.hema||'').trim()||(e.done_today||'').trim();
     const dep=parseInt(e.depression);
     const dc=!isNaN(dep)?dep>=7?'var(--red)':dep<=4?'var(--green)':'var(--yellow)':'var(--t3)';
     html+=`<div class="hist-item" onclick="goDate('${ds}')" style="padding:8px 12px">
@@ -4094,10 +4103,11 @@ function setDailyMode(mode) {
   const fb = document.getElementById('mode-btn-full');
   if (sb) { sb.classList.toggle('on', mode === 'simple'); }
   if (fb) { fb.classList.toggle('on', mode === 'full'); }
+  try { renderAlerts(); } catch(err) {}
   if (mode === 'full') { setTimeout(()=>{ updatePlanScore(); autoResizeAll(); }, 50); }
 }
-// 초기 전체기록 모드
-setDailyMode('full');
+// 초기 간편 모드 (90초 기록이 기본 — 전체 기록은 쓰고 싶은 날만)
+setDailyMode('simple');
 document.body.classList.add('has-row2');
 
 // ── 아코디언
@@ -4724,7 +4734,7 @@ function searchHistory(){
   const results=[];
   Object.keys(allDaily).sort().reverse().forEach(function(date){
     const e=allDaily[date];
-    [{label:'해마노트',val:e.hema},{label:'항법기록',val:e.navig},{label:'버텨낸것',val:e.survived},{label:'살아난순간',val:e.alive},{label:'기운빠진순간',val:e.drained}].forEach(function(f){
+    [{label:'해마노트',val:e.hema},{label:'오늘한것',val:e.done_today},{label:'항법기록',val:e.navig},{label:'버텨낸것',val:e.survived},{label:'살아난순간',val:e.alive},{label:'기운빠진순간',val:e.drained}].forEach(function(f){
       if(f.val&&f.val.toLowerCase().includes(q)) results.push({date:date,label:f.label,text:f.val});
     });
   });
