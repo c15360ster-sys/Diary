@@ -189,6 +189,15 @@ body.mode-simple .hide-simple{display:none!important}
 /* ── 간편모드 전용 요소 (full 모드에서 숨김) ── */
 body:not(.mode-simple) .show-simple-only{display:none!important}
 
+/* ── 우울/불안 0~10 탭 스케일 ── */
+.scale-btns{display:grid;grid-template-columns:repeat(11,1fr);gap:3px;flex:1;min-width:180px}
+.scale-btn{padding:5px 0;font-size:11.5px;font-family:inherit;background:var(--s3);border:1px solid var(--b1);border-radius:5px;color:var(--t3);cursor:pointer;text-align:center;transition:all .1s}
+.scale-btn.on{font-weight:700;color:#fff}
+.scale-btn.on.lv-low{background:#14532d;border-color:var(--green)}
+.scale-btn.on.lv-mid{background:#713f12;border-color:var(--yellow)}
+.scale-btn.on.lv-high{background:#7f1d1d;border-color:var(--red)}
+.yday-hint{font-size:10px;color:var(--t3);white-space:nowrap}
+
 /* ── 탭 그룹별 색상 ── */
 .tab.on[data-group="today"]{border-color:#38bdf8;color:#38bdf8}
 .tab.on[data-group="juki"]{border-color:#a78bfa;color:#a78bfa}
@@ -531,16 +540,25 @@ body.has-row2 .view{margin-top:107px}
     <div id="daily-plan-score" style="display:none;margin-top:6px;padding:6px 8px;background:var(--s3);border-radius:6px;font-size:12px;color:var(--t2);text-align:right"></div>
   </div>
 
-  <div class="card">
+  <div id="streak-badge" class="show-simple-only" style="display:none;background:#1a1206;border:1px solid #7c5806;border-radius:8px;padding:8px 14px;margin-bottom:10px;font-size:12px;color:var(--yellow);font-weight:700"></div>
+
+  <div class="card show-simple-only">
     <div class="sec-label">✅ 오늘 반드시 확인할 것</div>
     <div class="row">
-      <div class="rl"><div class="rl-m">우울 / 불안</div><div class="rl-s">각 0~10</div></div>
+      <div class="rl"><div class="rl-m">우울 / 불안</div><div class="rl-s">탭 한 번 (0~10)</div></div>
       <div class="rc">
-        <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:6px">
-          <label style="font-size:12px;color:var(--t2)">우울 <input type="number" id="f-dep" min="0" max="10" oninput="autoSave()"></label>
-          <label style="font-size:12px;color:var(--t2)">불안 <input type="number" id="f-anx" min="0" max="10" oninput="autoSave()"></label>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;flex-wrap:wrap">
+          <span style="font-size:12px;color:var(--t2);width:26px;flex-shrink:0">우울</span>
+          <div class="scale-btns" id="scale-dep"></div>
+          <span class="yday-hint" id="yday-dep"></span>
         </div>
-        <input type="text" id="f-dep-context" class="hide-simple" placeholder="어떤 상황에서 우울/불안했는지 (선택, 5점↑ 권장)..." oninput="autoSave()" style="font-size:12px;color:var(--yellow)">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap">
+          <span style="font-size:12px;color:var(--t2);width:26px;flex-shrink:0">불안</span>
+          <div class="scale-btns" id="scale-anx"></div>
+          <span class="yday-hint" id="yday-anx"></span>
+        </div>
+        <input type="hidden" id="f-dep"><input type="hidden" id="f-anx">
+        <input type="text" id="f-dep-context" placeholder="어떤 상황에서 우울/불안했는지 (선택, 5점↑ 권장)..." oninput="autoSave()" style="font-size:12px;color:var(--yellow)">
       </div>
     </div>
     <div class="row">
@@ -561,7 +579,7 @@ body.has-row2 .view{margin-top:107px}
       <div class="rl"><div class="rl-m">버텨낸 것</div><div class="rl-s">성과 아닌 버팀</div></div>
       <div class="rc"><input type="text" id="f-survived" placeholder="오늘 내가 버텨낸 것 한 가지..." oninput="autoSave()"></div>
     </div>
-    <div class="row hide-simple">
+    <div class="row">
       <div class="rl"><div class="rl-m">오늘 미래준비</div><div class="rl-s">1개라도</div></div>
       <div class="rc">
         <div style="display:flex;flex-wrap:wrap;gap:4px 8px;margin-bottom:6px">
@@ -2117,6 +2135,7 @@ function readForm() {
 }
 function fillForm(e) {
   sv('f-dep', e.depression); sv('f-anx', e.anxiety); sv('f-dep-context', e.dep_context);
+  renderScale('f-dep'); renderScale('f-anx'); renderYdayHint(); renderStreak();
   // 기존 데이터 마이그레이션 (sleep_bed/wake → sleep_night)
   if (!e.sleep_night && e.sleep_bed && e.sleep_wake) {
     const [bh,bm]=e.sleep_bed.split(':').map(Number),[wh,wm]=e.sleep_wake.split(':').map(Number);
@@ -2190,6 +2209,7 @@ function autoSave() {
     }
     saveDaily();
     renderAlerts();
+    renderStreak();
   }, 600);
 }
 function manualSave() {
@@ -2224,9 +2244,7 @@ function calcAlerts(e) {
 }
 function renderAlerts() {
   const e = readForm();
-  let a = calcAlerts(e);
-  // 간편 모드에는 미래준비 입력란이 없으므로 해당 경고 제외
-  if (document.body.classList.contains('mode-simple')) a = a.filter(x => x !== '미래준비 미기록');
+  const a = calcAlerts(e);
   const box = document.getElementById('alert-box');
   if (!a.length) { box.innerHTML = ''; return; }
   box.innerHTML = '<div class="alert-box">' + a.map(x=>`<div class="alert-item">⚠ ${x}</div>`).join('') + '</div>';
@@ -4094,6 +4112,59 @@ function autoFormatTime(el) {
   }
 }
 
+// ── 우울/불안 0~10 탭 스케일
+function initScaleBtns() {
+  [['scale-dep','f-dep'],['scale-anx','f-anx']].forEach(function(p){
+    const box = document.getElementById(p[0]); if (!box) return;
+    let h = '';
+    for (let i = 0; i <= 10; i++) h += '<button type="button" class="scale-btn" data-v="'+i+'" onclick="setScale(\''+p[1]+'\','+i+')">'+i+'</button>';
+    box.innerHTML = h;
+  });
+}
+function setScale(fid, v) {
+  const inp = document.getElementById(fid); if (!inp) return;
+  inp.value = (inp.value === String(v)) ? '' : String(v); // 같은 값 다시 탭하면 해제
+  renderScale(fid);
+  autoSave();
+}
+function renderScale(fid) {
+  const inp = document.getElementById(fid);
+  const box = document.getElementById(fid === 'f-dep' ? 'scale-dep' : 'scale-anx');
+  if (!inp || !box) return;
+  const val = inp.value;
+  box.querySelectorAll('.scale-btn').forEach(function(b){
+    const v = parseInt(b.dataset.v);
+    const on = val !== '' && v === parseInt(val);
+    b.className = 'scale-btn' + (on ? (' on ' + (v >= 7 ? 'lv-high' : v >= 5 ? 'lv-mid' : 'lv-low')) : '');
+  });
+}
+
+// ── 어제 수치 힌트 (우울/불안)
+function renderYdayHint() {
+  const dt = new Date(curDate + 'T00:00:00'); dt.setDate(dt.getDate() - 1);
+  const prev = allDaily[localDateStr(dt)] || {};
+  [['yday-dep', prev.depression], ['yday-anx', prev.anxiety]].forEach(function(p){
+    const el = document.getElementById(p[0]); if (!el) return;
+    el.textContent = (p[1] !== undefined && p[1] !== '') ? '어제 ' + p[1] : '';
+  });
+}
+
+// ── 연속 기록 스트릭
+function _hasCoreEntry(e) {
+  if (!e) return false;
+  return ['depression','anxiety','sleep_night','done_today','survived','hema'].some(k => e[k] && String(e[k]).trim() !== '');
+}
+function renderStreak() {
+  const el = document.getElementById('streak-badge'); if (!el) return;
+  let d = new Date(); d.setHours(0,0,0,0);
+  // 오늘 아직 안 썼으면 어제까지의 연속으로 계산 (오늘 몫은 아직 기회 있음)
+  if (!_hasCoreEntry(allDaily[localDateStr(d)])) d.setDate(d.getDate() - 1);
+  let n = 0;
+  while (_hasCoreEntry(allDaily[localDateStr(d)])) { n++; d.setDate(d.getDate() - 1); }
+  if (n >= 1) { el.textContent = '🔥 ' + n + '일 연속 기록 중'; el.style.display = 'block'; }
+  else el.style.display = 'none';
+}
+
 // ── 모드 토글
 let dailyMode = 'full';
 function setDailyMode(mode) {
@@ -4107,6 +4178,7 @@ function setDailyMode(mode) {
   if (mode === 'full') { setTimeout(()=>{ updatePlanScore(); autoResizeAll(); }, 50); }
 }
 // 초기 간편 모드 (90초 기록이 기본 — 전체 기록은 쓰고 싶은 날만)
+initScaleBtns();
 setDailyMode('simple');
 document.body.classList.add('has-row2');
 
