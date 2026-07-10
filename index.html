@@ -1560,7 +1560,7 @@ const DAYS = ['일','월','화','수','목','금','토'];
 const KEY_DAILY = 'daily_v2', KEY_WEEKLY = 'weekly_v2', KEY_MONTHLY = 'monthly_v2';
 
 const PILLARS = [
-  { key:'recovery', label:'회복', icon:'🔴', desc:'수면·수련(홍익>기천)·우울 안정', basis:'우울역산(4) + 수면7h↑(3) + 수련횟수(3) → 자동', warn:'4점↓ → 전 기둥 50% 즉시 축소', warnTh:4, auto:true },
+  { key:'recovery', label:'회복', icon:'🔴', desc:'수면·수련(홍익>기천)·정서 안정', basis:'정서역산(4: 우울/불안/무기력 평균) + 수면6h↑(3) + 수련횟수(3) → 자동', warn:'4점↓ → 전 기둥 50% 즉시 축소', warnTh:4, auto:true },
   { key:'relation', label:'관계', icon:'🟡', desc:'배우자와 예측 가능한 신뢰', basis:'긴장도역산(4) + 감정대화(3) + 아내따뜻(3) → 일부 자동', warn:'3점↓ → 이번 주 감정 대화 우선', warnTh:3, auto:false },
   { key:'livelihood', label:'생계', icon:'🟢', desc:'방산·국방·AI, 예측 가능 소득', basis:'연락횟수(4) + 포트폴리오진척(4) + 인터뷰보너스(2) → 자동', warn:'3점↓ → 플랜 B 트리거 거리 확인', warnTh:3, auto:true },
   { key:'growth', label:'성장', icon:'🔵', desc:'공부보다 산출물·포트폴리오', basis:'소산출물주3회↑(4) + 대산출물(4) + 블로그(2) → 수동', warn:'3점↓ → 오늘 행동 1개 규칙 강제', warnTh:3, auto:false },
@@ -2474,18 +2474,21 @@ function calcAutoPillarScores() {
   const wk = curWk;
   const days = Object.entries(allDaily).filter(([d])=>monStr(d)===wk).map(([,e])=>e);
   const scores = {};
-  // ── 회복 (10점): 우울역산(4) + 수면7h↑(3) + 수련횟수(3)
-  const deps = days.map(e=>parseFloat(e.depression)).filter(v=>!isNaN(v));
-  const depAvg = deps.length ? deps.reduce((a,b)=>a+b,0)/deps.length : null;
+  // ── 회복 (10점): 정서역산(4: 우울/불안/무기력 평균) + 수면6h↑(3) + 수련횟수(3)
+  const moods = days.map(e=>{
+    const vs=['depression','anxiety','lethargy'].map(k=>parseFloat(e[k])).filter(v=>!isNaN(v));
+    return vs.length ? vs.reduce((a,b)=>a+b,0)/vs.length : NaN;
+  }).filter(v=>!isNaN(v));
+  const depAvg = moods.length ? moods.reduce((a,b)=>a+b,0)/moods.length : null;
   const sleepDays = days.filter(e=>{
     const night=parseFloat(e.sleep_night)||0, nap=parseFloat(e.sleep_nap)||0;
     if(!night && !nap && !e.sleep_bed) return false;
     // 마이그레이션: 구버전 데이터
     if(!night && e.sleep_bed && e.sleep_wake){
       const [bh,bm]=e.sleep_bed.split(':').map(Number),[wh,wm]=e.sleep_wake.split(':').map(Number);
-      let d=(wh*60+wm)-(bh*60+bm); if(d<0)d+=1440; return d>=420;
+      let d=(wh*60+wm)-(bh*60+bm); if(d<0)d+=1440; return d>=360;
     }
-    return (night+nap)>=7;
+    return (night+nap)>=6;
   }).length;
   const trainDays = days.filter(e=>e.exercise&&(e.exercise.gicheon||e.exercise.hongik||e.exercise.mindful)).length;
   let rec = 0;
