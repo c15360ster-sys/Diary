@@ -545,19 +545,24 @@ body.has-row2 .view{margin-top:107px}
   <div class="card show-simple-only">
     <div class="sec-label">✅ 오늘 반드시 확인할 것</div>
     <div class="row">
-      <div class="rl"><div class="rl-m">우울 / 불안</div><div class="rl-s">탭 한 번 (0~10)</div></div>
+      <div class="rl"><div class="rl-m">우울 / 불안 / 무기력</div><div class="rl-s">탭 한 번 (0~10)</div></div>
       <div class="rc">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;flex-wrap:wrap">
-          <span style="font-size:12px;color:var(--t2);width:26px;flex-shrink:0">우울</span>
+          <span style="font-size:12px;color:var(--t2);width:38px;flex-shrink:0">우울</span>
           <div class="scale-btns" id="scale-dep"></div>
           <span class="yday-hint" id="yday-dep"></span>
         </div>
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap">
-          <span style="font-size:12px;color:var(--t2);width:26px;flex-shrink:0">불안</span>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;flex-wrap:wrap">
+          <span style="font-size:12px;color:var(--t2);width:38px;flex-shrink:0">불안</span>
           <div class="scale-btns" id="scale-anx"></div>
           <span class="yday-hint" id="yday-anx"></span>
         </div>
-        <input type="hidden" id="f-dep"><input type="hidden" id="f-anx">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap">
+          <span style="font-size:12px;color:var(--t2);width:38px;flex-shrink:0">무기력</span>
+          <div class="scale-btns" id="scale-let"></div>
+          <span class="yday-hint" id="yday-let"></span>
+        </div>
+        <input type="hidden" id="f-dep"><input type="hidden" id="f-anx"><input type="hidden" id="f-let">
         <input type="text" id="f-dep-context" placeholder="어떤 상황에서 우울/불안했는지 (선택, 5점↑ 권장)..." oninput="autoSave()" style="font-size:12px;color:var(--yellow)">
       </div>
     </div>
@@ -1504,6 +1509,7 @@ body.has-row2 .view{margin-top:107px}
       <div style="display:flex;gap:12px;justify-content:center;margin-top:8px;font-size:11px">
         <span style="color:var(--red)">● 우울</span>
         <span style="color:var(--yellow)">● 불안</span>
+        <span style="color:#a371f7">● 무기력</span>
         <span style="color:var(--blue)">● 수면</span>
         <span style="color:var(--green)">● 이행률</span>
       </div>
@@ -2094,7 +2100,7 @@ function autoResizeAll() {
 function readForm() {
   return {
     date: curDate,
-    depression: gv('f-dep'), anxiety: gv('f-anx'), dep_context: gv('f-dep-context'),
+    depression: gv('f-dep'), anxiety: gv('f-anx'), lethargy: gv('f-let'), dep_context: gv('f-dep-context'),
     sleep_night: gv('f-sleep-night'), sleep_nap: gv('f-sleep-nap'),
     action_checks: Object.assign({}, checks),
     action_contact: gv('f-action-contact'),
@@ -2134,8 +2140,8 @@ function readForm() {
   };
 }
 function fillForm(e) {
-  sv('f-dep', e.depression); sv('f-anx', e.anxiety); sv('f-dep-context', e.dep_context);
-  renderScale('f-dep'); renderScale('f-anx'); renderYdayHint(); renderStreak();
+  sv('f-dep', e.depression); sv('f-anx', e.anxiety); sv('f-let', e.lethargy); sv('f-dep-context', e.dep_context);
+  renderScale('f-dep'); renderScale('f-anx'); renderScale('f-let'); renderYdayHint(); renderStreak();
   // 기존 데이터 마이그레이션 (sleep_bed/wake → sleep_night)
   if (!e.sleep_night && e.sleep_bed && e.sleep_wake) {
     const [bh,bm]=e.sleep_bed.split(':').map(Number),[wh,wm]=e.sleep_wake.split(':').map(Number);
@@ -2229,14 +2235,14 @@ function calcSleep() {
   const hEl = document.getElementById('sleep-hrs'), bEl = document.getElementById('sleep-badge');
   if (!night && !nap) { if(hEl) hEl.textContent = ''; if(bEl) bEl.innerHTML = ''; return; }
   const napLabel = nap > 0 ? ` (밤${night}h+낮${nap}h)` : '';
-  if(hEl) { hEl.textContent = total.toFixed(1) + '시간' + napLabel; hEl.style.color = total < 7 ? 'var(--red)' : 'var(--green)'; }
-  if(bEl) bEl.innerHTML = total < 7 ? '<span class="badge">7시간↓</span>' : '';
+  if(hEl) { hEl.textContent = total.toFixed(1) + '시간' + napLabel; hEl.style.color = total < 6 ? 'var(--red)' : total < 7 ? 'var(--yellow)' : 'var(--green)'; }
+  if(bEl) bEl.innerHTML = total < 6 ? '<span class="badge">6시간↓</span>' : '';
 }
 function calcAlerts(e) {
   const a = [];
   if (parseInt(e.depression) >= 7) a.push('우울 7점↑ — 상담사 연락');
   const sleepTotal = (parseFloat(e.sleep_night)||0) + (parseFloat(e.sleep_nap)||0);
-  if (e.sleep_night && sleepTotal < 7) a.push('수면 7시간 미만');
+  if (e.sleep_night && sleepTotal < 6) a.push('수면 6시간 미만');
   const ac = e.action_checks || {};
   const hasAction = Object.values(ac).some(v=>v);
   if (!hasAction) a.push('미래준비 미기록');
@@ -3062,10 +3068,13 @@ function renderHistoryDaily() {
     const hema=(e.hema||'').trim()||(e.done_today||'').trim();
     const dep=parseInt(e.depression);
     const dc=!isNaN(dep)?dep>=7?'var(--red)':dep<=4?'var(--green)':'var(--yellow)':'var(--t3)';
+    const lth=parseInt(e.lethargy);
+    const lc=!isNaN(lth)?lth>=7?'var(--red)':lth<=4?'var(--green)':'var(--yellow)':'var(--t3)';
     html+=`<div class="hist-item" onclick="goDate('${ds}')" style="padding:8px 12px">
       <div style="display:flex;align-items:baseline;gap:8px">
         <span style="font-size:13px;font-weight:700;color:var(--blue);min-width:54px;flex-shrink:0">${d}(${dayKr})</span>
         ${!isNaN(dep)?`<span style="font-size:11px;color:${dc};flex-shrink:0">우울${dep}</span>`:''}
+        ${!isNaN(lth)?`<span style="font-size:11px;color:${lc};flex-shrink:0">무기력${lth}</span>`:''}
         <span style="font-size:12px;color:var(--t2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">${hema||'<span style="color:var(--t3)">—</span>'}</span>
       </div>
     </div>`;
@@ -4114,7 +4123,7 @@ function autoFormatTime(el) {
 
 // ── 우울/불안 0~10 탭 스케일
 function initScaleBtns() {
-  [['scale-dep','f-dep'],['scale-anx','f-anx']].forEach(function(p){
+  [['scale-dep','f-dep'],['scale-anx','f-anx'],['scale-let','f-let']].forEach(function(p){
     const box = document.getElementById(p[0]); if (!box) return;
     let h = '';
     for (let i = 0; i <= 10; i++) h += '<button type="button" class="scale-btn" data-v="'+i+'" onclick="setScale(\''+p[1]+'\','+i+')">'+i+'</button>';
@@ -4129,7 +4138,7 @@ function setScale(fid, v) {
 }
 function renderScale(fid) {
   const inp = document.getElementById(fid);
-  const box = document.getElementById(fid === 'f-dep' ? 'scale-dep' : 'scale-anx');
+  const box = document.getElementById({'f-dep':'scale-dep','f-anx':'scale-anx','f-let':'scale-let'}[fid]);
   if (!inp || !box) return;
   const val = inp.value;
   box.querySelectorAll('.scale-btn').forEach(function(b){
@@ -4143,7 +4152,7 @@ function renderScale(fid) {
 function renderYdayHint() {
   const dt = new Date(curDate + 'T00:00:00'); dt.setDate(dt.getDate() - 1);
   const prev = allDaily[localDateStr(dt)] || {};
-  [['yday-dep', prev.depression], ['yday-anx', prev.anxiety]].forEach(function(p){
+  [['yday-dep', prev.depression], ['yday-anx', prev.anxiety], ['yday-let', prev.lethargy]].forEach(function(p){
     const el = document.getElementById(p[0]); if (!el) return;
     el.textContent = (p[1] !== undefined && p[1] !== '') ? '어제 ' + p[1] : '';
   });
@@ -4152,7 +4161,7 @@ function renderYdayHint() {
 // ── 연속 기록 스트릭
 function _hasCoreEntry(e) {
   if (!e) return false;
-  return ['depression','anxiety','sleep_night','done_today','survived','hema'].some(k => e[k] && String(e[k]).trim() !== '');
+  return ['depression','anxiety','lethargy','sleep_night','done_today','survived','hema'].some(k => e[k] && String(e[k]).trim() !== '');
 }
 function renderStreak() {
   const el = document.getElementById('streak-badge'); if (!el) return;
@@ -4735,11 +4744,11 @@ function renderTrend(){
     const d=new Date(dt); d.setDate(d.getDate()-i);
     const key=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
     const e=allDaily[key]||{};
-    const dep=parseFloat(e.depression)||0, anx=parseFloat(e.anxiety)||0;
+    const dep=parseFloat(e.depression)||0, anx=parseFloat(e.anxiety)||0, lth=parseFloat(e.lethargy)||0;
     const slp=(parseFloat(e.sleep_night)||0)+(parseFloat(e.sleep_nap)||0);
     let pct=0; const rows=e.daily_plan_rows||[]; const total=rows.filter(r=>r).length;
     if(total>0){ const sc=rows.filter(r=>r).reduce((s,r)=>{if(r.focus==='o')return s+100;if(r.focus==='d')return s+75;return s;},0); pct=Math.round(sc/(total*100)*100); }
-    days.push({key,dep,anx,slp,pct,day:d.getDate()});
+    days.push({key,dep,anx,lth,slp,pct,day:d.getDate()});
   }
   const pL=28,pR=8,pT=10,pB=22,gW=W-pL-pR,gH=H-pT-pB;
   ctx.strokeStyle='#21262d'; ctx.lineWidth=0.5;
@@ -4747,6 +4756,7 @@ function renderTrend(){
   function drawLine(data,max,color){ctx.strokeStyle=color;ctx.lineWidth=1.5;ctx.beginPath();data.forEach((v,i)=>{const x=pL+(i/(data.length-1))*gW;const y=pT+gH-(v/max)*gH;if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);});ctx.stroke();}
   drawLine(days.map(d=>d.dep),10,'#f85149');
   drawLine(days.map(d=>d.anx),10,'#d29922');
+  drawLine(days.map(d=>d.lth),10,'#a371f7');
   drawLine(days.map(d=>d.slp),12,'#58a6ff');
   drawLine(days.map(d=>d.pct),100,'#3fb950');
   ctx.fillStyle='#484f58';ctx.font='9px sans-serif';ctx.textAlign='center';
