@@ -2245,7 +2245,8 @@ function calcAlerts(e) {
   if (e.sleep_night && sleepTotal < 6) a.push('수면 6시간 미만');
   const ac = e.action_checks || {};
   const hasAction = Object.values(ac).some(v=>v);
-  if (!hasAction) a.push('미래준비 미기록');
+  const dow = new Date((e.date || curDate) + 'T00:00:00').getDay();
+  if (!hasAction && dow !== 0 && dow !== 6) a.push('미래준비 미기록'); // 주말(토/일) 제외
   return a;
 }
 function renderAlerts() {
