@@ -2376,12 +2376,7 @@ function loadDate() {
   document.getElementById('date-label').textContent = `${dt.getMonth()+1}월 ${dt.getDate()}일 (${DAYS[dt.getDay()]})`;
   document.getElementById('date-picker').value = curDate;
   let e = allDaily[curDate] || {};
-  // 주간 기본값 적용 (해당 날짜 데이터 없을 때만)
-  if (!allDaily[curDate]) {
-    const mon = monStr(curDate);
-    const planDefault = (wkPlanDefaults&&wkPlanDefaults[mon])||[];
-    if (planDefault.length) e._planDefault = planDefault;
-  }
+  // 계획표 기본값 상속은 renderDailyPlan에서 처리 (해당 주 → 가장 최근 이전 주 defaults)
   fillForm(e); renderAlerts();
   loadTodaySchedule();
 
@@ -2691,13 +2686,17 @@ function renderWeekly() {
   if (tbody) tbody.innerHTML = '';
   let planRowsToLoad = w.plan_rows || [];
   if (!planRowsToLoad.length) {
-    // 1순위: 이전 주가 "다음주 일일 적용" 클릭해서 저장한 defaults
+    // 1순위: "다음주 일일 적용"으로 저장된 defaults (해당 주 없으면 가장 최근 이전 주 defaults 상속)
     planRowsToLoad = wkPlanDefaults[curWk] || [];
+    if (!planRowsToLoad.length && wkPlanDefaults) {
+      const dKeys = Object.keys(wkPlanDefaults).filter(k => k <= curWk).sort().reverse();
+      if (dKeys.length) planRowsToLoad = wkPlanDefaults[dKeys[0]] || [];
+    }
   }
   if (!planRowsToLoad.length) {
-    // 2순위: 가장 최근 이전 주의 plan_rows
-    const prevDt = new Date(curWk+'T00:00:00'); prevDt.setDate(prevDt.getDate()-7);
-    planRowsToLoad = (allWeekly[localDateStr(prevDt)]||{}).plan_rows || [];
+    // 2순위: plan_rows가 있는 가장 최근 이전 주 (바로 전 주가 비어도 몇 주 전까지 거슬러 상속)
+    const wKeys = Object.keys(allWeekly).filter(k => k < curWk && (allWeekly[k].plan_rows||[]).filter(r=>r).length).sort().reverse();
+    if (wKeys.length) planRowsToLoad = allWeekly[wKeys[0]].plan_rows;
   }
   planRowsToLoad.forEach(r => { if(r) addWkPlanRow(r.time, r.plan, r.days); });
   wkChecks.finance = !!w.finance; wkChecks.emotion = !!w.emotion; wkChecks.practice = !!w.practice;
