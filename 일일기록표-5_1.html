@@ -313,6 +313,25 @@ body.has-row2 .view{margin-top:107px}
       window.tenYearPlan = data.ten_year_plan || {};
       window.recurringEvt = data.recurring || {annual:[], weekly:[]};
       window.allTasks   = data.tasks || {};
+      // 홈 위젯 입력함(diary/widget/inbox) 소비 → 오늘 업무로 편입
+      try {
+        const inbox = data.widget && data.widget.inbox;
+        if (inbox) {
+          const t = new Date();
+          const d = t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');
+          const arr = window.allTasks[d] || [];
+          Object.keys(inbox).sort().forEach(k => {
+            const it = inbox[k] || {};
+            const txt = String(it.text || '').trim();
+            if (txt) arr.push({ id:'w'+(it.ts||Date.now())+'_'+k.slice(-4), nm:txt,
+              imp:(+it.imp>=1&&+it.imp<=5)?+it.imp:3, urg:3, del:false, wt:10, dl:null,
+              st:'inprogress', note:'📲 위젯 입력', ts:it.ts||Date.now() });
+          });
+          window.allTasks[d] = arr;
+          await set(ref(db, 'diary/tasks'), window.allTasks);
+          await set(ref(db, 'diary/widget/inbox'), null);
+        }
+      } catch(e) {}
     } catch(e) {
       window.allDaily   = {}; window.allWeekly  = {}; window.allMonthly = {};
       window.wkPlanDefaults = {}; window.allAnnual = {}; window.annualSched = {};
@@ -323,6 +342,11 @@ body.has-row2 .view{margin-top:107px}
     window._dataReady = true;
     if (window._clearOfflineTimer) window._clearOfflineTimer();
     window.loadDate();
+    // PWA 바로가기 진입 처리 (?go=task → 업무 탭)
+    try {
+      const go = new URLSearchParams(location.search).get('go');
+      if (go === 'task' && window.switchTab) window.switchTab('task');
+    } catch(e) {}
   }
 
   // DOM 준비 후 로드 시작
@@ -331,6 +355,15 @@ body.has-row2 .view{margin-top:107px}
   } else {
     loadFromFirebase();
   }
+</script>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0d1117">
+<link rel="apple-touch-icon" href="icon-192.png">
+<script>
+// PWA 서비스워커 등록
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function(){ navigator.serviceWorker.register('sw.js').catch(function(){}); });
+}
 </script>
 </head>
 <body>
@@ -3245,6 +3278,14 @@ function loadTodaySchedule() {
   (recurringEvt.weekly||[]).filter(r=>r&&+r.dayOfWeek===dow)
     .forEach(r=>items.push({time:r.time||'', text:r.title, src:'🔁'}));
   items.sort((a,b)=>(a.time||'99:99').localeCompare(b.time||'99:99'));
+  // 홈 위젯용 오늘 일정 발행 (오늘 날짜를 보고 있을 때만) — KWGT 등에서 diary/widget/today.json 읽기
+  if (window._dataReady && curDate === today() && window._fbSet) {
+    window._fbSet('diary/widget/today', {
+      date: curDate, updated: Date.now(),
+      items: items.map(it=>({time:it.time||'', text:it.text})),
+      summary: items.length ? items.map(it=>(it.time?it.time+' ':'')+it.text).join('\n') : '오늘 등록된 일정 없음'
+    });
+  }
   const box=document.getElementById('today-sched-box');
   const list=document.getElementById('today-sched-list');
   if (!box||!list) return;
