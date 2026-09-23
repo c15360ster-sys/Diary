@@ -452,6 +452,25 @@ if ('serviceWorker' in navigator) {
 </div>
 <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
 
+<!-- 뽀모도로 플로팅 타이머 (탭 이동해도 유지) -->
+<div id="pomo-bar" style="display:none;position:fixed;left:0;right:0;bottom:0;z-index:9500;background:rgba(13,31,58,.97);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-top:1px solid var(--acc);padding:9px 14px;align-items:center;gap:10px">
+  <div id="pomo-time" style="font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:700;color:var(--acc2);min-width:78px">25:00</div>
+  <div style="flex:1;min-width:0">
+    <div id="pomo-label" style="font-size:12px;color:var(--t1);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">집중 중</div>
+    <div style="height:4px;background:var(--b1);border-radius:2px;margin-top:4px;overflow:hidden"><div id="pomo-progress" style="height:100%;width:0%;background:var(--acc2);transition:width 1s linear"></div></div>
+  </div>
+  <button id="pomo-pause" onclick="pomoPause()" style="background:transparent;border:1px solid var(--b1);color:var(--t2);font-size:13px;padding:6px 10px;border-radius:6px;cursor:pointer">⏸</button>
+  <button onclick="pomoStop(true)" style="background:transparent;border:1px solid var(--red);color:var(--red);font-size:13px;padding:6px 10px;border-radius:6px;cursor:pointer">✕</button>
+</div>
+
+<!-- 즉각 보상 토스트 -->
+<div id="reward-toast" style="display:none;position:fixed;left:50%;top:70px;transform:translateX(-50%) translateY(-14px);z-index:11000;background:linear-gradient(135deg,#14532d,#0f3d22);border:1px solid var(--green);color:#e6ffe6;font-size:13px;font-weight:600;padding:10px 18px;border-radius:22px;box-shadow:0 8px 24px rgba(0,0,0,.4);opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;max-width:90vw;text-align:center"></div>
+<style>
+#reward-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+@keyframes rewardPop{0%{transform:scale(.6);opacity:0}50%{transform:scale(1.15)}100%{transform:scale(1);opacity:1}}
+.reward-pop{animation:rewardPop .4s ease-out}
+</style>
+
 <div class="topbar">
   <div class="title-row">
     <div><div class="title-main">인생기록표</div><div class="title-sub">9장 운영표 연동</div></div>
@@ -596,6 +615,17 @@ if ('serviceWorker' in navigator) {
   </div>
 
   <div id="alert-box"></div>
+
+  <!-- ADHD 유도: 지금 이거 하나만 + 뽀모도로 -->
+  <div id="focus-now-card" style="display:none;background:linear-gradient(135deg,#0d1f3a,#0a1428);border:1px solid var(--acc);border-radius:12px;padding:12px 14px;margin-bottom:10px">
+    <div style="font-size:10px;color:var(--acc2);font-weight:700;letter-spacing:.08em;margin-bottom:4px">⚡ 지금 이거 하나만</div>
+    <div id="focus-now-task" style="font-size:15px;font-weight:700;color:var(--t1);line-height:1.35;margin-bottom:10px">—</div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <button id="focus-start-btn" onclick="pomoStart()" style="flex:1;background:var(--acc);border:none;color:#fff;font-weight:700;font-size:14px;padding:10px;border-radius:8px;cursor:pointer">▶ 25분 집중 시작</button>
+      <button onclick="pomoPickDuration()" id="focus-dur-btn" style="background:transparent;border:1px solid var(--b1);color:var(--t2);font-size:12px;padding:10px 12px;border-radius:8px;cursor:pointer">25분</button>
+    </div>
+    <div style="font-size:10px;color:var(--t3);margin-top:7px;text-align:center">완벽한 계획보다 첫 동작. 품질은 내일.</div>
+  </div>
 
   <!-- 이번달 목표 (월간 탭 종합목표 → 읽기 전용) -->
   <div id="daily-month-goal" class="hide-simple" style="display:none;background:#1a0a2a;border:1px solid #4a1f7f;border-radius:8px;padding:10px 14px;margin-bottom:10px">
@@ -2324,12 +2354,15 @@ function autoSave() {
     saveDaily();
     renderAlerts();
     renderStreak();
+    rewardOnSave();
   }, 600);
 }
 function manualSave() {
   allDaily[curDate] = readForm();
   saveDaily();
   renderAlerts();
+  renderStreak();
+  rewardOnSave();
   const btn = document.getElementById('save-btn');
   btn.textContent = '✅ 저장됨'; btn.classList.add('ok');
   setTimeout(() => { btn.textContent = '💾 저장'; btn.classList.remove('ok'); }, 2000);
@@ -2487,6 +2520,8 @@ function loadDate() {
   // 계획표 기본값 상속은 renderDailyPlan에서 처리 (해당 주 → 가장 최근 이전 주 defaults)
   fillForm(e); renderAlerts();
   loadTodaySchedule();
+  _lastProgress = todayProgress();   // 보상은 '새로 채운' 것만 축하 (로드 시점 기준선)
+  try { renderFocusNow(); } catch(err) {}
 
   // 이번달 목표 표시 (현재 날짜 기준 월 월간탭 종합목표)
   const curYM = curDate.slice(0,7);
@@ -4282,15 +4317,146 @@ function _hasCoreEntry(e) {
   if (!e) return false;
   return ['depression','anxiety','lethargy','sleep_night','done_today','survived','hema'].some(k => e[k] && String(e[k]).trim() !== '');
 }
+// 연속 기록 계산 — 하루 공백은 '유예(freeze)' 1회로 흡수 (ADHD 친화: 하루 놓쳐도 안 무너짐)
+function _calcStreak() {
+  let d = new Date(); d.setHours(0,0,0,0);
+  let todayDone = _hasCoreEntry(allDaily[localDateStr(d)]);
+  if (!todayDone) d.setDate(d.getDate() - 1); // 오늘 아직이면 어제부터 카운트
+  let n = 0, usedFreeze = false;
+  while (true) {
+    const key = localDateStr(d);
+    if (_hasCoreEntry(allDaily[key])) { n++; d.setDate(d.getDate() - 1); continue; }
+    // 공백 발견 — 유예 1회 사용 (직전 하루 빈 날 건너뛰기, 그 전날이 기록돼 있으면 연속 유지)
+    if (!usedFreeze && n >= 1) {
+      const prev = new Date(d); prev.setDate(prev.getDate() - 1);
+      if (_hasCoreEntry(allDaily[localDateStr(prev)])) { usedFreeze = true; d = prev; continue; }
+    }
+    break;
+  }
+  return { n, todayDone, usedFreeze };
+}
 function renderStreak() {
   const el = document.getElementById('streak-badge'); if (!el) return;
-  let d = new Date(); d.setHours(0,0,0,0);
-  // 오늘 아직 안 썼으면 어제까지의 연속으로 계산 (오늘 몫은 아직 기회 있음)
-  if (!_hasCoreEntry(allDaily[localDateStr(d)])) d.setDate(d.getDate() - 1);
-  let n = 0;
-  while (_hasCoreEntry(allDaily[localDateStr(d)])) { n++; d.setDate(d.getDate() - 1); }
-  if (n >= 1) { el.textContent = '🔥 ' + n + '일 연속 기록 중'; el.style.display = 'block'; }
-  else el.style.display = 'none';
+  const { n, todayDone, usedFreeze } = _calcStreak();
+  if (n < 1) { el.style.display = 'none'; return; }
+  el.style.display = 'block';
+  const freezeTag = usedFreeze ? ' <span style="font-size:10px;color:var(--t3);font-weight:400">· 유예 1회 사용 ❄️</span>' : '';
+  const nudge = !todayDone
+    ? '<div style="font-size:11px;color:var(--yellow);font-weight:600;margin-top:3px">오늘 기록하면 ' + (n + 1) + '일 달성! 🎯</div>'
+    : '<div style="font-size:11px;color:var(--green);font-weight:600;margin-top:3px">오늘 기록 완료 ✓ 내일도 이어가요</div>';
+  el.innerHTML = '<div style="display:flex;align-items:center;gap:8px"><span style="font-size:22px">🔥</span><span style="font-size:18px;color:var(--yellow)">' + n + '일 연속</span>' + freezeTag + '</div>' + nudge;
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ADHD 유도: 즉각 보상 토스트
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+let _rewardTimer = null;
+function showReward(msg) {
+  if (localStorage.getItem('adhd_reward_off') === '1') return;
+  const el = document.getElementById('reward-toast'); if (!el) return;
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(_rewardTimer);
+  _rewardTimer = setTimeout(() => el.classList.remove('show'), 1800);
+}
+// 오늘 기록 진행도 (간편모드 핵심 항목 몇 개 채웠나)
+function todayProgress() {
+  const e = allDaily[today()] || {};
+  const core = ['depression','anxiety','lethargy','sleep_night','done_today'];
+  return core.filter(k => e[k] && String(e[k]).trim() !== '').length;
+}
+let _lastProgress = 0;
+const REWARD_MSGS = ['좋아요, 시작이 제일 어려워요 💪','기록 하나 완료 ✨','계속 쌓이고 있어요 📈','오늘도 자신을 챙겼네요 🌱','작은 승리 하나 🎉'];
+function rewardOnSave() {
+  const p = todayProgress();
+  if (p > _lastProgress) {
+    const msg = p >= 5 ? '오늘 핵심 기록 완료! 🔥 대단해요' : REWARD_MSGS[Math.min(p, REWARD_MSGS.length - 1)];
+    showReward(msg + (p < 5 ? '  (' + p + '/5)' : ''));
+  }
+  _lastProgress = p;
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ADHD 유도: "지금 이거 하나만" — 최우선 업무 노출
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function renderFocusNow() {
+  const card = document.getElementById('focus-now-card');
+  const label = document.getElementById('focus-now-task');
+  if (!card || !label) return;
+  if (curDate !== today()) { card.style.display = 'none'; return; } // 오늘일 때만
+  let top = null;
+  try {
+    const raw = (typeof taskLd === 'function') ? taskLd(taskToday()) : [];
+    const active = raw.filter(t => t && (t.st === 'inprogress' || t.st === 'deferred'));
+    top = (typeof taskSortT === 'function' ? taskSortT(active) : active)[0] || null;
+  } catch (e) {}
+  if (top) {
+    const pri = top.imp * 2 + top.urg;
+    const dl = top.dl ? ' · ' + top.dl.slice(5) + ' 마감' : '';
+    label.innerHTML = top.nm + ' <span style="font-size:11px;color:var(--acc2);font-weight:600">[우선 ' + pri + dl + ']</span>';
+    card.style.display = 'block';
+  } else {
+    label.textContent = '오늘 등록된 업무가 없어요. 업무 탭에서 하나만 추가해볼까요?';
+    card.style.display = 'block';
+  }
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ADHD 유도: 뽀모도로 타이머 (탭 이동해도 유지)
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+let _pomoDur = 25 * 60;      // 초
+let _pomoLeft = 0;
+let _pomoTick = null;
+let _pomoPaused = false;
+const POMO_DURS = [25, 15, 45, 5];
+function pomoPickDuration() {
+  const cur = Math.round(_pomoDur / 60);
+  const idx = POMO_DURS.indexOf(cur);
+  const next = POMO_DURS[(idx + 1) % POMO_DURS.length];
+  _pomoDur = next * 60;
+  const b = document.getElementById('focus-dur-btn'); if (b) b.textContent = next + '분';
+}
+function _pomoFmt(s) { const m = Math.floor(s / 60), sec = s % 60; return String(m).padStart(2, '0') + ':' + String(sec).padStart(2, '0'); }
+function pomoRender() {
+  const t = document.getElementById('pomo-time'); if (t) t.textContent = _pomoFmt(_pomoLeft);
+  const pr = document.getElementById('pomo-progress'); if (pr) pr.style.width = (100 * (1 - _pomoLeft / _pomoDur)) + '%';
+}
+function pomoStart() {
+  const label = document.getElementById('pomo-label');
+  const taskEl = document.getElementById('focus-now-task');
+  if (label && taskEl) label.textContent = '집중: ' + (taskEl.textContent || '').replace(/\[.*\]/, '').trim();
+  _pomoLeft = _pomoDur; _pomoPaused = false;
+  document.getElementById('pomo-bar').style.display = 'flex';
+  document.getElementById('pomo-pause').textContent = '⏸';
+  pomoRender();
+  clearInterval(_pomoTick);
+  _pomoTick = setInterval(() => {
+    if (_pomoPaused) return;
+    _pomoLeft--;
+    pomoRender();
+    if (_pomoLeft <= 0) pomoDone();
+  }, 1000);
+  showReward('타이머 시작! 첫 동작이 반이에요 ⏱');
+}
+function pomoPause() {
+  _pomoPaused = !_pomoPaused;
+  document.getElementById('pomo-pause').textContent = _pomoPaused ? '▶' : '⏸';
+}
+function pomoStop(silent) {
+  clearInterval(_pomoTick); _pomoTick = null;
+  const bar = document.getElementById('pomo-bar'); if (bar) bar.style.display = 'none';
+}
+function pomoDone() {
+  pomoStop();
+  showReward('🎉 집중 완료! 산출물 하나 남겼어요');
+  try {
+    if (navigator.vibrate) navigator.vibrate([120, 60, 120]);
+    // 짧은 알림음 (WebAudio)
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (AC) { const ac = new AC(); const o = ac.createOscillator(); const g = ac.createGain();
+      o.connect(g); g.connect(ac.destination); o.frequency.value = 660; g.gain.value = 0.12;
+      o.start(); setTimeout(() => { o.frequency.value = 880; }, 150); setTimeout(() => { o.stop(); ac.close(); }, 320); }
+  } catch (e) {}
 }
 
 // ── 모드 토글
@@ -4663,7 +4829,32 @@ function taskTogMemo(id){
 function taskSortT(arr){
   return arr.slice().sort(function(a,b){ var pa=a.imp*2+a.urg, pb=b.imp*2+b.urg; if(pb!==pa) return pb-pa; if(b.wt!==a.wt) return b.wt-a.wt; return a.ts-b.ts; });
 }
-function taskRender(){ taskRenderSum(); taskRenderMx(); taskRenderList(); }
+// 홈 위젯용 업무 상위 5개 발행 — KWGT 등에서 diary/widget/tasks 읽기
+// 항상 '오늘' 기준의 활성 업무(진행중/연기)를 우선순위 순으로 최대 5줄 발행
+function publishTaskWidget(){
+  if(!(window._dataReady && window._fbSet)) return;
+  try {
+    var raw = taskLd(taskToday());                       // 오늘 기준 (다른 날짜를 보고 있어도 오늘 발행)
+    var active = raw.filter(function(t){ return t && (t.st==='inprogress'||t.st==='deferred'); });
+    var top = taskSortT(active).slice(0,5);
+    var items = top.map(function(t){
+      var pri = t.imp*2 + t.urg;
+      var dlS = t.dl ? (t.dl.slice(5)+' 마감') : '';
+      return { nm:t.nm, imp:t.imp, urg:t.urg, pri:pri, del:!!t.del, dl:t.dl||'', dlLabel:dlS };
+    });
+    var summary = items.length
+      ? items.map(function(it,i){ return (i+1)+'. '+it.nm+' [우선 '+it.pri+(it.dlLabel?' · '+it.dlLabel:'')+']'; }).join('\n')
+      : '오늘 처리할 업무 없음';
+    window._fbSet('diary/widget/tasks', {
+      date: taskToday(),
+      updated: Date.now(),
+      count: active.length,      // 활성 업무 총 개수 (상위 5개 외 나머지 파악용)
+      items: items,
+      summary: summary
+    });
+  } catch(e){}
+}
+function taskRender(){ taskRenderSum(); taskRenderMx(); taskRenderList(); publishTaskWidget(); }
 function taskRenderSum(){
   var t=taskLd(taskCurD), n=t.length,
     dn=t.filter(function(x){return x.st==='done';}).length,
