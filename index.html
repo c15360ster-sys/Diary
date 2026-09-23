@@ -605,6 +605,21 @@ if ('serviceWorker' in navigator) {
 
 <!-- ═══════════════════ 일일 ═══════════════════ -->
 <div class="view on" id="v-today">
+  <!-- 오늘의 한마디 (동기부여 문구, 탭하면 다음 문구) -->
+  <div id="quote-banner" onclick="nextQuote()" style="background:linear-gradient(135deg,#1a1430,#0f0a1f);border:1px solid #3a2f5f;border-radius:10px;padding:11px 14px;margin-bottom:10px;cursor:pointer;position:relative">
+    <div id="quote-text" style="font-size:13px;color:var(--t1);line-height:1.5;font-weight:600">—</div>
+    <div id="quote-author" style="font-size:11px;color:var(--purple);margin-top:4px;text-align:right"></div>
+    <div style="position:absolute;top:6px;right:9px;font-size:9px;color:var(--t3)">탭 ↻</div>
+  </div>
+
+  <!-- 오늘의 원칙 (10원칙 중 매일 하나 순환) -->
+  <div id="today-principle" onclick="nextPrinciple()" style="display:none;background:#0a1626;border:1px solid #1e3a5f;border-radius:10px;padding:10px 14px;margin-bottom:10px;cursor:pointer;position:relative">
+    <div style="font-size:10px;color:var(--blue);font-weight:700;letter-spacing:.06em;margin-bottom:3px">📌 오늘 되새길 원칙</div>
+    <div id="today-principle-title" style="font-size:14px;font-weight:700;color:var(--t1)">—</div>
+    <div id="today-principle-desc" style="font-size:12px;color:var(--t2);margin-top:2px;line-height:1.4"></div>
+    <div style="position:absolute;top:6px;right:9px;font-size:9px;color:var(--t3)">탭 ↻</div>
+  </div>
+
   <div class="date-nav">
     <button class="date-arrow" onclick="shiftDate(-1)">‹</button>
     <div style="text-align:center">
@@ -679,6 +694,12 @@ if ('serviceWorker' in navigator) {
   </div>
 
   <div id="streak-badge" class="show-simple-only" style="display:none;background:#1a1206;border:1px solid #7c5806;border-radius:8px;padding:8px 14px;margin-bottom:10px;font-size:12px;color:var(--yellow);font-weight:700"></div>
+
+  <!-- ADHD 유도: 이번 주 축하 카드 (긍정 프레이밍) -->
+  <div id="week-celebrate" style="display:none;background:linear-gradient(135deg,#0f2d1a,#0a1f12);border:1px solid #1e6b3a;border-radius:10px;padding:11px 14px;margin-bottom:10px">
+    <div style="font-size:11px;color:var(--gbright);font-weight:700;letter-spacing:.05em;margin-bottom:6px">✨ 이번 주 나의 발자취</div>
+    <div id="week-celebrate-body" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+  </div>
 
   <div class="card show-simple-only">
     <div class="sec-label">✅ 오늘 반드시 확인할 것</div>
@@ -1611,7 +1632,7 @@ if ('serviceWorker' in navigator) {
 <!-- ═══════════════════ 기록 ═══════════════════ -->
 <div class="view" id="v-history">
   <div style="margin-bottom:10px">
-    <input type="text" id="hist-search" placeholder="🔍 해마노트 / 메모 검색..." oninput="searchHistory()" style="width:100%;font-size:13px;padding:8px 12px;border-radius:8px">
+    <input type="text" id="hist-search" placeholder="🔍 전체 검색 (기록·업무·주간·월간)..." oninput="searchHistory()" style="width:100%;font-size:13px;padding:8px 12px;border-radius:8px">
   </div>
   <div id="hist-search-results" style="display:none;margin-bottom:12px"></div>
   <div class="subtabs">
@@ -2522,6 +2543,9 @@ function loadDate() {
   loadTodaySchedule();
   _lastProgress = todayProgress();   // 보상은 '새로 채운' 것만 축하 (로드 시점 기준선)
   try { renderFocusNow(); } catch(err) {}
+  try { renderQuote(); } catch(err) {}
+  try { renderPrincipleToday(); } catch(err) {}
+  try { renderWeekCelebrate(); } catch(err) {}
 
   // 이번달 목표 표시 (현재 날짜 기준 월 월간탭 종합목표)
   const curYM = curDate.slice(0,7);
@@ -4459,6 +4483,131 @@ function pomoDone() {
   } catch (e) {}
 }
 
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 오늘의 한마디 — 동기부여 문구 (오프라인 내장 · 이 앱 톤에 맞춤)
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const QUOTES = [
+  // 실행 · 시작
+  { t:'완벽한 계획보다 첫 동작이 길을 연다.', a:'실행 원칙' },
+  { t:'시작이 반이다. 나머지 반은 계속하는 것이다.', a:'—' },
+  { t:'생각 30분 후엔 반드시 행동 하나로 끝낸다.', a:'원칙 2' },
+  { t:'품질은 내일. 오늘은 90초짜리 빈칸 하나만 채운다.', a:'STOP-3' },
+  { t:'움직이지 않는 완벽함보다, 어설프게 움직이는 편이 낫다.', a:'—' },
+  { t:'가장 어려운 건 시작하는 것이다. 이미 그걸 해냈다면 절반은 이겼다.', a:'—' },
+  { t:'25분이면 충분하다. 타이머를 켜는 순간 회피는 멈춘다.', a:'도파민 스프린트' },
+  // 회복 · 자기돌봄
+  { t:'修身이 먼저다. 몸과 마음을 진로보다 앞에 둔다.', a:'원칙 1' },
+  { t:'게으른 게 아니라, 구조가 없었던 것이다.', a:'재프레이밍' },
+  { t:'오늘 하루를 버텨낸 것도 훌륭한 성취다.', a:'—' },
+  { t:'기분이 올라오길 기다리지 않는다. 행동이 감정보다 먼저다.', a:'—' },
+  { t:'무너진 날은 실패가 아니라 데이터다.', a:'—' },
+  { t:'복구 프로토콜이 완벽한 루틴보다 중요하다.', a:'ZERO' },
+  // 꾸준함 · 기록
+  { t:'기록이 선언보다 먼저다.', a:'원칙 9' },
+  { t:'작은 승리가 쌓이면 방향이 된다.', a:'—' },
+  { t:'매일의 1%가 1년 뒤 37배가 된다.', a:'복리의 원칙' },
+  { t:'꾸준함은 강도가 아니라 빈도에서 나온다.', a:'—' },
+  { t:'오늘 남긴 한 줄이 미래의 나를 구한다.', a:'—' },
+  // 회피 · 과잉분석
+  { t:'자료가 더 필요하다는 건, 시작 기준이 모호하다는 뜻이다.', a:'—' },
+  { t:'머릿속에서 해결하지 않는다. 꺼내고, 닫고, 만든다.', a:'—' },
+  { t:'더 어려운 공부가 당기면, 그건 고급 회피 신호다.', a:'—' },
+  { t:'분석은 3분만. 그다음은 산출물이다.', a:'STOP-3' },
+  // 관계 · 신뢰
+  { t:'신뢰는 반복되는 예측 가능성에서 생긴다.', a:'원칙 5' },
+  { t:'"믿어줘"가 아니라 "이번 달 이것을 했다"로 말한다.', a:'—' },
+  // 결정 · 절제
+  { t:'밤 10시 이후의 결정은 내일의 내가 후회한다.', a:'72시간 게이트' },
+  { t:'줄일 것을 먼저 정한다. 과부하는 재발의 전조다.', a:'원칙 10' },
+  { t:'무반응도 데이터다. 10회 단위로 판단한다.', a:'원칙 8' },
+  // 관점
+  { t:'나는 의지로 버티는 사람이 아니라, 짧은 승리 구조로 바꾸는 사람이다.', a:'재프레이밍' },
+  { t:'분노는 방향을 요구하는 에너지다. 기술로 바꾼다.', a:'—' },
+  { t:'내 뇌는 더 어려운 문제를 요구하고 있다. 과제를 설계하라.', a:'—' },
+];
+function _daySeed() {
+  // 오늘 날짜 기준 시드 (하루 종일 같은 문구, 자정에 바뀜)
+  const s = today().replace(/-/g,'');
+  return parseInt(s,10) || 0;
+}
+let _quoteIdx = -1;
+function renderQuote() {
+  const tEl = document.getElementById('quote-text');
+  const aEl = document.getElementById('quote-author');
+  if (!tEl || !aEl || !QUOTES.length) return;
+  if (_quoteIdx < 0) _quoteIdx = _daySeed() % QUOTES.length; // 그날의 기본 문구
+  const q = QUOTES[((_quoteIdx % QUOTES.length) + QUOTES.length) % QUOTES.length];
+  tEl.textContent = '“' + q.t + '”';
+  aEl.textContent = q.a && q.a !== '—' ? '— ' + q.a : '';
+}
+function nextQuote() {
+  _quoteIdx = (_quoteIdx < 0 ? _daySeed() : _quoteIdx) + 1;
+  renderQuote();
+  const b = document.getElementById('quote-banner');
+  if (b) { b.classList.remove('reward-pop'); void b.offsetWidth; b.classList.add('reward-pop'); }
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 오늘의 원칙 — 10원칙 중 매일 하나 순환 (새로움 요소)
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+let _principleIdx = -1;
+function renderPrincipleToday() {
+  const card = document.getElementById('today-principle');
+  const tEl = document.getElementById('today-principle-title');
+  const dEl = document.getElementById('today-principle-desc');
+  if (!card || !tEl || !dEl || typeof PRINCIPLES === 'undefined' || !PRINCIPLES.length) return;
+  if (curDate !== today()) { card.style.display = 'none'; return; }
+  if (_principleIdx < 0) _principleIdx = (_daySeed() + 3) % PRINCIPLES.length; // 명언과 다른 시드
+  const p = PRINCIPLES[((_principleIdx % PRINCIPLES.length) + PRINCIPLES.length) % PRINCIPLES.length];
+  card.style.borderColor = (p.c || '#1e3a5f') + '88';
+  tEl.innerHTML = '<span style="color:' + (p.c || 'var(--blue)') + '">' + p.n + '. ' + p.title + '</span>';
+  dEl.textContent = p.desc + (p.trigger ? '  · ' + p.trigger : '');
+  card.style.display = 'block';
+}
+function nextPrinciple() {
+  _principleIdx = (_principleIdx < 0 ? _daySeed() + 3 : _principleIdx) + 1;
+  renderPrincipleToday();
+  const b = document.getElementById('today-principle');
+  if (b) { b.classList.remove('reward-pop'); void b.offsetWidth; b.classList.add('reward-pop'); }
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ADHD 유도: 이번 주 축하 카드 (긍정 프레이밍)
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function renderWeekCelebrate() {
+  const card = document.getElementById('week-celebrate');
+  const body = document.getElementById('week-celebrate-body');
+  if (!card || !body) return;
+  if (curDate !== today()) { card.style.display = 'none'; return; } // 오늘일 때만
+  // 이번 주 월요일~오늘 범위
+  const wkMon = monStr(today());
+  let recordDays = 0, aliveN = 0, focusN = 0, tasksDone = 0;
+  const start = new Date(wkMon + 'T00:00:00');
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(start); d.setDate(d.getDate() + i);
+    const key = localDateStr(d);
+    if (key > today()) break;
+    const e = allDaily[key];
+    if (_hasCoreEntry(e)) recordDays++;
+    if (e && e.alive && e.alive.trim()) aliveN++;
+    // 완료 업무 집계
+    try {
+      (window.allTasks && window.allTasks[key] || []).forEach(t => { if (t && t.st === 'done') tasksDone++; });
+    } catch (err) {}
+  }
+  const chips = [];
+  if (recordDays > 0) chips.push({ n: recordDays + '일', l: '기록', c: '#3fb950' });
+  if (aliveN > 0)     chips.push({ n: aliveN + '번', l: '살아난 순간', c: '#56d364' });
+  if (tasksDone > 0)  chips.push({ n: tasksDone + '개', l: '업무 완료', c: '#58a6ff' });
+  if (!chips.length) { card.style.display = 'none'; return; }
+  card.style.display = 'block';
+  body.innerHTML = chips.map(c =>
+    '<div style="background:rgba(0,0,0,.25);border:1px solid ' + c.c + '55;border-radius:8px;padding:6px 10px;text-align:center;min-width:64px">' +
+    '<div style="font-size:16px;font-weight:700;color:' + c.c + '">' + c.n + '</div>' +
+    '<div style="font-size:10px;color:var(--t3)">' + c.l + '</div></div>'
+  ).join('');
+}
+
 // ── 모드 토글
 let dailyMode = 'full';
 function setDailyMode(mode) {
@@ -5131,18 +5280,56 @@ function searchHistory(){
   const el=document.getElementById('hist-search-results');
   if(!q||q.length<2){el.style.display='none';el.innerHTML='';return;}
   const results=[];
+  const hit=function(v){ return v && String(v).toLowerCase().includes(q); };
+  // 1) 일일 기록 (텍스트 필드 전체로 확장)
   Object.keys(allDaily).sort().reverse().forEach(function(date){
-    const e=allDaily[date];
-    [{label:'해마노트',val:e.hema},{label:'오늘한것',val:e.done_today},{label:'항법기록',val:e.navig},{label:'버텨낸것',val:e.survived},{label:'살아난순간',val:e.alive},{label:'기운빠진순간',val:e.drained}].forEach(function(f){
-      if(f.val&&f.val.toLowerCase().includes(q)) results.push({date:date,label:f.label,text:f.val});
+    const e=allDaily[date]||{};
+    [{label:'해마노트',val:e.hema},{label:'오늘한것',val:e.done_today},{label:'항법기록',val:e.navig},
+     {label:'버텨낸것',val:e.survived},{label:'살아난순간',val:e.alive},{label:'기운빠진순간',val:e.drained},
+     {label:'화두',val:e.tmr_agenda},{label:'우울맥락',val:e.dep_context},{label:'배우자',val:e.wife},
+     {label:'내일첫행동',val:e.tmr_action}].forEach(function(f){
+      if(hit(f.val)) results.push({kind:'date',date:date,label:f.label,text:f.val});
+    });
+    // 일일 계획표 내용
+    (e.daily_plan_rows||[]).forEach(function(r){ if(r&&hit(r.plan)) results.push({kind:'date',date:date,label:'계획',text:r.plan}); });
+  });
+  // 2) 업무 (모든 날짜 + 반복)
+  const seenTask={};
+  Object.keys(window.allTasks||{}).forEach(function(k){
+    if(k==='_recurring') return;
+    (window.allTasks[k]||[]).forEach(function(t){
+      if(t&&hit(t.nm)&&!seenTask[t.id]){ seenTask[t.id]=1; results.push({kind:'task',date:k,label:'업무',text:t.nm+(t.note?' — '+t.note:'')}); }
+    });
+  });
+  ((window.allTasks||{})._recurring||[]).forEach(function(r){ if(r&&hit(r.nm)) results.push({kind:'task',date:'',label:'반복업무',text:'🔁 '+r.nm}); });
+  // 3) 주간 결산
+  Object.keys(allWeekly||{}).sort().reverse().forEach(function(wk){
+    const w=allWeekly[wk]||{};
+    [{label:'주간회고',val:w.review},{label:'주간산출물',val:w.output},{label:'트리거패턴',val:w.trigger_pattern}].forEach(function(f){
+      if(hit(f.val)) results.push({kind:'date',date:wk,label:f.label,text:f.val});
+    });
+    (w.next_goals||[]).forEach(function(g){ if(g&&hit(g.text)) results.push({kind:'date',date:wk,label:'주간목표',text:g.text}); });
+  });
+  // 4) 월간 목표
+  Object.keys(allMonthly||{}).sort().reverse().forEach(function(mk){
+    const m=allMonthly[mk]||{};
+    (m.month_comp||[]).forEach(function(g){ if(g&&hit(g.text)) results.push({kind:'month',date:mk,label:'월간목표',text:g.text}); });
+    Object.keys(m.month_goals_v2||{}).forEach(function(cat){
+      (m.month_goals_v2[cat]||[]).forEach(function(g){ if(g&&hit(g.text)) results.push({kind:'month',date:mk,label:'월간세부',text:g.text}); });
     });
   });
   if(!results.length){el.style.display='block';el.innerHTML='<div style="font-size:12px;color:var(--t3);padding:8px">검색 결과 없음</div>';return;}
   el.style.display='block';
-  el.innerHTML=results.slice(0,20).map(function(r){
+  const LBLC={업무:'var(--purple)',반복업무:'var(--purple)',월간목표:'var(--green)',월간세부:'var(--green)',주간목표:'var(--blue)',주간회고:'var(--blue)'};
+  el.innerHTML=results.slice(0,30).map(function(r){
     var snippet=r.text.length>60?r.text.slice(0,60)+'...':r.text;
-    return '<div onclick="goDate(\''+r.date+'\')" style="background:var(--s1);border:1px solid var(--b1);border-radius:6px;padding:8px 10px;margin-bottom:4px;cursor:pointer"><div style="display:flex;justify-content:space-between;margin-bottom:2px"><span style="font-size:11px;color:var(--blue);font-weight:600">'+r.date+'</span><span style="font-size:10px;color:var(--t3)">'+r.label+'</span></div><div style="font-size:12px;color:var(--t2)">'+snippet+'</div></div>';
-  }).join('')+(results.length>20?'<div style="font-size:11px;color:var(--t3);text-align:center;padding:4px">... 외 '+(results.length-20)+'건</div>':'');
+    var onclick = r.kind==='task' ? 'switchTab(\'task\')'
+                : r.kind==='month' ? 'switchTab(\'monthly\')'
+                : 'goDate(\''+r.date+'\')';
+    var lblCol = LBLC[r.label]||'var(--t3)';
+    var dateStr = r.date||'반복';
+    return '<div onclick="'+onclick+'" style="background:var(--s1);border:1px solid var(--b1);border-radius:6px;padding:8px 10px;margin-bottom:4px;cursor:pointer"><div style="display:flex;justify-content:space-between;margin-bottom:2px"><span style="font-size:11px;color:var(--blue);font-weight:600">'+dateStr+'</span><span style="font-size:10px;color:'+lblCol+';font-weight:600">'+r.label+'</span></div><div style="font-size:12px;color:var(--t2)">'+snippet+'</div></div>';
+  }).join('')+(results.length>30?'<div style="font-size:11px;color:var(--t3);text-align:center;padding:4px">... 외 '+(results.length-30)+'건</div>':'');
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
