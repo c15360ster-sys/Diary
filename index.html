@@ -418,9 +418,29 @@ body.has-row2 .view{margin-top:107px}
 <meta name="theme-color" content="#0d1117">
 <link rel="apple-touch-icon" href="icon-192.png">
 <script>
-// PWA 서비스워커 등록
+// PWA 서비스워커 등록 + 새 버전 자동 반영
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', function(){ navigator.serviceWorker.register('sw.js').catch(function(){}); });
+  window.addEventListener('load', function(){
+    navigator.serviceWorker.register('sw.js').then(function(reg){
+      // 주기적으로 업데이트 확인
+      reg.update();
+      reg.addEventListener('updatefound', function(){
+        var nw = reg.installing;
+        if (!nw) return;
+        nw.addEventListener('statechange', function(){
+          // 새 SW가 설치 완료되고 기존 컨트롤러가 있으면 = 업데이트 발생 → 새로고침
+          if (nw.state === 'installed' && navigator.serviceWorker.controller) {
+            location.reload();
+          }
+        });
+      });
+    }).catch(function(){});
+    // 컨트롤러가 바뀌면(새 SW 활성화) 한 번 새로고침
+    var _reloaded = false;
+    navigator.serviceWorker.addEventListener('controllerchange', function(){
+      if (_reloaded) return; _reloaded = true; location.reload();
+    });
+  });
 }
 </script>
 </head>
