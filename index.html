@@ -237,6 +237,7 @@ body.has-row2 .view{margin-top:107px}
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getDatabase, ref, get, set, onValue, goOffline, goOnline } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+  import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyBPU6uqf3pvKAhPPEF9OTwKx20S_YdbO0s",
@@ -250,6 +251,7 @@ body.has-row2 .view{margin-top:107px}
 
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
+  const auth = getAuth(app);
 
   // 오프라인 대기 큐
   let pendingWrites = {};
@@ -349,11 +351,67 @@ body.has-row2 .view{margin-top:107px}
     } catch(e) {}
   }
 
-  // DOM 준비 후 로드 시작
+  // ── 로그인 게이트 ──────────────────────────────
+  // 인증된 사용자만 데이터를 불러온다. (Firebase 보안 규칙과 짝을 이룸)
+  let _loaded = false;
+  function showLogin(show, msg) {
+    const g = document.getElementById('login-gate');
+    if (g) g.style.display = show ? 'flex' : 'none';
+    const e = document.getElementById('login-error');
+    if (e) e.textContent = msg || '';
+  }
+
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      window._authed = true;      // 오프라인 폴백 허용 (인증 확인됨)
+      showLogin(false);
+      if (!_loaded) { _loaded = true; loadFromFirebase(); }
+    } else {
+      // 로그인 안 됨 → 로그인 화면 표시, 데이터 로드 안 함
+      window._authed = false;
+      if (window._clearOfflineTimer) window._clearOfflineTimer(); // 오프라인 폴백 중단
+      showSpinner(false);
+      showLogin(true);
+    }
+  });
+
+  async function doLogin() {
+    const email = (document.getElementById('login-email')||{}).value || '';
+    const pw = (document.getElementById('login-pw')||{}).value || '';
+    if (!email.trim() || !pw) { showLogin(true, '이메일과 비밀번호를 입력하세요.'); return; }
+    const btn = document.getElementById('login-btn');
+    if (btn) { btn.disabled = true; btn.textContent = '로그인 중...'; }
+    try {
+      await signInWithEmailAndPassword(auth, email.trim(), pw);
+      // onAuthStateChanged가 나머지 처리
+    } catch(err) {
+      const map = {
+        'auth/invalid-email': '이메일 형식이 올바르지 않습니다.',
+        'auth/user-not-found': '등록되지 않은 계정입니다.',
+        'auth/wrong-password': '비밀번호가 틀렸습니다.',
+        'auth/invalid-credential': '이메일 또는 비밀번호가 올바르지 않습니다.',
+        'auth/too-many-requests': '시도가 너무 많습니다. 잠시 후 다시 시도하세요.',
+        'auth/network-request-failed': '네트워크 오류입니다. 연결을 확인하세요.'
+      };
+      showLogin(true, map[err.code] || ('로그인 실패: ' + (err.code || err.message)));
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = '로그인'; }
+    }
+  }
+
+  window._logout = function(){ signOut(auth).catch(()=>{}); location.reload(); };
+
+  // DOM 준비 후 로그인 화면 배선 (onAuthStateChanged가 데이터 로드 트리거)
+  function wireLogin() {
+    const btn = document.getElementById('login-btn');
+    if (btn) btn.addEventListener('click', doLogin);
+    const pw = document.getElementById('login-pw');
+    if (pw) pw.addEventListener('keydown', (e)=>{ if (e.key === 'Enter') doLogin(); });
+  }
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', loadFromFirebase);
+    document.addEventListener('DOMContentLoaded', wireLogin);
   } else {
-    loadFromFirebase();
+    wireLogin();
   }
 </script>
 <link rel="manifest" href="manifest.webmanifest">
@@ -367,6 +425,23 @@ if ('serviceWorker' in navigator) {
 </script>
 </head>
 <body>
+
+<!-- 로그인 게이트 -->
+<div id="login-gate" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:10000;flex-direction:column;align-items:center;justify-content:center;padding:24px">
+  <div style="width:100%;max-width:320px">
+    <div style="text-align:center;margin-bottom:22px">
+      <div style="font-size:18px;font-weight:700;background:linear-gradient(135deg,var(--blue),var(--purple));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent">인생기록표</div>
+      <div style="font-size:12px;color:var(--t3);margin-top:4px">로그인이 필요합니다</div>
+    </div>
+    <input type="email" id="login-email" placeholder="이메일" autocomplete="username" inputmode="email"
+      style="width:100%;font-size:15px;padding:11px 13px;margin-bottom:9px;background:var(--s1);border:1px solid var(--b1);border-radius:8px;color:var(--t1)">
+    <input type="password" id="login-pw" placeholder="비밀번호" autocomplete="current-password"
+      style="width:100%;font-size:15px;padding:11px 13px;margin-bottom:9px;background:var(--s1);border:1px solid var(--b1);border-radius:8px;color:var(--t1)">
+    <button id="login-btn"
+      style="width:100%;font-size:15px;font-weight:700;padding:11px;background:var(--acc);border:none;border-radius:8px;color:#fff;cursor:pointer">로그인</button>
+    <div id="login-error" style="font-size:12px;color:var(--red);margin-top:10px;min-height:16px;text-align:center"></div>
+  </div>
+</div>
 
 <!-- 로딩 스피너 -->
 <div id="loading-overlay" style="position:fixed;inset:0;background:rgba(13,17,23,.92);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px">
@@ -4248,6 +4323,9 @@ function toggleAccordion(hdrId, bodyId) {
 // ── 오프라인 모드 진입
 function enterOfflineMode() {
   if (window._dataReady) return; // 이미 로드됨 — 중복 실행 방지
+  // 로그인 게이트가 떠 있으면(=미인증) 오프라인 진입 금지 — 인증 우회 방지
+  const gate = document.getElementById('login-gate');
+  if (gate && gate.style.display !== 'none') return;
   // Firebase 연결 강제 종료 (pending get() 해소)
   try { if (window._goOffline && window._db) window._goOffline(window._db); } catch(e) {}
   // 전역 데이터 초기화 (빈 상태로 시작)
@@ -4277,6 +4355,10 @@ function showSaveStatus(status, msg) {
 
 // ── 로딩 타임아웃: 2초 후 자동 오프라인 모드 (버튼 클릭 불필요)
 let _offlineTimerId = setTimeout(() => {
+  // 인증이 확인되지 않았으면(로그인 전) 오프라인 폴백을 띄우지 않는다 — 인증 우회 방지
+  if (!window._authed) return;
+  const gate = document.getElementById('login-gate');
+  if (gate && gate.style.display !== 'none') return;
   if (!window._dataReady) {
     const msg = document.getElementById('overlay-msg');
     const btn = document.getElementById('overlay-offline-btn');
