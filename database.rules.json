@@ -1,0 +1,12 @@
+{
+  "rules": {
+    "diary": {
+      ".read": "auth != null && auth.uid === 'JIL2ejFo4Oe0srBH3QNqdFAH11A2'",
+      ".write": "auth != null && auth.uid === 'JIL2ejFo4Oe0srBH3QNqdFAH11A2'"
+    },
+    "$other": {
+      ".read": false,
+      ".write": false
+    }
+  }
+}
