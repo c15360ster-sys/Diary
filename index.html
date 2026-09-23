@@ -5011,14 +5011,17 @@ function publishTaskWidget(){
       var dlS = t.dl ? (t.dl.slice(5)+' 마감') : '';
       return { nm:t.nm, imp:t.imp, urg:t.urg, pri:pri, del:!!t.del, dl:t.dl||'', dlLabel:dlS };
     });
-    var summary = items.length
-      ? items.map(function(it,i){ return (i+1)+'. '+it.nm+' [우선 '+it.pri+(it.dlLabel?' · '+it.dlLabel:'')+']'; }).join('\n')
-      : '오늘 처리할 업무 없음';
+    var lineArr = items.map(function(it,i){ return (i+1)+'. '+it.nm+(it.dlLabel?' ('+it.dlLabel+')':''); });
+    var summary = items.length ? lineArr.join('\n') : '오늘 처리할 업무 없음';
+    // KWGT 등 위젯이 정규식 없이 한 줄씩 읽도록 line1~line5 개별 발행
+    var lines = {};
+    for (var i=0;i<5;i++){ lines['line'+(i+1)] = lineArr[i] || ''; }
     window._fbSet('diary/widget/tasks', {
       date: taskToday(),
       updated: Date.now(),
       count: active.length,      // 활성 업무 총 개수 (상위 5개 외 나머지 파악용)
       items: items,
+      lines: lines,              // { line1:'1. ...', line2:'2. ...', ... , line5:'' }
       summary: summary
     });
   } catch(e){}
